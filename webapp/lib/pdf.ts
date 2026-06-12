@@ -1,7 +1,7 @@
 // Client-side PDF text extraction. Runs entirely in the browser so large PDFs
 // never hit the serverless body limit — only the extracted text is sent on.
 
-export async function extractPdfText(file: File, maxChars = 16000): Promise<string> {
+export async function extractPdfText(file: File, maxChars = 60000): Promise<string> {
   // Dynamic import keeps pdfjs out of the server bundle / SSR pass.
   const pdfjs = await import("pdfjs-dist");
   pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;

@@ -4,7 +4,10 @@ export const runtime = "nodejs";
 export const maxDuration = 120;
 
 const TYPES = ["paper", "concept", "algorithm", "resource", "synthesis"];
-const MAX_INPUT_CHARS = 16000;
+// Send (close to) the whole paper so the distillation reflects the full text,
+// not just the first pages. ~60k chars ≈ 15-20k tokens — within DeepSeek's
+// context and still cheap. Most articles fit comfortably under this.
+const MAX_INPUT_CHARS = 60000;
 const MAX_TOKENS = 3000;
 
 const SECTIONS: Record<string, string> = {
@@ -59,7 +62,7 @@ export async function POST(req: NextRequest) {
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: system },
-        { role: "user", content: `Document text (beginning):\n\n${text.slice(0, MAX_INPUT_CHARS)}` },
+        { role: "user", content: `Full document text:\n\n${text.slice(0, MAX_INPUT_CHARS)}` },
       ],
     }),
   });
