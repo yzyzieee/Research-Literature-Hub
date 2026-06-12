@@ -171,6 +171,16 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
 
 .checklist { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 24px; font-size: 14px; color: var(--text-2); }
 
+.pdf-zone {
+  background: var(--accent-soft);
+  border: 1px solid #cfe2f7;
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin-bottom: 18px;
+}
+.pdf-zone-main { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.pdf-zone b { font-size: 16px; }
+
 .login-wrap { display: flex; justify-content: center; padding-top: 60px; }
 .login-card { max-width: 380px; width: 100%; }
 .login-card h1 { font-size: 20px; margin-bottom: 2px; }

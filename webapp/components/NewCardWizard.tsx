@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { BODY_TEMPLATES } from "@/lib/templates";
 import type { CardType } from "@/lib/types";
 import { TYPE_LABELS } from "@/lib/types";
 import { useLang } from "@/lib/i18n";
+import { extractPdfText } from "@/lib/pdf";
 
 function kebab(s: string): string {
   return s
@@ -32,8 +33,11 @@ export default function NewCardWizard() {
   const [drive, setDrive] = useState("");
   const [notes, setNotes] = useState("");
   const [body, setBody] = useState("");
-  const [busy, setBusy] = useState<"" | "doi" | "draft" | "commit">("");
+  const [busy, setBusy] = useState<"" | "doi" | "draft" | "commit" | "pdf">("");
+  const [pdfName, setPdfName] = useState("");
   const [msg, setMsg] = useState<{ kind: "ok" | "warn"; text: string; link?: string } | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const driveFolder = process.env.NEXT_PUBLIC_DRIVE_FOLDER_URL;
 
   const slug = type === "paper" ? citationKey.trim() : kebab(title);
   const authorList = authors.split(/[;,]/).map((a) => a.trim()).filter(Boolean);
@@ -59,6 +63,36 @@ export default function NewCardWizard() {
       "",
     ].join("\n");
     return fm + (body.trim() ? body.trim() : BODY_TEMPLATES[type].trim()) + "\n";
+  };
+
+  const onPdf = async (file: File | undefined) => {
+    if (!file) return;
+    setBusy("pdf");
+    setMsg(null);
+    setPdfName(file.name);
+    try {
+      const text = await extractPdfText(file);
+      if (text.length < 80) throw new Error(t("new.pdfNoText"));
+      const res = await fetch("/api/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      if (data.type && TYPE_LABELS[data.type as CardType]) setType(data.type);
+      setTitle(data.title || "");
+      setAuthors((data.authors || []).join(", "));
+      setYear(data.year ? String(data.year) : "");
+      setCitationKey(data.citation_key || "");
+      setTags((data.tags || []).join(", "));
+      setBody(data.body || "");
+      setMsg({ kind: "ok", text: t("new.pdfOk") });
+    } catch (e) {
+      setMsg({ kind: "warn", text: `${t("new.pdfFail")}: ${e instanceof Error ? e.message : e}` });
+    } finally {
+      setBusy("");
+    }
   };
 
   const lookupDoi = async () => {
@@ -139,6 +173,35 @@ export default function NewCardWizard() {
 
   return (
     <>
+      <div className="pdf-zone">
+        <input
+          ref={fileRef}
+          type="file"
+          accept="application/pdf"
+          style={{ display: "none" }}
+          onChange={(e) => onPdf(e.target.files?.[0])}
+        />
+        <div className="pdf-zone-main">
+          <div>
+            <b>{t("new.pdfTitle")}</b>
+            <p className="subtitle" style={{ margin: "4px 0 0" }}>{t("new.pdfHint")}</p>
+          </div>
+          <button className="btn primary" onClick={() => fileRef.current?.click()} disabled={busy !== ""}>
+            {busy === "pdf" ? t("new.pdfBusy") : t("new.pdfBtn")}
+          </button>
+        </div>
+        {pdfName && <p className="subtitle" style={{ margin: "8px 0 0" }}>📄 {pdfName}</p>}
+        <p className="subtitle" style={{ margin: "10px 0 0" }}>
+          {t("new.driveReminder")}
+          {driveFolder && (
+            <>
+              {" "}
+              <a href={driveFolder} target="_blank" rel="noreferrer">{t("new.driveOpen")}</a>
+            </>
+          )}
+        </p>
+      </div>
+
       <div className="form-card">
         <label>{t("new.type")}</label>
         <select value={type} onChange={(e) => setType(e.target.value as CardType)}>
