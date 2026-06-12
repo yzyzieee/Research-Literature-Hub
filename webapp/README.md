@@ -27,6 +27,7 @@ The app reads cards from the parent directory by default (`KB_PATH` env to overr
 |---|---|
 | `GITHUB_TOKEN` + `GITHUB_REPO` | "提交 PR" button — creates a branch + commit + pull request via the GitHub API. Use a fine-grained PAT with Contents and Pull requests read/write on the KB repo. |
 | `DEEPSEEK_API_KEY` (+ `DEEPSEEK_MODEL`) | the "draft with DeepSeek" button. Frugal by design: one capped (3K tokens) non-streaming call per explicit click, nothing automatic. |
+| `APP_PASSWORD` | Password-gates the whole site (login page + cookie). Unset = open access. Enforced in `middleware.ts`, so it also protects the write APIs (`/api/commit`, `/api/draft`), not just the UI. Changing it signs everyone out. |
 | `NEXT_PUBLIC_GITHUB_REPO` | GitHub links in the UI (edit card, PR list) |
 
 Without these, the wizard still works — download or copy the markdown and commit it yourself.

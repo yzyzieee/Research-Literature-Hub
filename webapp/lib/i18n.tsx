@@ -90,6 +90,12 @@ const dict: Record<Lang, Record<string, string>> = {
     "export.preview": "Preview",
 
     "copy.copied": "✓ Copied",
+
+    "login.subtitle": "Team access — enter the shared password to continue.",
+    "login.password": "Password",
+    "login.submit": "Enter",
+    "login.wrong": "Wrong password.",
+    "login.logout": "Sign out",
   },
   zh: {
     "brand.tagline": "音频研究知识库",
@@ -176,6 +182,12 @@ const dict: Record<Lang, Record<string, string>> = {
     "export.preview": "预览",
 
     "copy.copied": "✓ 已复制",
+
+    "login.subtitle": "团队访问 — 输入共享密码后继续。",
+    "login.password": "密码",
+    "login.submit": "进入",
+    "login.wrong": "密码错误。",
+    "login.logout": "退出登录",
   },
 };
 
