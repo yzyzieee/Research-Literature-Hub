@@ -7,11 +7,10 @@ import { TYPE_TO_DIR } from "./types";
 const KB_ROOT = process.env.KB_PATH || path.resolve(process.cwd(), "..");
 const CARD_DIRS = [...Object.values(TYPE_TO_DIR), "90_pending"];
 
-function summaryParagraphs(body: string): string[] {
+function summaryText(body: string): string {
   const lines = body.split(/\r?\n/);
-  const out: string[] = [];
+  const para: string[] = [];
   let inSection = false;
-  let para: string[] = [];
   for (const line of lines) {
     if (line.startsWith("## ")) {
       if (inSection) break;
@@ -20,25 +19,19 @@ function summaryParagraphs(body: string): string[] {
     }
     if (!inSection) continue;
     if (line.trim()) para.push(line.trim());
-    else if (para.length) {
-      out.push(para.join(" "));
-      para = [];
-    }
+    else if (para.length) break;
   }
-  if (para.length) out.push(para.join(" "));
-  return out;
+  return para.join(" ");
 }
 
 function parseCard(filePath: string, folder: string): Card | null {
   try {
     const raw = fs.readFileSync(filePath, "utf-8");
     const { data, content } = matter(raw);
-    const paras = summaryParagraphs(content);
     return {
       slug: path.basename(filePath, ".md"),
       folder,
       title: String(data.title ?? path.basename(filePath, ".md")),
-      title_zh: String(data.title_zh ?? ""),
       type: (data.type ?? "concept") as CardType,
       status: (data.status ?? "pending") as CardStatus,
       tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
@@ -48,8 +41,7 @@ function parseCard(filePath: string, folder: string): Card | null {
       related: Array.isArray(data.related) ? data.related.map(String) : [],
       drive: Array.isArray(data.drive) ? data.drive.map(String) : [],
       created: String(data.created ?? ""),
-      summary: paras[0] ?? "",
-      summary_zh: paras[1] ?? "",
+      summary: summaryText(content),
       body: content,
     };
   } catch {

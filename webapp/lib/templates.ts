@@ -1,94 +1,94 @@
 import type { CardType } from "./types";
 
 export const BODY_TEMPLATES: Record<CardType, string> = {
-  paper: `## Summary | 摘要
+  paper: `## Summary
 
-(one-paragraph summary 一段话概括)
+(one-paragraph summary)
 
-## Key points | 要点
+## Key points
 
 -
 
-## Method | 方法
+## Method
 
-## Results | 结果
+## Results
 
-## My notes | 个人笔记
+## My notes
 
-## References | 参考
+## References
 `,
-  concept: `## Summary | 摘要
+  concept: `## Summary
 
-(definition in 2-3 sentences 两三句话定义)
+(definition in 2-3 sentences)
 
-## Key points | 要点
+## Key points
 
 -
 
-## Intuition | 直觉理解
+## Intuition
 
-## Math | 数学表达
+## Math
 
-## My notes | 个人笔记
+## My notes
 
-## References | 参考
+## References
 `,
-  algorithm: `## Summary | 摘要
+  algorithm: `## Summary
 
-(what the algorithm does 算法做什么)
+(what the algorithm does)
 
-## Key points | 要点
+## Key points
 
 -
 
-## Method | 方法
+## Method
 
 \`\`\`text
 pseudocode
 \`\`\`
 
-## When to use | 适用场景
+## When to use
 
-## Implementation notes | 实现笔记
+## Implementation notes
 
-## My notes | 个人笔记
+## My notes
 
-## References | 参考
+## References
 `,
-  resource: `## Summary | 摘要
+  resource: `## Summary
 
-(what the resource is and why it matters 资源是什么、为什么有用)
+(what the resource is and why it matters)
 
-## Key points | 要点
+## Key points
 
 -
 
-## When to use | 适用场景
+## When to use
 
-## How to get it | 获取方式
+## How to get it
 
-## My notes | 个人笔记
+## My notes
 
-## References | 参考
+## References
 `,
-  synthesis: `## Summary | 摘要
+  synthesis: `## Summary
 
-(the question this synthesis answers 本综述回答的问题)
+(the question this synthesis answers)
 
-## Key points | 要点
+## Key points
 
 -
 
-## Landscape | 全景梳理
+## Landscape
 
 | Approach | Card | Strength | Weakness |
 |---|---|---|---|
 | | | | |
 
-## Open questions | 开放问题
+## Open questions
 
-## My notes | 个人笔记
+## My notes
 
-## References | 参考
+## References
 `,
 };

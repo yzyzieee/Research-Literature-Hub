@@ -1,6 +1,5 @@
 ---
 title: ""
-title_zh: ""
 type: concept
 status: pending
 tags: []
@@ -10,26 +9,26 @@ created: ""
 reviewed_by: []
 ---
 
-## Summary | 摘要
+## Summary
 
-Definition in 2–3 sentences. 用两三句话给出定义。
+Definition in 2-3 sentences.
 
-## Key points | 要点
+## Key points
 
-- What it is / is not | 是什么 / 不是什么
-- Where it appears in our field | 在本领域中的位置
+- What it is / is not
+- Where it appears in our field
 
-## Intuition | 直觉理解
+## Intuition
 
-Plain-language explanation or analogy. 通俗解释或类比。
+Plain-language explanation or analogy.
 
-## Math | 数学表达
+## Math
 
-Core equations with symbol definitions. 核心公式与符号定义。
+Core equations with symbol definitions.
 
-## My notes | 个人笔记
+## My notes
 
-## References | 参考
+## References
 
 - Related cards: [[slug]]
 - Textbook / lecture / paper sources

@@ -37,9 +37,20 @@ a:hover { text-decoration: underline; }
   z-index: 10;
 }
 .topnav .brand { font-weight: 600; font-size: 17px; color: var(--text); }
-.topnav nav { display: flex; gap: 20px; }
+.topnav nav { display: flex; gap: 20px; align-items: center; }
 .topnav nav a { color: var(--text-2); font-size: 14px; }
 .topnav nav a:hover { color: var(--accent); text-decoration: none; }
+.lang-toggle {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  min-width: 48px;
+}
+.lang-toggle:hover { border-color: var(--accent); color: var(--accent); }
 
 .container { max-width: 1000px; margin: 0 auto; padding: 28px 20px 60px; }
 

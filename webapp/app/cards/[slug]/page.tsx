@@ -2,7 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCard, getCards, toMeta } from "@/lib/kb";
 import { renderCardBody } from "@/lib/markdown";
+import { cardToPrompt } from "@/lib/export";
 import { STATUS_LABELS, TYPE_LABELS } from "@/lib/types";
+import { T } from "@/lib/i18n";
+import CopyButton from "@/components/CopyButton";
 
 export const dynamic = "force-static";
 
@@ -26,7 +29,6 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
     <>
       <div className="detail-header">
         <h1>{card.title}</h1>
-        {card.title_zh && <div className="zh-title">{card.title_zh}</div>}
         <div className="meta-row" style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           <span className="badge type">{TYPE_LABELS[card.type]}</span>
           <span className={`badge ${card.status}`}>{STATUS_LABELS[card.status]}</span>
@@ -36,24 +38,24 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
           ))}
         </div>
         {card.authors.length > 0 && (
-          <div className="kv"><b>Authors</b> · {card.authors.join(", ")}</div>
+          <div className="kv"><b><T k="detail.authors" /></b> · {card.authors.join(", ")}</div>
         )}
         {card.citation_key && (
-          <div className="kv"><b>Citation key</b> · <code>{card.citation_key}</code></div>
+          <div className="kv"><b><T k="detail.citationKey" /></b> · <code>{card.citation_key}</code></div>
         )}
         {card.drive.length > 0 && (
           <div className="kv">
-            <b>Drive</b> ·{" "}
+            <b><T k="detail.fulltext" /></b> ·{" "}
             {card.drive.map((d, i) => (
               <a key={d} href={d} target="_blank" rel="noreferrer">
-                PDF/资料 {i + 1} ↗{" "}
+                PDF {i + 1} ↗{" "}
               </a>
             ))}
           </div>
         )}
         {related.length > 0 && (
           <div className="kv">
-            <b>Related</b> ·{" "}
+            <b><T k="detail.related" /></b> ·{" "}
             {related.map((r, i) => (
               <span key={r.slug}>
                 {i > 0 && " · "}
@@ -62,17 +64,19 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
             ))}
           </div>
         )}
-        {repo && (
-          <div className="kv">
+        <div className="btn-row">
+          <CopyButton text={cardToPrompt(card, repo)} labelKey="detail.copy" />
+          {repo && (
             <a
+              className="btn"
               href={`https://github.com/${repo}/blob/main/${card.folder}/${card.slug}.md`}
               target="_blank"
               rel="noreferrer"
             >
-              在 GitHub 上编辑 ↗
+              <T k="detail.edit" />
             </a>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       <article className="prose" dangerouslySetInnerHTML={{ __html: html }} />
     </>

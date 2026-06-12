@@ -1,7 +1,7 @@
 # Audio Research Knowledge Base | 音频研究知识库
 
-Collaborative bilingual knowledge base for audio / ANC / signal processing research.
-面向音频 / 主动降噪 / 信号处理方向的双语协作研究知识库。
+Collaborative knowledge base for audio / ANC / signal processing research. Cards are written in English; the web app UI can switch between English and Chinese.
+面向音频 / 主动降噪 / 信号处理方向的协作研究知识库。知识卡统一用英文撰写；Web 应用界面可在中英文之间切换。
 
 > **Formal rule | 正式规则**: PDFs stay in Google Drive; cards, templates, index and scripts stay in this repo.
 > PDF 原文存放在 Google Drive；卡片、模板、索引与脚本存放在本仓库。
