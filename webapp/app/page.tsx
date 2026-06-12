@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getCards, toMeta } from "@/lib/kb";
 import { TYPE_LABELS } from "@/lib/types";
 import type { CardType } from "@/lib/types";
+import { T } from "@/lib/i18n";
 import CardListItem from "@/components/CardListItem";
 
 export const dynamic = "force-static";
@@ -20,17 +21,17 @@ export default function HomePage() {
 
   return (
     <>
-      <h1>音频研究知识库</h1>
-      <p className="subtitle">Collaborative bilingual knowledge base · audio / ANC / signal processing</p>
+      <h1><T k="home.title" /></h1>
+      <p className="subtitle"><T k="home.subtitle" /></p>
 
       <div className="stat-grid">
         <div className="stat">
           <div className="num">{official.length}</div>
-          <div className="label">正式卡片 official</div>
+          <div className="label"><T k="home.official" /></div>
         </div>
         <div className="stat">
           <div className="num">{pending.length}</div>
-          <div className="label">待审核 pending</div>
+          <div className="label"><T k="home.pending" /></div>
         </div>
         {byType
           .filter((t) => t.count > 0)
@@ -45,7 +46,7 @@ export default function HomePage() {
       {pending.length > 0 && (
         <>
           <h2>
-            待审核 <Link href="/pending" style={{ fontSize: 14 }}>查看队列 →</Link>
+            <T k="home.pendingReview" /> <Link href="/pending" style={{ fontSize: 14 }}><T k="home.viewQueue" /></Link>
           </h2>
           <div className="card-grid">
             {pending.slice(0, 3).map((c) => (
@@ -56,7 +57,7 @@ export default function HomePage() {
       )}
 
       <h2>
-        最近更新 <Link href="/cards" style={{ fontSize: 14 }}>浏览全部 →</Link>
+        <T k="home.recent" /> <Link href="/cards" style={{ fontSize: 14 }}><T k="home.browseAll" /></Link>
       </h2>
       <div className="card-grid">
         {recent.map((c) => (

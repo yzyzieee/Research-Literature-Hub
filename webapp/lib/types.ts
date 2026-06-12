@@ -5,7 +5,6 @@ export interface CardMeta {
   slug: string;
   folder: string;
   title: string;
-  title_zh: string;
   type: CardType;
   status: CardStatus;
   tags: string[];
@@ -16,7 +15,6 @@ export interface CardMeta {
   drive: string[];
   created: string;
   summary: string;
-  summary_zh: string;
 }
 
 export interface Card extends CardMeta {
@@ -24,11 +22,11 @@ export interface Card extends CardMeta {
 }
 
 export const TYPE_LABELS: Record<CardType, string> = {
-  concept: "概念 Concept",
-  algorithm: "算法 Algorithm",
-  paper: "论文 Paper",
-  resource: "资源 Resource",
-  synthesis: "综述 Synthesis",
+  concept: "Concept",
+  algorithm: "Algorithm",
+  paper: "Paper",
+  resource: "Resource",
+  synthesis: "Synthesis",
 };
 
 export const TYPE_TO_DIR: Record<CardType, string> = {
@@ -40,7 +38,7 @@ export const TYPE_TO_DIR: Record<CardType, string> = {
 };
 
 export const STATUS_LABELS: Record<CardStatus, string> = {
-  pending: "待审 pending",
-  reviewed: "已审 reviewed",
-  official: "正式 official",
+  pending: "pending",
+  reviewed: "reviewed",
+  official: "official",
 };

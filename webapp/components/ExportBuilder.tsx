@@ -4,9 +4,11 @@ import { useMemo, useState } from "react";
 import type { Card, CardType } from "@/lib/types";
 import { TYPE_LABELS } from "@/lib/types";
 import { bundlePrompt, estimateTokens } from "@/lib/export";
+import { useLang } from "@/lib/i18n";
 import CopyButton from "./CopyButton";
 
 export default function ExportBuilder({ cards, repo }: { cards: Card[]; repo?: string }) {
+  const { t } = useLang();
   const [type, setType] = useState<"" | CardType>("");
   const [filter, setFilter] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -16,10 +18,7 @@ export default function ExportBuilder({ cards, repo }: { cards: Card[]; repo?: s
     return cards.filter(
       (c) =>
         (!type || c.type === type) &&
-        (!f ||
-          c.title.toLowerCase().includes(f) ||
-          c.title_zh.includes(filter.trim()) ||
-          c.tags.some((t) => t.includes(f))),
+        (!f || c.title.toLowerCase().includes(f) || c.tags.some((tag) => tag.includes(f))),
     );
   }, [cards, type, filter]);
 
@@ -48,20 +47,20 @@ export default function ExportBuilder({ cards, repo }: { cards: Card[]; repo?: s
       <div className="toolbar">
         <input
           type="search"
-          placeholder="按标题 / 标签过滤…"
+          placeholder={t("export.filter")}
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
         />
         <select value={type} onChange={(e) => setType(e.target.value as "" | CardType)}>
-          <option value="">全部类型</option>
-          {(Object.keys(TYPE_LABELS) as CardType[]).map((t) => (
-            <option key={t} value={t}>{TYPE_LABELS[t]}</option>
+          <option value="">{t("export.allTypes")}</option>
+          {(Object.keys(TYPE_LABELS) as CardType[]).map((ct) => (
+            <option key={ct} value={ct}>{TYPE_LABELS[ct]}</option>
           ))}
         </select>
         <button className="btn" onClick={() => setSelected(new Set([...selected, ...visible.map((c) => c.slug)]))}>
-          全选当前
+          {t("export.selectAll")}
         </button>
-        <button className="btn" onClick={() => setSelected(new Set())}>清空</button>
+        <button className="btn" onClick={() => setSelected(new Set())}>{t("export.clear")}</button>
       </div>
 
       <div className="card-grid" style={{ marginBottom: 20 }}>
@@ -74,15 +73,12 @@ export default function ExportBuilder({ cards, repo }: { cards: Card[]; repo?: s
               style={{ width: "auto", marginTop: 4 }}
             />
             <span>
-              <span className="titles">
-                {c.title}
-                {c.title_zh && <span className="zh">{c.title_zh}</span>}
-              </span>
+              <span className="titles">{c.title}</span>
               <span className="meta-row">
                 <span className="badge type">{TYPE_LABELS[c.type]}</span>
-                {c.drive.length > 0 && <span className="badge">📎 有全文链接</span>}
-                {c.tags.map((t) => (
-                  <span key={t} className="badge">#{t}</span>
+                {c.drive.length > 0 && <span className="badge">{t("export.hasFulltext")}</span>}
+                {c.tags.map((tag) => (
+                  <span key={tag} className="badge">#{tag}</span>
                 ))}
               </span>
             </span>
@@ -93,17 +89,16 @@ export default function ExportBuilder({ cards, repo }: { cards: Card[]; repo?: s
       {chosen.length > 0 && (
         <div className="form-card">
           <b>
-            已选 {chosen.length} 张卡片 · 约 {tokens.toLocaleString()} tokens
+            {chosen.length} {t("export.selected")} · ~{tokens.toLocaleString()} tokens
           </b>
           <p className="subtitle" style={{ margin: "6px 0 12px" }}>
-            复制后直接粘贴到任意 LLM（ChatGPT / Claude / Kimi / 元宝…）作为上下文；
-            包内已附每张卡的 Drive 全文链接与 GitHub 源链接。
+            {t("export.hint")}
           </p>
           <div className="btn-row" style={{ marginTop: 0 }}>
-            <CopyButton text={bundle} label={`复制卡片包（${chosen.length} 张）`} primary />
-            <button className="btn" onClick={download}>下载 .md</button>
+            <CopyButton text={bundle} label={t("export.copy")} primary />
+            <button className="btn" onClick={download}>{t("export.download")}</button>
           </div>
-          <label style={{ marginTop: 14 }}>预览 Preview</label>
+          <label style={{ marginTop: 14 }}>{t("export.preview")}</label>
           <textarea rows={12} readOnly value={bundle} />
         </div>
       )}

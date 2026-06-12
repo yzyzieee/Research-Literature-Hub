@@ -10,7 +10,7 @@ import sys
 from kblib import (PENDING_DIR, STATUSES, TYPE_TO_DIR, TYPES, Card, iter_cards,
                    utf8_stdout)
 
-REQUIRED_ALWAYS = ["title", "title_zh", "type", "status", "tags", "created"]
+REQUIRED_ALWAYS = ["title", "type", "status", "tags", "created"]
 REQUIRED_PAPER = ["citation_key", "authors", "year"]
 SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 WIKILINK_RE = re.compile(r"\[\[([^\]|#]+)")

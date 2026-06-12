@@ -4,7 +4,6 @@
     "path": "90_pending/fxlms.md",
     "folder": "90_pending",
     "title": "Filtered-x LMS (FxLMS)",
-    "title_zh": "滤波-x 最小均方算法",
     "type": "algorithm",
     "status": "reviewed",
     "tags": [
@@ -21,15 +20,13 @@
     ],
     "drive": [],
     "created": "2026-06-12",
-    "summary": "FxLMS is the workhorse adaptive algorithm of active noise control: standard LMS diverges when a secondary path S(z) sits between the controller output and the error sensor, so FxLMS filters the reference signal through an estimate Ŝ(z) before the weight update, restoring gradient alignment. FxLMS 是主动噪声控制的主力自适应算法：当控制器输出与误差传感器之间存在次级通路 S(z) 时，标准 LMS 会发散；FxLMS 先用次级通路估计 Ŝ(z) 对参考信号滤波再做权重更新，从而恢复梯度方向的正确性。",
-    "summary_zh": ""
+    "summary": "FxLMS is the workhorse adaptive algorithm of active noise control: standard LMS diverges when a secondary path S(z) sits between the controller output and the error sensor, so FxLMS filters the reference signal through an estimate Ŝ(z) before the weight update, restoring gradient alignment."
   },
   {
     "slug": "active-noise-control",
     "path": "01_concepts/active-noise-control.md",
     "folder": "01_concepts",
     "title": "Active noise control (ANC)",
-    "title_zh": "主动噪声控制",
     "type": "concept",
     "status": "official",
     "tags": [
@@ -46,15 +43,13 @@
     ],
     "drive": [],
     "created": "2026-06-12",
-    "summary": "Active noise control cancels unwanted sound by generating an \"anti-noise\" signal of equal amplitude and opposite phase through secondary sources (loudspeakers), exploiting destructive interference. It is most effective at low frequencies where passive absorption is bulky and inefficient. 主动噪声控制通过次级声源（扬声器）发出与噪声幅度相同、相位相反的\"反噪声\"，利用相消干涉来抵消噪声。它在低频段最有效——这正是被动吸声材料笨重且低效的频段。",
-    "summary_zh": ""
+    "summary": "Active noise control cancels unwanted sound by generating an \"anti-noise\" signal of equal amplitude and opposite phase through secondary sources (loudspeakers), exploiting destructive interference. It is most effective at low frequencies where passive absorption is bulky and inefficient."
   },
   {
     "slug": "widrow1975adaptive",
     "path": "03_papers/widrow1975adaptive.md",
     "folder": "03_papers",
     "title": "Adaptive noise cancelling: principles and applications",
-    "title_zh": "自适应噪声消除：原理与应用",
     "type": "paper",
     "status": "official",
     "tags": [
@@ -82,7 +77,6 @@
     ],
     "drive": [],
     "created": "2026-06-12",
-    "summary": "The foundational paper on adaptive noise cancelling: a reference input correlated with the noise (but not the signal) is adaptively filtered and subtracted from the primary input, with the LMS algorithm driving the filter towards the Wiener solution without prior knowledge of signal statistics. 自适应噪声消除的奠基之作：取一路与噪声相关（而与目标信号无关）的参考输入，经自适应滤波后从主输入中减去；LMS 算法在无需信号统计先验的情况下将滤波器推向维纳最优解。",
-    "summary_zh": ""
+    "summary": "The foundational paper on adaptive noise cancelling: a reference input correlated with the noise (but not the signal) is adaptively filtered and subtracted from the primary input, with the LMS algorithm driving the filter towards the Wiener solution without prior knowledge of signal statistics."
   }
 ]

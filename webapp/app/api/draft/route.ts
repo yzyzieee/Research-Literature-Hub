@@ -17,10 +17,9 @@ export async function POST(req: NextRequest) {
       { status: 501 },
     );
   }
-  const { type, title, title_zh, authors, year, citation_key, notes } = (await req.json()) as {
+  const { type, title, authors, year, citation_key, notes } = (await req.json()) as {
     type: CardType;
     title: string;
-    title_zh?: string;
     authors?: string[];
     year?: number | null;
     citation_key?: string;
@@ -31,17 +30,16 @@ export async function POST(req: NextRequest) {
   }
 
   const system = [
-    "You draft bilingual (English + Simplified Chinese) research knowledge cards for an audio / active-noise-control / signal-processing research group.",
+    "You draft English research knowledge cards for an audio / active-noise-control / signal-processing research group.",
     "Output ONLY the markdown card body — no YAML frontmatter, no code fence around the whole output, no preamble.",
-    "Follow the section structure of the given template exactly. Within each section write the English content first, then the Chinese content, mirroring each other.",
-    "Be technically precise and conservative: if you are unsure of a specific number or claim, mark it with (TODO: verify 待核实) instead of inventing it.",
+    "Follow the section structure of the given template exactly. Write in clear, standard academic English only.",
+    "Be technically precise and conservative: if you are unsure of a specific number or claim, mark it with (TODO: verify) instead of inventing it.",
     "Keep it compact — this is a knowledge card, not a survey. The draft will be human-reviewed before entering the official library.",
   ].join("\n");
 
   const user = [
     `Card type: ${type}`,
-    `Title (en): ${title}`,
-    title_zh ? `Title (zh): ${title_zh}` : "",
+    `Title: ${title}`,
     authors?.length ? `Authors: ${authors.join(", ")}` : "",
     year ? `Year: ${year}` : "",
     citation_key ? `Citation key: ${citation_key}` : "",
