@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCard, getCards, toMeta } from "@/lib/kb";
 import { renderCardBody } from "@/lib/markdown";
+import { cardToPrompt } from "@/lib/export";
 import { STATUS_LABELS, TYPE_LABELS } from "@/lib/types";
+import CopyButton from "@/components/CopyButton";
 
 export const dynamic = "force-static";
 
@@ -62,17 +64,19 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
             ))}
           </div>
         )}
-        {repo && (
-          <div className="kv">
+        <div className="btn-row">
+          <CopyButton text={cardToPrompt(card, repo)} label="📋 复制喂给你的 LLM" />
+          {repo && (
             <a
+              className="btn"
               href={`https://github.com/${repo}/blob/main/${card.folder}/${card.slug}.md`}
               target="_blank"
               rel="noreferrer"
             >
               在 GitHub 上编辑 ↗
             </a>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       <article className="prose" dangerouslySetInnerHTML={{ __html: html }} />
     </>

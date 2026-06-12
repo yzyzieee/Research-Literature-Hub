@@ -100,7 +100,7 @@ export default function NewCardWizard() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setBody(data.body);
-      setMsg({ kind: "ok", text: "草稿已生成——请逐节核对后再提交。LLM 只辅助起草，人是最终裁判。" });
+      setMsg({ kind: "ok", text: "草稿已生成（DeepSeek）——请逐节核对后再提交。LLM 只辅助起草，人是最终裁判。" });
     } catch (e) {
       setMsg({ kind: "warn", text: `生成失败: ${e}` });
     } finally {
@@ -183,7 +183,7 @@ export default function NewCardWizard() {
         <label>Google Drive 链接（PDF/数据，空格分隔）</label>
         <input value={drive} onChange={(e) => setDrive(e.target.value)} />
 
-        <label>给 Claude 的要点提示 Notes for drafting（可选）</label>
+        <label>起草要点提示 Notes for drafting（可选）</label>
         <textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)}
           placeholder="想突出的重点、与课题的关联、需要展开的小节…" />
 
@@ -194,7 +194,7 @@ export default function NewCardWizard() {
         <label>正文 Body（留空则使用模板骨架；可先用 Claude 生成再修改）</label>
         <div className="btn-row" style={{ marginBottom: 10 }}>
           <button className="btn" onClick={draftWithClaude} disabled={!title.trim() || busy !== ""}>
-            {busy === "draft" ? "Claude 起草中…" : "✨ 用 Claude 生成双语草稿"}
+            {busy === "draft" ? "起草中…" : "✨ 用 DeepSeek 生成双语草稿"}
           </button>
           <button className="btn" onClick={() => setBody(BODY_TEMPLATES[type].trim())} disabled={busy !== ""}>
             插入空白模板

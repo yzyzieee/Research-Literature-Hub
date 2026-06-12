@@ -18,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Link href="/cards">卡片库 Library</Link>
             <Link href="/pending">审核队列 Review</Link>
             <Link href="/new">新建卡片 New</Link>
+            <Link href="/export">导出 Export</Link>
             {repo && (
               <a href={`https://github.com/${repo}`} target="_blank" rel="noreferrer">
                 GitHub ↗

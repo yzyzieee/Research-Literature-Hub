@@ -5,9 +5,10 @@ Next.js UI layer over the knowledge-base repo. The repo (markdown cards in the p
 ## Features
 
 - **卡片库** — browse all cards, client-side fuzzy search (title / tags / authors / summary, bilingual), type filter
-- **卡片详情** — rendered bilingual markdown, `[[wiki-links]]` resolved to card links, Drive links, related cards
+- **卡片详情** — rendered bilingual markdown, `[[wiki-links]]` resolved to card links, Drive links, related cards, one-click "copy for your LLM"
 - **审核队列** — drafts in `90_pending/` with the review checklist; review itself happens in GitHub PRs
-- **新建向导** — choose a template, auto-fill metadata from a DOI (Crossref), optionally draft the bilingual body with Claude, then open a PR into `90_pending/` (or download/copy the markdown)
+- **新建向导** — choose a template, auto-fill metadata from a DOI (Crossref), optionally draft the bilingual body with DeepSeek, then open a PR into `90_pending/` (or download/copy the markdown)
+- **导出 Export** — pick cards, bundle them into a prompt-ready markdown pack (with Drive full-text links and a token estimate) to paste into each member's own ChatGPT / Claude / Kimi — zero team API spend for literature research
 
 ## Local development
 
@@ -24,7 +25,7 @@ The app reads cards from the parent directory by default (`KB_PATH` env to overr
 | Variable | Enables |
 |---|---|
 | `GITHUB_TOKEN` + `GITHUB_REPO` | "提交 PR" button — creates a branch + commit + pull request via the GitHub API. Use a fine-grained PAT with Contents and Pull requests read/write on the KB repo. |
-| `ANTHROPIC_API_KEY` | "用 Claude 生成双语草稿" button (model: claude-opus-4-8) |
+| `DEEPSEEK_API_KEY` (+ `DEEPSEEK_MODEL`) | "生成双语草稿" button. Frugal by design: one capped (3K tokens) non-streaming call per explicit click, nothing automatic. |
 | `NEXT_PUBLIC_GITHUB_REPO` | GitHub links in the UI (edit card, PR list) |
 
 Without these, the wizard still works — download or copy the markdown and commit it yourself.
