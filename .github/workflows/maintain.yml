@@ -1,0 +1,37 @@
+name: Maintain library
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: maintain-main
+  cancel-in-progress: false
+
+jobs:
+  maintain:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r scripts/requirements.txt
+      - name: Promote approved cards
+        run: python scripts/promote.py
+      - name: Merge bibliographies
+        run: python scripts/merge_bibtex.py
+      - name: Rebuild index
+        run: python scripts/update_index.py
+      - name: Sanity check
+        run: python scripts/check_cards.py
+      - name: Commit generated files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || (git commit -m "chore: promote cards and rebuild index" && git push)

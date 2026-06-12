@@ -1,0 +1,10 @@
+.claude/
+__pycache__/
+*.pyc
+node_modules/
+.next/
+.vercel/
+.env
+.env.local
+.env*.local
+.DS_Store

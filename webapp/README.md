@@ -1,0 +1,43 @@
+# Audio Research KB — Web App
+
+Next.js UI layer over the knowledge-base repo. The repo (markdown cards in the parent folder) is the single source of truth — the app stores nothing itself.
+
+## Features
+
+- **卡片库** — browse all cards, client-side fuzzy search (title / tags / authors / summary, bilingual), type filter
+- **卡片详情** — rendered bilingual markdown, `[[wiki-links]]` resolved to card links, Drive links, related cards
+- **审核队列** — drafts in `90_pending/` with the review checklist; review itself happens in GitHub PRs
+- **新建向导** — choose a template, auto-fill metadata from a DOI (Crossref), optionally draft the bilingual body with Claude, then open a PR into `90_pending/` (or download/copy the markdown)
+
+## Local development
+
+```bash
+cd webapp
+npm install
+npm run dev          # http://localhost:3000
+```
+
+The app reads cards from the parent directory by default (`KB_PATH` env to override). No env vars are required for read-only browsing.
+
+## Optional integrations (`.env.local`, see `.env.example`)
+
+| Variable | Enables |
+|---|---|
+| `GITHUB_TOKEN` + `GITHUB_REPO` | "提交 PR" button — creates a branch + commit + pull request via the GitHub API. Use a fine-grained PAT with Contents and Pull requests read/write on the KB repo. |
+| `ANTHROPIC_API_KEY` | "用 Claude 生成双语草稿" button (model: claude-opus-4-8) |
+| `NEXT_PUBLIC_GITHUB_REPO` | GitHub links in the UI (edit card, PR list) |
+
+Without these, the wizard still works — download or copy the markdown and commit it yourself.
+
+## Deployment (Vercel)
+
+1. Push the whole repo (knowledge base + `webapp/`) to GitHub.
+2. In Vercel: import the repo, set **Root Directory = `webapp`**.
+3. Add the env vars above in Vercel project settings.
+4. Every merge to `main` redeploys, so the site always reflects the latest cards. Content pages are statically generated at build time (`force-static`).
+
+## Architecture notes
+
+- Pages read markdown via `lib/kb.ts` (gray-matter) at build time; search runs client-side with Fuse.js over the serialized card index.
+- Write path never touches the local filesystem: `/api/commit` calls the GitHub REST API (branch → commit → PR), so the human review gate is exactly a PR review.
+- Promotion to the official folders is done by GitHub Actions after merge (`scripts/promote.py`), not by the app.
