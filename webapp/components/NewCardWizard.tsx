@@ -6,6 +6,7 @@ import type { CardType } from "@/lib/types";
 import { TYPE_LABELS } from "@/lib/types";
 import { useLang } from "@/lib/i18n";
 import { extractPdfText } from "@/lib/pdf";
+import { uploadToDrive } from "@/lib/drive";
 
 function kebab(s: string): string {
   return s
@@ -33,11 +34,14 @@ export default function NewCardWizard() {
   const [drive, setDrive] = useState("");
   const [notes, setNotes] = useState("");
   const [body, setBody] = useState("");
-  const [busy, setBusy] = useState<"" | "doi" | "draft" | "commit" | "pdf">("");
+  const [busy, setBusy] = useState<"" | "doi" | "draft" | "commit" | "pdf" | "drive">("");
   const [pdfName, setPdfName] = useState("");
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [msg, setMsg] = useState<{ kind: "ok" | "warn"; text: string; link?: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const driveFolder = process.env.NEXT_PUBLIC_DRIVE_FOLDER_URL;
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const driveFolderId = process.env.NEXT_PUBLIC_DRIVE_FOLDER_ID;
 
   const slug = type === "paper" ? citationKey.trim() : kebab(title);
   const authorList = authors.split(/[;,]/).map((a) => a.trim()).filter(Boolean);
@@ -65,11 +69,27 @@ export default function NewCardWizard() {
     return fm + (body.trim() ? body.trim() : BODY_TEMPLATES[type].trim()) + "\n";
   };
 
+  const uploadDrive = async () => {
+    if (!pdfFile || !googleClientId) return;
+    setBusy("drive");
+    setMsg(null);
+    try {
+      const link = await uploadToDrive(pdfFile, googleClientId, driveFolderId);
+      setDrive(link);
+      setMsg({ kind: "ok", text: t("new.driveUploaded"), link });
+    } catch (e) {
+      setMsg({ kind: "warn", text: `${t("new.driveUploadFail")}: ${e instanceof Error ? e.message : e}` });
+    } finally {
+      setBusy("");
+    }
+  };
+
   const onPdf = async (file: File | undefined) => {
     if (!file) return;
     setBusy("pdf");
     setMsg(null);
     setPdfName(file.name);
+    setPdfFile(file);
     try {
       const text = await extractPdfText(file);
       if (text.length < 80) throw new Error(t("new.pdfNoText"));
@@ -190,9 +210,18 @@ export default function NewCardWizard() {
             {busy === "pdf" ? t("new.pdfBusy") : t("new.pdfBtn")}
           </button>
         </div>
-        {pdfName && <p className="subtitle" style={{ margin: "8px 0 0" }}>📄 {pdfName}</p>}
+        {pdfName && (
+          <div className="pdf-zone-main" style={{ marginTop: 8 }}>
+            <p className="subtitle" style={{ margin: 0 }}>📄 {pdfName}</p>
+            {googleClientId && (
+              <button className="btn" onClick={uploadDrive} disabled={!pdfFile || busy !== ""}>
+                {busy === "drive" ? t("new.driveUploading") : t("new.driveUpload")}
+              </button>
+            )}
+          </div>
+        )}
         <p className="subtitle" style={{ margin: "10px 0 0" }}>
-          {t("new.driveReminder")}
+          {googleClientId ? t("new.driveAuto") : t("new.driveReminder")}
           {driveFolder && (
             <>
               {" "}

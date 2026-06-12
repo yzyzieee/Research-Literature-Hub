@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { BODY_TEMPLATES } from "@/lib/templates";
 import type { CardType } from "@/lib/types";
+import { llmChat, llmConfigured } from "@/lib/llm";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -10,10 +11,9 @@ export const maxDuration = 120;
 const MAX_TOKENS = 3000;
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.DEEPSEEK_API_KEY;
-  if (!apiKey) {
+  if (!llmConfigured()) {
     return NextResponse.json(
-      { error: "DEEPSEEK_API_KEY not configured — fill the card manually or set the key in .env.local" },
+      { error: "No LLM API key configured — fill the card manually or set a key (e.g. DEEPSEEK_API_KEY)." },
       { status: 501 },
     );
   }
@@ -50,39 +50,18 @@ export async function POST(req: NextRequest) {
     BODY_TEMPLATES[type],
     "```",
     "",
-    "Write the complete bilingual card body now.",
+    "Write the complete card body now.",
   ]
     .filter(Boolean)
     .join("\n");
 
-  const res = await fetch("https://api.deepseek.com/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: process.env.DEEPSEEK_MODEL || "deepseek-v4-pro",
-      max_tokens: MAX_TOKENS,
-      temperature: 0.3,
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
-    }),
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    return NextResponse.json(
-      { error: `DeepSeek API error ${res.status}: ${text.slice(0, 300)}` },
-      { status: 502 },
-    );
+  try {
+    const body = await llmChat({ system, user, maxTokens: MAX_TOKENS });
+    if (!body.trim()) {
+      return NextResponse.json({ error: "The model returned an empty draft" }, { status: 502 });
+    }
+    return NextResponse.json({ body });
+  } catch (e) {
+    return NextResponse.json({ error: `LLM error: ${e instanceof Error ? e.message : e}` }, { status: 502 });
   }
-  const data = await res.json();
-  const body: string = data.choices?.[0]?.message?.content ?? "";
-  if (!body.trim()) {
-    return NextResponse.json({ error: "DeepSeek returned an empty draft" }, { status: 502 });
-  }
-  return NextResponse.json({ body, usage: data.usage });
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { llmChat, llmConfigured, parseJsonLoose } from "@/lib/llm";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -19,10 +20,9 @@ const SECTIONS: Record<string, string> = {
 };
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.DEEPSEEK_API_KEY;
-  if (!apiKey) {
+  if (!llmConfigured()) {
     return NextResponse.json(
-      { error: "DEEPSEEK_API_KEY not configured — set it in .env.local / Vercel to enable PDF auto-extraction." },
+      { error: "No LLM API key configured — set one (e.g. DEEPSEEK_API_KEY) to enable PDF auto-extraction." },
       { status: 501 },
     );
   }
@@ -52,32 +52,22 @@ export async function POST(req: NextRequest) {
     "Keep it compact — a knowledge card, not a full reproduction. The draft is human-reviewed before entering the library.",
   ].join("\n");
 
-  const res = await fetch("https://api.deepseek.com/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: process.env.DEEPSEEK_MODEL || "deepseek-v4-pro",
-      max_tokens: MAX_TOKENS,
-      temperature: 0.2,
-      response_format: { type: "json_object" },
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: `Full document text:\n\n${text.slice(0, MAX_INPUT_CHARS)}` },
-      ],
-    }),
-  });
-
-  if (!res.ok) {
-    const t = await res.text();
-    return NextResponse.json({ error: `DeepSeek API error ${res.status}: ${t.slice(0, 300)}` }, { status: 502 });
+  let raw: string;
+  try {
+    raw = await llmChat({
+      system,
+      user: `Full document text:\n\n${text.slice(0, MAX_INPUT_CHARS)}`,
+      maxTokens: MAX_TOKENS,
+      json: true,
+    });
+  } catch (e) {
+    return NextResponse.json({ error: `LLM error: ${e instanceof Error ? e.message : e}` }, { status: 502 });
   }
-  const data = await res.json();
-  const raw = data.choices?.[0]?.message?.content ?? "";
   let card: Record<string, unknown>;
   try {
-    card = JSON.parse(raw);
+    card = parseJsonLoose(raw);
   } catch {
-    return NextResponse.json({ error: "DeepSeek did not return valid JSON — try again or fill manually." }, { status: 502 });
+    return NextResponse.json({ error: "The model did not return valid JSON — try again or fill manually." }, { status: 502 });
   }
 
   const type = TYPES.includes(String(card.type)) ? String(card.type) : "paper";
@@ -93,6 +83,5 @@ export async function POST(req: NextRequest) {
       : [],
     citation_key: String(card.citation_key ?? ""),
     body: String(card.body ?? ""),
-    usage: data.usage,
   });
 }
