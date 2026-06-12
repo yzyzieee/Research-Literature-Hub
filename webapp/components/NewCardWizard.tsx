@@ -40,8 +40,7 @@ export default function NewCardWizard() {
   const [msg, setMsg] = useState<{ kind: "ok" | "warn"; text: string; link?: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const driveFolder = process.env.NEXT_PUBLIC_DRIVE_FOLDER_URL;
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-  const driveFolderId = process.env.NEXT_PUBLIC_DRIVE_FOLDER_ID;
+  const driveUploadEnabled = process.env.NEXT_PUBLIC_DRIVE_UPLOAD === "1";
 
   const slug = type === "paper" ? citationKey.trim() : kebab(title);
   const authorList = authors.split(/[;,]/).map((a) => a.trim()).filter(Boolean);
@@ -70,11 +69,11 @@ export default function NewCardWizard() {
   };
 
   const uploadDrive = async () => {
-    if (!pdfFile || !googleClientId) return;
+    if (!pdfFile || !driveUploadEnabled) return;
     setBusy("drive");
     setMsg(null);
     try {
-      const link = await uploadToDrive(pdfFile, googleClientId, driveFolderId);
+      const link = await uploadToDrive(pdfFile);
       setDrive(link);
       setMsg({ kind: "ok", text: t("new.driveUploaded"), link });
     } catch (e) {
@@ -213,7 +212,7 @@ export default function NewCardWizard() {
         {pdfName && (
           <div className="pdf-zone-main" style={{ marginTop: 8 }}>
             <p className="subtitle" style={{ margin: 0 }}>📄 {pdfName}</p>
-            {googleClientId && (
+            {driveUploadEnabled && (
               <button className="btn" onClick={uploadDrive} disabled={!pdfFile || busy !== ""}>
                 {busy === "drive" ? t("new.driveUploading") : t("new.driveUpload")}
               </button>
@@ -221,7 +220,7 @@ export default function NewCardWizard() {
           </div>
         )}
         <p className="subtitle" style={{ margin: "10px 0 0" }}>
-          {googleClientId ? t("new.driveAuto") : t("new.driveReminder")}
+          {driveUploadEnabled ? t("new.driveAuto") : t("new.driveReminder")}
           {driveFolder && (
             <>
               {" "}
