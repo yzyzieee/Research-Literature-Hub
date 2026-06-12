@@ -3,14 +3,41 @@ import crypto from "crypto";
 
 export const runtime = "nodejs";
 
-interface ServiceAccount {
-  client_email: string;
-  private_key: string;
+function hasOwnerOAuth(): boolean {
+  return Boolean(
+    process.env.GOOGLE_OAUTH_REFRESH_TOKEN &&
+      process.env.GOOGLE_OAUTH_CLIENT_ID &&
+      process.env.GOOGLE_OAUTH_CLIENT_SECRET,
+  );
 }
 
-// Mint a Google access token from the service-account key (JWT bearer grant).
-// Done manually with node crypto to avoid an extra dependency.
-async function getAccessToken(creds: ServiceAccount): Promise<string> {
+function driveConfigured(): boolean {
+  return hasOwnerOAuth() || Boolean(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
+}
+
+// Owner OAuth (refresh token) works on a personal Gmail Drive — files are owned
+// by the owner, uploaded on everyone's behalf, no per-user sign-in. Falls back
+// to a service account (for Google Workspace Shared Drives).
+async function getAccessToken(): Promise<string> {
+  if (hasOwnerOAuth()) {
+    const res = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "refresh_token",
+        refresh_token: process.env.GOOGLE_OAUTH_REFRESH_TOKEN!,
+        client_id: process.env.GOOGLE_OAUTH_CLIENT_ID!,
+        client_secret: process.env.GOOGLE_OAUTH_CLIENT_SECRET!,
+      }),
+    });
+    if (!res.ok) throw new Error(`oauth refresh ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    return ((await res.json()) as { access_token: string }).access_token;
+  }
+
+  const creds = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY!) as {
+    client_email: string;
+    private_key: string;
+  };
   const now = Math.floor(Date.now() / 1000);
   const enc = (o: unknown) => Buffer.from(JSON.stringify(o)).toString("base64url");
   const unsigned = `${enc({ alg: "RS256", typ: "JWT" })}.${enc({
@@ -29,23 +56,16 @@ async function getAccessToken(creds: ServiceAccount): Promise<string> {
       assertion: `${unsigned}.${signature}`,
     }),
   });
-  if (!res.ok) throw new Error(`token ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  if (!res.ok) throw new Error(`sa token ${res.status}: ${(await res.text()).slice(0, 200)}`);
   return ((await res.json()) as { access_token: string }).access_token;
 }
 
 export async function POST(req: NextRequest) {
-  const keyRaw = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
-  if (!keyRaw) {
+  if (!driveConfigured()) {
     return NextResponse.json(
-      { error: "Drive upload not configured (GOOGLE_SERVICE_ACCOUNT_KEY missing)." },
+      { error: "Drive upload not configured (set owner OAuth or a service-account key)." },
       { status: 501 },
     );
-  }
-  let creds: ServiceAccount;
-  try {
-    creds = JSON.parse(keyRaw);
-  } catch {
-    return NextResponse.json({ error: "GOOGLE_SERVICE_ACCOUNT_KEY is not valid JSON." }, { status: 500 });
   }
 
   const { name, mimeType, size } = (await req.json()) as {
@@ -57,7 +77,7 @@ export async function POST(req: NextRequest) {
 
   let token: string;
   try {
-    token = await getAccessToken(creds);
+    token = await getAccessToken();
   } catch (e) {
     return NextResponse.json({ error: `auth failed: ${e instanceof Error ? e.message : e}` }, { status: 502 });
   }
