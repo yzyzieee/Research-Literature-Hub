@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { LangProvider, T } from "@/lib/i18n";
 import SiteHeader from "@/components/SiteHeader";
+import packageJson from "@/package.json";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,7 +19,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SiteHeader repo={repo} gated={gated} />
           <main className="container">{children}</main>
           <footer className="footer">
-            <T k="footer" />
+            <span><T k="footer" /></span>
+            <span className="app-version">v{packageJson.version}</span>
           </footer>
         </LangProvider>
       </body>

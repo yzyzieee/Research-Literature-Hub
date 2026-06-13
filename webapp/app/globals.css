@@ -55,11 +55,18 @@ a:hover { text-decoration: underline; }
 .container { max-width: 1000px; margin: 0 auto; padding: 28px 20px 60px; }
 
 .footer {
-  text-align: center;
   color: var(--text-2);
   font-size: 12px;
   padding: 18px;
   border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.app-version {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  white-space: nowrap;
 }
 
 h1 { font-size: 26px; margin: 0 0 6px; }

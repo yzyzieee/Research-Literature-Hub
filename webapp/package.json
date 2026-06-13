@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "bump:patch": "npm version patch --no-git-tag-version"
   },
   "dependencies": {
     "fuse.js": "^7.0.0",

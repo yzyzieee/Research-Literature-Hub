@@ -39,6 +39,14 @@ Without these, the wizard still works — download or copy the markdown and comm
 3. Add the env vars above in Vercel project settings.
 4. Every merge to `main` redeploys, so the site always reflects the latest cards. Content pages are statically generated at build time (`force-static`).
 
+## Versioning
+
+The app uses semantic versions from `webapp/package.json` and displays the
+current version in the footer. Every non-bot push to `main` automatically bumps
+the patch component (`0.1.0` -> `0.1.1`) in the `Maintain library` workflow,
+commits the updated package files, and triggers the final Vercel deployment.
+For a local/manual bump, run `npm run bump:patch` inside `webapp/`.
+
 ## Architecture notes
 
 - Pages read markdown via `lib/kb.ts` (gray-matter) at build time; search runs client-side with Fuse.js over the serialized card index.
