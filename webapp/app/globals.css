@@ -200,6 +200,8 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
 }
 .pdf-zone-main { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .pdf-zone b { font-size: 16px; }
+.upload-progress { height: 8px; overflow: hidden; border-radius: 999px; background: var(--border); margin: 14px 0; }
+.upload-progress span { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width 180ms ease; }
 
 .login-wrap { display: flex; justify-content: center; padding-top: 60px; }
 .login-card { max-width: 380px; width: 100%; }

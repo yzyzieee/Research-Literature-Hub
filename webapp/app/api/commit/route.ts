@@ -21,6 +21,23 @@ async function gh(path: string, token: string, init?: RequestInit) {
   return res.json();
 }
 
+async function ghFileExists(repo: string, path: string, ref: string, token: string): Promise<boolean> {
+  const params = new URLSearchParams({ ref });
+  const res = await fetch(`${GH}/repos/${repo}/contents/${path}?${params}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+    cache: "no-store",
+  });
+  if (res.status === 404) return false;
+  if (!res.ok) {
+    throw new Error(`GitHub duplicate check -> ${res.status}: ${(await res.text()).slice(0, 300)}`);
+  }
+  return true;
+}
+
 export async function POST(req: NextRequest) {
   const token = process.env.GITHUB_TOKEN;
   const repo = process.env.GITHUB_REPO || process.env.NEXT_PUBLIC_GITHUB_REPO;
@@ -55,6 +72,16 @@ export async function POST(req: NextRequest) {
   const branch = `card/${slug}-${Date.now().toString(36)}`;
 
   try {
+    const duplicatePaths = [`official/${slug}.md`, `pending/${slug}.md`];
+    for (const path of duplicatePaths) {
+      if (await ghFileExists(repository, path, base, githubToken)) {
+        return NextResponse.json(
+          { error: `A card for "${slug}" already exists at ${path}. Review the existing card instead of creating a duplicate.` },
+          { status: 409 },
+        );
+      }
+    }
+
     const baseRef = await gh(`/repos/${repository}/git/ref/heads/${base}`, githubToken);
     await gh(`/repos/${repository}/git/refs`, githubToken, {
       method: "POST",

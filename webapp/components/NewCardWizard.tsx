@@ -39,15 +39,32 @@ export default function NewCardWizard() {
   const [busy, setBusy] = useState<"" | "doi" | "draft" | "commit" | "pdf" | "drive">("");
   const [pdfName, setPdfName] = useState("");
   const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [archived, setArchived] = useState<{
+    id: string;
+    name: string;
+    link: string;
+    reused: boolean;
+    signature: string;
+  } | null>(null);
   const [msg, setMsg] = useState<{ kind: "ok" | "warn"; text: string; link?: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const driveFolder = process.env.NEXT_PUBLIC_DRIVE_FOLDER_URL;
   const driveUploadEnabled = process.env.NEXT_PUBLIC_DRIVE_UPLOAD === "1";
 
   const slug = type === "paper" ? citationKey.trim() : kebab(title);
+  const ready = Boolean(title.trim() && domain && slug && /^[a-z0-9][a-z0-9-]*$/.test(slug));
+  const archiveSignature = `${sourceType}:${slug}`;
   const authorList = authors.split(/[;,]/).map((a) => a.trim()).filter(Boolean);
   const tagList = tags.split(/[,，\s]+/).map((t) => t.trim().toLowerCase()).filter(Boolean);
   const driveList = drive.split(/\s+/).map((d) => d.trim()).filter(Boolean);
+  const archiveCurrent = Boolean(
+    archived &&
+      archived.signature === archiveSignature &&
+      driveList.includes(archived.link),
+  );
+  const needsArchive = Boolean(pdfFile && driveUploadEnabled);
+  const readyToSubmit = ready && (!needsArchive || archiveCurrent);
 
   const fullMarkdown = () => {
     const today = new Date().toISOString().slice(0, 10);
@@ -95,27 +112,23 @@ export default function NewCardWizard() {
   };
 
   const uploadDrive = async () => {
-    if (!pdfFile || !driveUploadEnabled) return;
+    if (!pdfFile || !driveUploadEnabled || !ready) return;
     setBusy("drive");
+    setUploadProgress(0);
     setMsg(null);
     try {
-      const base = slug || pdfFile.name.replace(/\.pdf$/i, "");
-      const { id, link } = await uploadToDrive(pdfFile, base, sourceType);
+      const result = await uploadToDrive(pdfFile, slug, sourceType, doi, setUploadProgress);
+      const { link } = result;
       setDrive(link);
-      // Re-analyse from the original PDF (Gemini reads figures/equations).
-      const res = await fetch("/api/extract", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ driveFileId: id }),
+      setArchived({
+        ...result,
+        signature: archiveSignature,
       });
-      const data = await res.json();
-      if (res.ok) {
-        applyCard(data);
-        setMsg({ kind: "ok", text: t("new.driveVisionOk"), link });
-      } else {
-        // Keep the text-based draft if vision isn't available.
-        setMsg({ kind: "ok", text: t("new.driveUploaded"), link });
-      }
+      setMsg({
+        kind: "ok",
+        text: result.reused ? t("new.driveDuplicate") : t("new.driveUploaded"),
+        link,
+      });
     } catch (e) {
       setMsg({ kind: "warn", text: `${t("new.driveUploadFail")}: ${e instanceof Error ? e.message : e}` });
     } finally {
@@ -129,6 +142,9 @@ export default function NewCardWizard() {
     setMsg(null);
     setPdfName(file.name);
     setPdfFile(file);
+    setDrive("");
+    setArchived(null);
+    setUploadProgress(0);
     try {
       const text = await extractPdfText(file);
       if (text.length < 80) throw new Error(t("new.pdfNoText"));
@@ -222,8 +238,6 @@ export default function NewCardWizard() {
     URL.revokeObjectURL(a.href);
   };
 
-  const ready = title.trim() && slug && /^[a-z0-9][a-z0-9-]*$/.test(slug);
-
   return (
     <>
       <div className="pdf-zone">
@@ -243,16 +257,7 @@ export default function NewCardWizard() {
             {busy === "pdf" ? t("new.pdfBusy") : t("new.pdfBtn")}
           </button>
         </div>
-        {pdfName && (
-          <div className="pdf-zone-main" style={{ marginTop: 8 }}>
-            <p className="subtitle" style={{ margin: 0 }}>📄 {pdfName}</p>
-            {driveUploadEnabled && (
-              <button className="btn" onClick={uploadDrive} disabled={!pdfFile || busy !== ""}>
-                {busy === "drive" ? t("new.driveUploading") : t("new.driveUpload")}
-              </button>
-            )}
-          </div>
-        )}
+        {pdfName && <p className="subtitle" style={{ margin: "8px 0 0" }}>{pdfName}</p>}
         <p className="subtitle" style={{ margin: "10px 0 0" }}>
           {driveUploadEnabled ? t("new.driveAuto") : t("new.driveReminder")}
           {driveFolder && (
@@ -338,6 +343,39 @@ export default function NewCardWizard() {
         <textarea rows={18} value={body} onChange={(e) => setBody(e.target.value)} />
       </div>
 
+      {driveUploadEnabled && pdfFile && (
+        <div className="form-card">
+          <h2 style={{ marginTop: 0 }}>{t("new.archiveTitle")}</h2>
+          <p className="subtitle">{t("new.archiveHint")}</p>
+          <p className="subtitle">
+            {t("new.archiveTarget")}: <code>{sourceType}/NNNN_{slug || "citation-key"}.pdf</code>
+          </p>
+          {busy === "drive" && (
+            <div className="upload-progress" aria-label={`${uploadProgress}%`}>
+              <span style={{ width: `${uploadProgress}%` }} />
+            </div>
+          )}
+          <div className="btn-row">
+            <button className="btn primary" onClick={uploadDrive} disabled={!ready || busy !== "" || archiveCurrent}>
+              {busy === "drive"
+                ? `${t("new.driveUploading")} ${uploadProgress}%`
+                : archiveCurrent
+                  ? t("new.driveArchived")
+                  : t("new.driveConfirmUpload")}
+            </button>
+            {archived && (
+              <a className="btn" href={archived.link} target="_blank" rel="noreferrer">
+                {t("new.driveOpenFile")}
+              </a>
+            )}
+          </div>
+          {!ready && <p className="subtitle">{t("new.archiveRequired")}</p>}
+          {archived && !archiveCurrent && (
+            <div className="notice warn">{t("new.archiveChanged")}</div>
+          )}
+        </div>
+      )}
+
       {msg && (
         <div className={`notice ${msg.kind}`}>
           {msg.text} {msg.link && <a href={msg.link} target="_blank" rel="noreferrer">{msg.link}</a>}
@@ -345,7 +383,7 @@ export default function NewCardWizard() {
       )}
 
       <div className="btn-row">
-        <button className="btn primary" onClick={submitPr} disabled={!ready || busy !== ""}>
+        <button className="btn primary" onClick={submitPr} disabled={!readyToSubmit || busy !== ""}>
           {busy === "commit" ? t("new.submitting") : t("new.submitPr")}
         </button>
         <button className="btn" onClick={download} disabled={!ready}>{t("new.download")}</button>
@@ -353,6 +391,9 @@ export default function NewCardWizard() {
           {t("new.copyMd")}
         </button>
       </div>
+      {ready && needsArchive && !archiveCurrent && (
+        <p className="subtitle">{t("new.submitNeedsArchive")}</p>
+      )}
     </>
   );
 }
