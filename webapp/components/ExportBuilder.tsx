@@ -3,13 +3,15 @@
 import { useMemo, useState } from "react";
 import type { Card, CardType } from "@/lib/types";
 import { TYPE_LABELS } from "@/lib/types";
-import { bundlePrompt, estimateTokens } from "@/lib/export";
+import { bundlePrompt, driveDownloadUrl, estimateTokens, matchCardsFromText } from "@/lib/export";
 import { useLang } from "@/lib/i18n";
 import CopyButton from "./CopyButton";
+import DownloadButton from "./DownloadButton";
 
 export default function ExportBuilder({ cards, repo }: { cards: Card[]; repo?: string }) {
   const { t } = useLang();
   const [type, setType] = useState<"" | CardType>("");
+  const [listText, setListText] = useState("");
   const [filter, setFilter] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
@@ -41,6 +43,15 @@ export default function ExportBuilder({ cards, repo }: { cards: Card[]; repo?: s
     a.click();
     URL.revokeObjectURL(a.href);
   };
+
+  const matched = useMemo(
+    () => (listText.trim() ? matchCardsFromText(cards, listText) : []),
+    [listText, cards],
+  );
+  const matchedLinks = matched
+    .filter((c) => c.drive.length)
+    .map((c) => driveDownloadUrl(c.drive[0]))
+    .join("\n");
 
   return (
     <>
@@ -102,6 +113,44 @@ export default function ExportBuilder({ cards, repo }: { cards: Card[]; repo?: s
           <textarea rows={12} readOnly value={bundle} />
         </div>
       )}
+
+      <h2 style={{ marginTop: 36 }}>{t("get.title")}</h2>
+      <p className="subtitle">{t("get.subtitle")}</p>
+      <div className="form-card">
+        <textarea
+          rows={5}
+          placeholder={t("get.placeholder")}
+          value={listText}
+          onChange={(e) => setListText(e.target.value)}
+        />
+        {listText.trim() && (
+          <>
+            <p className="subtitle" style={{ margin: "12px 0 8px" }}>
+              {matched.length} {t("get.matched")}
+            </p>
+            <div className="card-grid">
+              {matched.map((c) => (
+                <div key={c.slug} className="card-item" style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
+                  <span>
+                    <span className="titles">{c.title}</span>
+                    <span className="cite">{c.citation_key || c.slug}</span>
+                  </span>
+                  {c.drive.length > 0 ? (
+                    <DownloadButton link={c.drive[0]} />
+                  ) : (
+                    <span className="badge">{t("get.noPdf")}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+            {matchedLinks && (
+              <div className="btn-row">
+                <CopyButton text={matchedLinks} label={t("get.copyLinks")} />
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </>
   );
 }

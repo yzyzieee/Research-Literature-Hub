@@ -32,15 +32,41 @@ export function cardToPrompt(card: Card, repo?: string): string {
 
 export function bundlePrompt(cards: Card[], repo?: string): string {
   const header = [
-    "# Knowledge cards from our audio research knowledge base",
+    "# Our audio research knowledge base — use this as your library",
     "",
-    `${cards.length} knowledge card(s) on audio / ANC / signal processing follow.`,
-    "Use them as trusted context for my next questions. Each card has a direct PDF download link — when you recommend a paper, give me its download link so I can fetch the original.",
+    `Below are ${cards.length} English knowledge cards from our group's library (audio / ANC / signal processing).`,
+    "Each card has metadata (type, domain, tags), a distilled summary, and — when a PDF exists — a direct download link.",
+    "",
+    "How to work with me:",
+    "- Treat these cards as your trusted knowledge base. I will tell you what direction or question I want to research — the topic is mine to choose.",
+    "- Answer using these cards as the primary source. If the library does not cover something I ask, say so explicitly rather than guessing.",
+    "- Whenever you recommend or cite a paper, ALWAYS list it as: `<title> — <citation_key> — <download link>`, so I can fetch the originals. Only use links and papers that appear in the cards; never invent them.",
+    "- A good answer usually ends with a short reference list in that format.",
     "",
     "---",
     "",
   ].join("\n");
   return header + cards.map((c) => cardToPrompt(c, repo)).join("\n\n---\n\n") + "\n";
+}
+
+/**
+ * Match cards against a free-text reference list pasted back from an LLM,
+ * by citation key, slug, or title. Returns matched cards (deduped, order kept).
+ */
+export function matchCardsFromText(cards: Card[], text: string): Card[] {
+  const hay = text.toLowerCase();
+  const seen = new Set<string>();
+  const out: Card[] = [];
+  for (const c of cards) {
+    const keys = [c.citation_key, c.slug].filter(Boolean).map((s) => s.toLowerCase());
+    const byKey = keys.some((k) => hay.includes(k));
+    const byTitle = c.title.length > 8 && hay.includes(c.title.toLowerCase());
+    if ((byKey || byTitle) && !seen.has(c.slug)) {
+      seen.add(c.slug);
+      out.push(c);
+    }
+  }
+  return out;
 }
 
 /** Rough token estimate: CJK ≈ 0.6 tok/char, other text ≈ 0.25 tok/char. */

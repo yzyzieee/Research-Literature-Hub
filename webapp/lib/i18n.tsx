@@ -97,7 +97,7 @@ const dict: Record<Lang, Record<string, string>> = {
     "new.prFail": "Submit failed",
 
     "export.title": "Export for your LLM",
-    "export.subtitle": "Pick cards → bundle into a prompt → paste into each member's own ChatGPT / Claude / Kimi for literature research. No team API spend.",
+    "export.subtitle": "Bundle the library into a prompt for your own LLM, then paste its reference list back here to download the originals. No team API spend.",
     "export.filter": "Filter by title / tags …",
     "export.allTypes": "All types",
     "export.selectAll": "Select shown",
@@ -108,6 +108,12 @@ const dict: Record<Lang, Record<string, string>> = {
     "export.copy": "Copy bundle",
     "export.download": "Download .md",
     "export.preview": "Preview",
+    "get.title": "Get original PDFs from a list",
+    "get.subtitle": "Paste the reference list your LLM returned (titles or citation keys). Matching cards appear below with a download button — fetch the originals without digging through Drive.",
+    "get.placeholder": "Paste the papers your LLM recommended — titles, citation keys, or its whole reference list…",
+    "get.matched": "matched in the library",
+    "get.noPdf": "no PDF yet",
+    "get.copyLinks": "Copy all download links",
 
     "copy.copied": "✓ Copied",
     "card.download": "Download original PDF",
@@ -210,7 +216,7 @@ const dict: Record<Lang, Record<string, string>> = {
     "new.prFail": "提交失败",
 
     "export.title": "导出给你的 LLM",
-    "export.subtitle": "勾选卡片 → 打包成提示词 → 粘贴到每个成员自己的 ChatGPT / Claude / Kimi 做文献调研。不消耗团队 API 额度。",
+    "export.subtitle": "把文献库打包成提示词喂给你自己的 LLM,再把它给的文献清单粘回这里下载原文。不消耗团队 API 额度。",
     "export.filter": "按标题 / 标签过滤 …",
     "export.allTypes": "全部类型",
     "export.selectAll": "全选当前",
@@ -221,6 +227,12 @@ const dict: Record<Lang, Record<string, string>> = {
     "export.copy": "复制卡片包",
     "export.download": "下载 .md",
     "export.preview": "预览",
+    "get.title": "按清单下载原文 PDF",
+    "get.subtitle": "把 LLM 返回的文献清单（标题或 citation key）粘进来,匹配到的卡片会列在下面并带下载按钮——不用进 Drive 翻就能拿原文。",
+    "get.placeholder": "粘贴 LLM 推荐的论文——标题、citation key,或它给的整段参考文献列表…",
+    "get.matched": "篇在库中匹配到",
+    "get.noPdf": "暂无 PDF",
+    "get.copyLinks": "复制全部下载链接",
 
     "copy.copied": "✓ 已复制",
     "card.download": "下载原文 PDF",
