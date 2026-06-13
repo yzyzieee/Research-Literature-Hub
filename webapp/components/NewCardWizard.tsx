@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { BODY_TEMPLATES } from "@/lib/templates";
 import type { CardType } from "@/lib/types";
-import { TYPE_LABELS } from "@/lib/types";
+import { DOMAINS, DOMAIN_LABELS, SOURCE_TYPES, TYPE_LABELS } from "@/lib/types";
 import { useLang } from "@/lib/i18n";
 import { extractPdfText } from "@/lib/pdf";
 import { uploadToDrive } from "@/lib/drive";
@@ -25,6 +25,8 @@ function yamlList(items: string[]): string {
 export default function NewCardWizard() {
   const { t } = useLang();
   const [type, setType] = useState<CardType>("paper");
+  const [domain, setDomain] = useState("");
+  const [sourceType, setSourceType] = useState("paper");
   const [title, setTitle] = useState("");
   const [doi, setDoi] = useState("");
   const [citationKey, setCitationKey] = useState("");
@@ -53,6 +55,8 @@ export default function NewCardWizard() {
       "---",
       `title: ${JSON.stringify(title)}`,
       `type: ${type}`,
+      `domain: ${domain}`,
+      ...(type === "paper" ? [`source_type: ${sourceType}`] : []),
       "status: pending",
       ...(type === "paper"
         ? [`citation_key: ${citationKey.trim()}`, `authors: ${yamlList(authorList)}`, `year: ${year || "null"}`]
@@ -70,6 +74,8 @@ export default function NewCardWizard() {
 
   const applyCard = (data: {
     type?: string;
+    domain?: string;
+    source_type?: string;
     title?: string;
     authors?: string[];
     year?: number | null;
@@ -78,6 +84,8 @@ export default function NewCardWizard() {
     body?: string;
   }) => {
     if (data.type && TYPE_LABELS[data.type as CardType]) setType(data.type as CardType);
+    if (data.domain && DOMAINS.includes(data.domain)) setDomain(data.domain);
+    if (data.source_type) setSourceType(data.source_type);
     setTitle(data.title || "");
     setAuthors((data.authors || []).join(", "));
     setYear(data.year ? String(data.year) : "");
@@ -256,6 +264,14 @@ export default function NewCardWizard() {
       </div>
 
       <div className="form-card">
+        <label>{t("new.domain")}</label>
+        <select value={domain} onChange={(e) => setDomain(e.target.value)}>
+          <option value="">{t("new.domainPick")}</option>
+          {DOMAINS.map((d) => (
+            <option key={d} value={d}>{DOMAIN_LABELS[d] || d}</option>
+          ))}
+        </select>
+
         <label>{t("new.type")}</label>
         <select value={type} onChange={(e) => setType(e.target.value as CardType)}>
           {(Object.keys(TYPE_LABELS) as CardType[]).map((ct) => (
@@ -265,6 +281,13 @@ export default function NewCardWizard() {
 
         {type === "paper" && (
           <>
+            <label>{t("new.sourceType")}</label>
+            <select value={sourceType} onChange={(e) => setSourceType(e.target.value)}>
+              {SOURCE_TYPES.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+
             <label>{t("new.doi")}</label>
             <div style={{ display: "flex", gap: 8 }}>
               <input value={doi} onChange={(e) => setDoi(e.target.value)} placeholder="10.1109/PROC.1975.10036" />
@@ -298,7 +321,7 @@ export default function NewCardWizard() {
         <label>{t("new.notes")}</label>
         <textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t("new.notesPh")} />
 
-        {slug && <p className="subtitle" style={{ margin: "10px 0 0" }}>{t("new.fileName")}: <code>90_pending/{slug}.md</code></p>}
+        {slug && <p className="subtitle" style={{ margin: "10px 0 0" }}>{t("new.fileName")}: <code>pending/{slug}.md</code></p>}
       </div>
 
       <div className="form-card">

@@ -1,11 +1,13 @@
 ---
 title: ""
 type: paper
+domain: ""            # one of the domains in scripts/kblib.py DOMAINS
+source_type: paper   # paper | conference | book | patent | other
 status: pending
 citation_key: ""
 authors: []
 year:
-tags: []
+tags: []             # domain keywords, broad -> narrow, lowercase-kebab; no years/authors
 drive: []
 related: []
 created: ""

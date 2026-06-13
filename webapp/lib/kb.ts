@@ -2,10 +2,9 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import type { Card, CardMeta, CardStatus, CardType } from "./types";
-import { TYPE_TO_DIR } from "./types";
 
 const KB_ROOT = process.env.KB_PATH || path.resolve(process.cwd(), "..");
-const CARD_DIRS = [...Object.values(TYPE_TO_DIR), "90_pending"];
+const CARD_DIRS = ["official", "pending"];
 
 function summaryText(body: string): string {
   const lines = body.split(/\r?\n/);
@@ -33,6 +32,8 @@ function parseCard(filePath: string, folder: string): Card | null {
       folder,
       title: String(data.title ?? path.basename(filePath, ".md")),
       type: (data.type ?? "concept") as CardType,
+      domain: String(data.domain ?? ""),
+      source_type: String(data.source_type ?? ""),
       status: (data.status ?? "pending") as CardStatus,
       tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
       authors: Array.isArray(data.authors) ? data.authors.map(String) : [],

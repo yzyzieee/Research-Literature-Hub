@@ -4,16 +4,8 @@ from __future__ import annotations
 import json
 from datetime import date
 
-from kblib import (CARD_DIRS, PENDING_DIR, ROOT, TYPE_TO_DIR,
-                   first_section_paragraphs, iter_cards, utf8_stdout)
-
-TYPE_LABELS = {
-    "concept": "Concepts",
-    "algorithm": "Algorithms",
-    "paper": "Papers",
-    "resource": "Resources",
-    "synthesis": "Synthesis",
-}
+from kblib import (DOMAINS, PENDING_DIR, ROOT, first_section_paragraphs,
+                   iter_cards, utf8_stdout)
 
 
 def main() -> None:
@@ -29,6 +21,8 @@ def main() -> None:
             "folder": card.folder,
             "title": meta.get("title", card.slug),
             "type": meta.get("type", ""),
+            "domain": meta.get("domain", ""),
+            "source_type": meta.get("source_type", ""),
             "status": meta.get("status", ""),
             "tags": meta.get("tags") or [],
             "authors": meta.get("authors") or [],
@@ -39,7 +33,7 @@ def main() -> None:
             "created": str(meta.get("created", "")),
             "summary": paras[0] if paras else "",
         })
-    index.sort(key=lambda c: (c["type"], c["slug"]))
+    index.sort(key=lambda c: (c["domain"], c["type"], c["slug"]))
 
     out_dir = ROOT / "index"
     out_dir.mkdir(exist_ok=True)
@@ -53,20 +47,21 @@ def main() -> None:
         f"Total cards: {len(index)}",
         "",
     ]
-    for ctype, label in TYPE_LABELS.items():
-        official = [c for c in index if c["type"] == ctype and c["folder"] != PENDING_DIR]
+    # Group official cards by domain.
+    for domain in DOMAINS:
+        official = [c for c in index if c["domain"] == domain and c["folder"] != PENDING_DIR]
         if not official:
             continue
-        lines += [f"## {label}", ""]
+        lines += [f"## {domain}", ""]
         for c in official:
             year = f" ({c['year']})" if c["year"] else ""
-            lines.append(f"- [{c['title']}]({c['path']}){year}")
+            lines.append(f"- [{c['title']}]({c['path']}) — _{c['type']}_{year}")
         lines.append("")
     pending = [c for c in index if c["folder"] == PENDING_DIR]
     if pending:
         lines += ["## Pending review", ""]
         for c in pending:
-            lines.append(f"- [{c['title']}]({c['path']}) `{c['status']}`")
+            lines.append(f"- [{c['title']}]({c['path']}) — _{c['domain']}_ `{c['status']}`")
         lines.append("")
     (out_dir / "INDEX.md").write_text("\n".join(lines), encoding="utf-8")
     print(f"Indexed {len(index)} cards -> index/cards.json, index/INDEX.md")

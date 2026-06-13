@@ -6,8 +6,8 @@ Next.js UI layer over the knowledge-base repo. The repo (markdown cards in the p
 
 - **Library** — browse all cards, client-side fuzzy search (title / tags / authors / summary), type filter
 - **Card detail** — rendered markdown, `[[wiki-links]]` resolved to card links, Drive links, related cards, one-click "copy for your LLM"
-- **Review queue** — drafts in `90_pending/` with the review checklist; review itself happens in GitHub PRs
-- **New-card wizard** — choose a template, auto-fill metadata from a DOI (Crossref), optionally draft the English body with DeepSeek, then open a PR into `90_pending/` (or download/copy the markdown)
+- **Review queue** — drafts in `pending/` with the review checklist; review itself happens in GitHub PRs
+- **New-card wizard** — choose a template, auto-fill metadata from a DOI (Crossref), optionally draft the English body with DeepSeek, then open a PR into `pending/` (or download/copy the markdown)
 - **UI language toggle** — one-click EN / 中文 switch in the top-right; cards and classification stay English, only the interface chrome switches
 - **导出 Export** — pick cards, bundle them into a prompt-ready markdown pack (with Drive full-text links and a token estimate) to paste into each member's own ChatGPT / Claude / Kimi — zero team API spend for literature research
 

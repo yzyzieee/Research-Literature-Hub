@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { llmChat, llmConfigured, llmProvider, parseJsonLoose } from "@/lib/llm";
 import { driveConfigured, fetchDriveFile } from "@/lib/google";
+import { DOMAINS, SOURCE_TYPES } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -25,14 +26,18 @@ function buildSystem(fromOriginal: boolean): string {
     fromOriginal
       ? "You read the original PDF of a research document (including its figures, equations and tables) for an audio / active-noise-control / signal-processing knowledge base."
       : "You process the extracted text of a research document for an audio / active-noise-control / signal-processing knowledge base.",
-    "First classify the document into exactly one type, then produce a single English knowledge card.",
-    `Allowed types: ${TYPES.join(", ")}. Most journal/conference articles are "paper".`,
+    "Classify the document, then produce a single English knowledge card.",
+    `Allowed types (knowledge kind): ${TYPES.join(", ")}. Most journal/conference articles are "paper".`,
+    `Allowed domains (research field — pick the single best fit): ${DOMAINS.join(", ")}. Use "other" only if none fit.`,
+    `Allowed source_type (document kind): ${SOURCE_TYPES.join(", ")}.`,
     "Respond with a JSON object only, with these keys:",
     '- "type": one of the allowed types',
+    '- "domain": one of the allowed domains',
+    '- "source_type": one of the allowed source_type values',
     '- "title": the document title (English)',
     '- "authors": array of author names (empty array if not a paper / unknown)',
     '- "year": integer publication year or null',
-    '- "tags": array of 2-5 lowercase kebab-case topic tags',
+    '- "tags": array of 2-4 lowercase kebab-case keywords ordered broad to narrow (e.g. ["anc", "adaptive-filter", "fxlms"]). NEVER include years or author names.',
     '- "citation_key": a Better-BibTeX-style key, lowercase, e.g. "widrow1975adaptive" (firstauthor + year + first significant title word)',
     '- "body": the markdown card body following the section structure for the chosen type',
     "Section structure by type:",
@@ -75,16 +80,24 @@ async function geminiVision(pdfBase64: string, system: string): Promise<string> 
 
 function shapeCard(card: Record<string, unknown>) {
   const type = TYPES.includes(String(card.type)) ? String(card.type) : "paper";
+  const domain = DOMAINS.includes(String(card.domain)) ? String(card.domain) : "other";
+  const source_type = SOURCE_TYPES.includes(String(card.source_type) as never)
+    ? String(card.source_type)
+    : "";
+  const tags = Array.isArray(card.tags)
+    ? card.tags
+        .map((t) => String(t).toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""))
+        // drop years and empty tokens — tags are domain keywords only
+        .filter((t) => t && !/^\d{4}$/.test(t))
+    : [];
   return {
     type,
+    domain,
+    source_type,
     title: String(card.title ?? ""),
     authors: Array.isArray(card.authors) ? card.authors.map(String) : [],
     year: card.year ? Number(card.year) : null,
-    tags: Array.isArray(card.tags)
-      ? card.tags.map((t) =>
-          String(t).toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""),
-        )
-      : [],
+    tags,
     citation_key: String(card.citation_key ?? ""),
     body: String(card.body ?? ""),
   };

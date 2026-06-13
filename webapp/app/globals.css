@@ -88,6 +88,7 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
 .card-item:hover { border-color: var(--accent); text-decoration: none; }
 .card-item .titles { font-weight: 600; }
 .card-item .zh { color: var(--text-2); font-weight: 400; margin-left: 8px; }
+.card-item .cite { color: var(--text-2); font-size: 12px; margin-top: 2px; }
 .card-item .excerpt { color: var(--text-2); font-size: 13px; margin-top: 4px; }
 .card-item .meta-row { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 
@@ -101,6 +102,7 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
   background: var(--bg);
 }
 .badge.type { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+.badge.domain { background: #ede9fe; color: #5b21b6; border-color: transparent; font-weight: 500; }
 .badge.official { background: var(--green-soft); color: var(--green); border-color: transparent; }
 .badge.pending, .badge.reviewed { background: var(--amber-soft); color: var(--amber); border-color: transparent; }
 

@@ -1,8 +1,9 @@
 ---
 title: ""
 type: algorithm
+domain: ""   # one of the domains in scripts/kblib.py DOMAINS
 status: pending
-tags: []
+tags: []     # domain keywords, broad -> narrow, lowercase-kebab; no years/authors
 drive: []
 related: []
 created: ""

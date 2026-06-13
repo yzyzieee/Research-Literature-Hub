@@ -1,8 +1,9 @@
 ---
 title: Active noise control (ANC)
 type: concept
+domain: active-noise-control
 status: official
-tags: [anc, acoustics, adaptive-filter]
+tags: [anc, acoustics]
 drive: []
 related: [widrow1975adaptive, fxlms]
 created: 2026-06-12

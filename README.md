@@ -10,19 +10,17 @@ Collaborative knowledge base for audio / ANC / signal processing research. Cards
 
 ```
 00_templates/   Card templates 卡片模板 (paper / concept / algorithm / resource / synthesis)
-01_concepts/    Official concept cards 概念卡（正式）
-02_algorithms/  Official algorithm cards 算法卡（正式）
-03_papers/      Official paper cards 论文卡（正式）
-04_resources/   Official resource cards 资源卡（正式）
-05_synthesis/   Official synthesis cards 综述卡（正式）
-90_pending/     Draft cards awaiting review 待审核草稿卡
+official/       Approved cards 正式卡片 (flat; organised by domain/type in frontmatter)
+pending/        Draft cards awaiting review 待审核草稿卡
 bib/personal/   Each member's Better BibTeX export 个人 .bib 导出
 bib/library.bib Merged bibliography (generated) 合并书目（自动生成）
 index/          Generated index 自动生成的索引 (cards.json / INDEX.md)
-scripts/        Maintenance scripts 维护脚本
+scripts/        Maintenance scripts 维护脚本 (DOMAINS list lives in scripts/kblib.py)
 docs/           Specs and guides 规范文档
 webapp/         Team web app (Next.js) 团队协作 Web 应用
 ```
+
+Cards are stored flat and **organised by `domain` (research field) and `type` via frontmatter** — the web app groups and filters by them. The controlled domain list lives in `scripts/kblib.py` (`DOMAINS`).
 
 ## Workflow | 工作流
 

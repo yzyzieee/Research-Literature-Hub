@@ -9,19 +9,33 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 
-TYPE_TO_DIR = {
-    "concept": "01_concepts",
-    "algorithm": "02_algorithms",
-    "paper": "03_papers",
-    "resource": "04_resources",
-    "synthesis": "05_synthesis",
-}
-OFFICIAL_DIRS = list(TYPE_TO_DIR.values())
-PENDING_DIR = "90_pending"
-CARD_DIRS = OFFICIAL_DIRS + [PENDING_DIR]
+# Flat storage: cards live in official/ once approved, pending/ while in review.
+# Organisation by domain/type is metadata-driven (the web app groups by it).
+OFFICIAL_DIR = "official"
+PENDING_DIR = "pending"
+CARD_DIRS = [OFFICIAL_DIR, PENDING_DIR]
 
-TYPES = set(TYPE_TO_DIR)
+# Knowledge-unit kind.
+TYPES = {"concept", "algorithm", "paper", "resource", "synthesis"}
 STATUSES = {"pending", "reviewed", "official"}
+
+# Research domain (the primary organising axis). Edit this list to fit the group.
+DOMAINS = [
+    "active-noise-control",
+    "acoustic-echo-cancellation",
+    "speech-enhancement",
+    "source-separation",
+    "beamforming-arrays",
+    "spatial-audio",
+    "audio-coding",
+    "room-acoustics",
+    "machine-learning-audio",
+    "fundamentals-dsp",
+    "other",
+]
+
+# Physical document kind (used for the Drive subfolder, optional on a card).
+SOURCE_TYPES = {"paper", "conference", "book", "patent", "other"}
 
 
 def utf8_stdout() -> None:

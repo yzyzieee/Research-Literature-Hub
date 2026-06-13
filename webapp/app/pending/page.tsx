@@ -5,7 +5,7 @@ import CardListItem from "@/components/CardListItem";
 export const dynamic = "force-static";
 
 export default function PendingPage() {
-  const pending = getCards().filter((c) => c.folder === "90_pending");
+  const pending = getCards().filter((c) => c.folder === "pending");
   const repo = process.env.NEXT_PUBLIC_GITHUB_REPO;
 
   return (

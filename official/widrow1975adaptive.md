@@ -1,11 +1,13 @@
 ---
 title: "Adaptive noise cancelling: principles and applications"
 type: paper
+domain: active-noise-control
+source_type: paper
 status: official
 citation_key: widrow1975adaptive
 authors: [B. Widrow, J. R. Glover, J. M. McCool, J. Kaunitz, C. S. Williams, R. H. Hearn, J. R. Zeidler, E. Dong, R. C. Goodlin]
 year: 1975
-tags: [anc, adaptive-filter, lms, foundational]
+tags: [anc, adaptive-filter, lms]
 drive: []
 related: [active-noise-control, fxlms]
 created: 2026-06-12

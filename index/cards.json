@@ -1,15 +1,17 @@
 [
   {
     "slug": "fxlms",
-    "path": "90_pending/fxlms.md",
-    "folder": "90_pending",
+    "path": "pending/fxlms.md",
+    "folder": "pending",
     "title": "Filtered-x LMS (FxLMS)",
     "type": "algorithm",
+    "domain": "active-noise-control",
+    "source_type": "",
     "status": "reviewed",
     "tags": [
       "anc",
       "adaptive-filter",
-      "lms"
+      "fxlms"
     ],
     "authors": [],
     "year": null,
@@ -24,15 +26,16 @@
   },
   {
     "slug": "active-noise-control",
-    "path": "01_concepts/active-noise-control.md",
-    "folder": "01_concepts",
+    "path": "official/active-noise-control.md",
+    "folder": "official",
     "title": "Active noise control (ANC)",
     "type": "concept",
+    "domain": "active-noise-control",
+    "source_type": "",
     "status": "official",
     "tags": [
       "anc",
-      "acoustics",
-      "adaptive-filter"
+      "acoustics"
     ],
     "authors": [],
     "year": null,
@@ -47,16 +50,17 @@
   },
   {
     "slug": "widrow1975adaptive",
-    "path": "03_papers/widrow1975adaptive.md",
-    "folder": "03_papers",
+    "path": "official/widrow1975adaptive.md",
+    "folder": "official",
     "title": "Adaptive noise cancelling: principles and applications",
     "type": "paper",
+    "domain": "active-noise-control",
+    "source_type": "paper",
     "status": "official",
     "tags": [
       "anc",
       "adaptive-filter",
-      "lms",
-      "foundational"
+      "lms"
     ],
     "authors": [
       "B. Widrow",

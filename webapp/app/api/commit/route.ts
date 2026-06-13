@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       method: "POST",
       body: JSON.stringify({ ref: `refs/heads/${branch}`, sha: baseRef.object.sha }),
     });
-    await gh(`/repos/${repo}/contents/90_pending/${slug}.md`, {
+    await gh(`/repos/${repo}/contents/pending/${slug}.md`, {
       method: "PUT",
       body: JSON.stringify({
         message: `draft: add card ${slug}`,
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
         head: branch,
         base,
         body: [
-          `New draft card \`90_pending/${slug}.md\`${author ? ` by ${author}` : ""}.`,
+          `New draft card \`pending/${slug}.md\`${author ? ` by ${author}` : ""}.`,
           "",
           "Review checklist 审核清单:",
           "- [ ] Metadata complete (bilingual titles, type, tags, citation key) 元数据完整",

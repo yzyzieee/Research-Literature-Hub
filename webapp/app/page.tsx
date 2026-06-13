@@ -9,8 +9,8 @@ export const dynamic = "force-static";
 
 export default function HomePage() {
   const cards = getCards();
-  const official = cards.filter((c) => c.folder !== "90_pending");
-  const pending = cards.filter((c) => c.folder === "90_pending");
+  const official = cards.filter((c) => c.folder !== "pending");
+  const pending = cards.filter((c) => c.folder === "pending");
   const byType = (Object.keys(TYPE_LABELS) as CardType[]).map((t) => ({
     type: t,
     count: official.filter((c) => c.type === t).length,

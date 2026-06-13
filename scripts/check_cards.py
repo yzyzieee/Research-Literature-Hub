@@ -7,12 +7,13 @@ from __future__ import annotations
 import re
 import sys
 
-from kblib import (PENDING_DIR, STATUSES, TYPE_TO_DIR, TYPES, Card, iter_cards,
-                   utf8_stdout)
+from kblib import (DOMAINS, OFFICIAL_DIR, PENDING_DIR, SOURCE_TYPES, STATUSES,
+                   TYPES, Card, iter_cards, utf8_stdout)
 
-REQUIRED_ALWAYS = ["title", "type", "status", "tags", "created"]
+REQUIRED_ALWAYS = ["title", "type", "domain", "status", "tags", "created"]
 REQUIRED_PAPER = ["citation_key", "authors", "year"]
 SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
+TAG_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 WIKILINK_RE = re.compile(r"\[\[([^\]|#]+)")
 REQUIRED_SECTIONS = ["## Summary", "## Key points"]
 
@@ -44,9 +45,15 @@ def main() -> int:
                 errors.append(f"{where}: missing required field '{key}'")
 
         ctype = meta.get("type")
+        domain = meta.get("domain")
+        source_type = meta.get("source_type")
         status = meta.get("status")
         if ctype and ctype not in TYPES:
             errors.append(f"{where}: invalid type '{ctype}' (expected one of {sorted(TYPES)})")
+        if domain and domain not in DOMAINS:
+            errors.append(f"{where}: invalid domain '{domain}' (expected one of {DOMAINS})")
+        if source_type and source_type not in SOURCE_TYPES:
+            errors.append(f"{where}: invalid source_type '{source_type}' (expected one of {sorted(SOURCE_TYPES)})")
         if status and status not in STATUSES:
             errors.append(f"{where}: invalid status '{status}' (expected one of {sorted(STATUSES)})")
 
@@ -61,15 +68,18 @@ def main() -> int:
         tags = meta.get("tags")
         if tags is not None and not isinstance(tags, list):
             errors.append(f"{where}: 'tags' must be a list")
+        elif isinstance(tags, list):
+            for tag in tags:
+                if not TAG_RE.match(str(tag)):
+                    errors.append(f"{where}: tag '{tag}' must be lowercase kebab-case")
+                if str(tag).isdigit():
+                    errors.append(f"{where}: tag '{tag}' looks like a year — tags are domain keywords, not years")
 
         if card.folder == PENDING_DIR:
             if status == "official":
                 warnings.append(f"{where}: status is official — will be promoted on next merge")
-        else:
-            if status != "official":
-                errors.append(f"{where}: card in {card.folder} must have status official")
-            if ctype and TYPE_TO_DIR.get(ctype) != card.folder:
-                errors.append(f"{where}: type '{ctype}' belongs in {TYPE_TO_DIR.get(ctype)}, not {card.folder}")
+        elif status != "official":
+            errors.append(f"{where}: card in {OFFICIAL_DIR}/ must have status official")
 
         for section in REQUIRED_SECTIONS:
             if section not in card.body:
