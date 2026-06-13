@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { llmChat, llmConfigured, parseJsonLoose } from "@/lib/llm";
+import { llmChat, llmConfigured, llmProvider, parseJsonLoose } from "@/lib/llm";
+import { driveConfigured, fetchDriveFile } from "@/lib/google";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -19,23 +20,11 @@ const SECTIONS: Record<string, string> = {
   synthesis: "## Summary, ## Key points, ## Landscape, ## Open questions, ## My notes, ## References",
 };
 
-export async function POST(req: NextRequest) {
-  if (!llmConfigured()) {
-    return NextResponse.json(
-      { error: "No LLM API key configured — set one (e.g. DEEPSEEK_API_KEY) to enable PDF auto-extraction." },
-      { status: 501 },
-    );
-  }
-  const { text } = (await req.json()) as { text?: string };
-  if (!text || text.trim().length < 80) {
-    return NextResponse.json(
-      { error: "No usable text extracted from the PDF (it may be a scan/image — try a text PDF or fill the card manually)." },
-      { status: 400 },
-    );
-  }
-
-  const system = [
-    "You process the extracted text of a research document for an audio / active-noise-control / signal-processing knowledge base.",
+function buildSystem(fromOriginal: boolean): string {
+  return [
+    fromOriginal
+      ? "You read the original PDF of a research document (including its figures, equations and tables) for an audio / active-noise-control / signal-processing knowledge base."
+      : "You process the extracted text of a research document for an audio / active-noise-control / signal-processing knowledge base.",
     "First classify the document into exactly one type, then produce a single English knowledge card.",
     `Allowed types: ${TYPES.join(", ")}. Most journal/conference articles are "paper".`,
     "Respond with a JSON object only, with these keys:",
@@ -51,27 +40,42 @@ export async function POST(req: NextRequest) {
     "Within the body, write clear standard academic English. Be conservative: if a number or claim is uncertain, write (TODO: verify) rather than inventing it.",
     "Keep it compact — a knowledge card, not a full reproduction. The draft is human-reviewed before entering the library.",
   ].join("\n");
+}
 
-  let raw: string;
-  try {
-    raw = await llmChat({
-      system,
-      user: `Full document text:\n\n${text.slice(0, MAX_INPUT_CHARS)}`,
-      maxTokens: MAX_TOKENS,
-      json: true,
-    });
-  } catch (e) {
-    return NextResponse.json({ error: `LLM error: ${e instanceof Error ? e.message : e}` }, { status: 502 });
-  }
-  let card: Record<string, unknown>;
-  try {
-    card = parseJsonLoose(raw);
-  } catch {
-    return NextResponse.json({ error: "The model did not return valid JSON — try again or fill manually." }, { status: 502 });
-  }
+// Gemini reads the actual PDF pages (figures + equations), not just text.
+async function geminiVision(pdfBase64: string, system: string): Promise<string> {
+  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: system }] },
+        contents: [
+          {
+            parts: [
+              { inlineData: { mimeType: "application/pdf", data: pdfBase64 } },
+              { text: "Produce the knowledge card JSON now." },
+            ],
+          },
+        ],
+        generationConfig: {
+          responseMimeType: "application/json",
+          maxOutputTokens: MAX_TOKENS,
+          temperature: 0.2,
+        },
+      }),
+    },
+  );
+  if (!res.ok) throw new Error(`gemini vision ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+}
 
+function shapeCard(card: Record<string, unknown>) {
   const type = TYPES.includes(String(card.type)) ? String(card.type) : "paper";
-  return NextResponse.json({
+  return {
     type,
     title: String(card.title ?? ""),
     authors: Array.isArray(card.authors) ? card.authors.map(String) : [],
@@ -83,5 +87,65 @@ export async function POST(req: NextRequest) {
       : [],
     citation_key: String(card.citation_key ?? ""),
     body: String(card.body ?? ""),
-  });
+  };
+}
+
+export async function POST(req: NextRequest) {
+  const { text, driveFileId } = (await req.json()) as { text?: string; driveFileId?: string };
+
+  // Vision path: Gemini reads the original PDF fetched from Drive.
+  if (driveFileId) {
+    if (llmProvider() !== "gemini" || !process.env.GEMINI_API_KEY) {
+      return NextResponse.json(
+        { error: "Reading the original PDF needs the Gemini provider (set LLM_PROVIDER=gemini)." },
+        { status: 400 },
+      );
+    }
+    if (!driveConfigured()) {
+      return NextResponse.json({ error: "Drive is not configured." }, { status: 400 });
+    }
+    let raw: string;
+    try {
+      const pdf = await fetchDriveFile(driveFileId);
+      raw = await geminiVision(pdf.toString("base64"), buildSystem(true));
+    } catch (e) {
+      return NextResponse.json({ error: `vision read failed: ${e instanceof Error ? e.message : e}` }, { status: 502 });
+    }
+    try {
+      return NextResponse.json(shapeCard(parseJsonLoose(raw)));
+    } catch {
+      return NextResponse.json({ error: "Gemini did not return valid JSON — keep the text-based draft." }, { status: 502 });
+    }
+  }
+
+  // Text path: extracted text → configured LLM provider.
+  if (!llmConfigured()) {
+    return NextResponse.json(
+      { error: "No LLM API key configured — set one (e.g. DEEPSEEK_API_KEY) to enable PDF auto-extraction." },
+      { status: 501 },
+    );
+  }
+  if (!text || text.trim().length < 80) {
+    return NextResponse.json(
+      { error: "No usable text extracted from the PDF (it may be a scan/image — try a text PDF or fill the card manually)." },
+      { status: 400 },
+    );
+  }
+
+  let raw: string;
+  try {
+    raw = await llmChat({
+      system: buildSystem(false),
+      user: `Full document text:\n\n${text.slice(0, MAX_INPUT_CHARS)}`,
+      maxTokens: MAX_TOKENS,
+      json: true,
+    });
+  } catch (e) {
+    return NextResponse.json({ error: `LLM error: ${e instanceof Error ? e.message : e}` }, { status: 502 });
+  }
+  try {
+    return NextResponse.json(shapeCard(parseJsonLoose(raw)));
+  } catch {
+    return NextResponse.json({ error: "The model did not return valid JSON — try again or fill manually." }, { status: 502 });
+  }
 }

@@ -68,14 +68,45 @@ export default function NewCardWizard() {
     return fm + (body.trim() ? body.trim() : BODY_TEMPLATES[type].trim()) + "\n";
   };
 
+  const applyCard = (data: {
+    type?: string;
+    title?: string;
+    authors?: string[];
+    year?: number | null;
+    citation_key?: string;
+    tags?: string[];
+    body?: string;
+  }) => {
+    if (data.type && TYPE_LABELS[data.type as CardType]) setType(data.type as CardType);
+    setTitle(data.title || "");
+    setAuthors((data.authors || []).join(", "));
+    setYear(data.year ? String(data.year) : "");
+    setCitationKey(data.citation_key || "");
+    setTags((data.tags || []).join(", "));
+    setBody(data.body || "");
+  };
+
   const uploadDrive = async () => {
     if (!pdfFile || !driveUploadEnabled) return;
     setBusy("drive");
     setMsg(null);
     try {
-      const link = await uploadToDrive(pdfFile);
+      const { id, link } = await uploadToDrive(pdfFile);
       setDrive(link);
-      setMsg({ kind: "ok", text: t("new.driveUploaded"), link });
+      // Re-analyse from the original PDF (Gemini reads figures/equations).
+      const res = await fetch("/api/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ driveFileId: id }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        applyCard(data);
+        setMsg({ kind: "ok", text: t("new.driveVisionOk"), link });
+      } else {
+        // Keep the text-based draft if vision isn't available.
+        setMsg({ kind: "ok", text: t("new.driveUploaded"), link });
+      }
     } catch (e) {
       setMsg({ kind: "warn", text: `${t("new.driveUploadFail")}: ${e instanceof Error ? e.message : e}` });
     } finally {
@@ -99,14 +130,8 @@ export default function NewCardWizard() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      if (data.type && TYPE_LABELS[data.type as CardType]) setType(data.type);
-      setTitle(data.title || "");
-      setAuthors((data.authors || []).join(", "));
-      setYear(data.year ? String(data.year) : "");
-      setCitationKey(data.citation_key || "");
-      setTags((data.tags || []).join(", "));
-      setBody(data.body || "");
-      setMsg({ kind: "ok", text: t("new.pdfOk") });
+      applyCard(data);
+      setMsg({ kind: "ok", text: driveUploadEnabled ? t("new.pdfOkUpload") : t("new.pdfOk") });
     } catch (e) {
       setMsg({ kind: "warn", text: `${t("new.pdfFail")}: ${e instanceof Error ? e.message : e}` });
     } finally {
