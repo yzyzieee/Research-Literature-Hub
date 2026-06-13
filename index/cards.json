@@ -108,5 +108,35 @@
     "drive": [],
     "created": "2026-06-13",
     "summary": "This paper proposes an enhanced approach to Spatially Selective Active Noise Control (SSANC) for open-fitting hearables. The core innovation is the incorporation of acausal relative impulse responses (ReIRs) into the optimization process, aiming to improve performance over existing causal methods. The system is evaluated through simulations using a KEMAR dummy head with open-fitting hearables, considering both speech and noise sources at various locations. Performance is measured by speech distortion, noise reduction, and signal-to-noise ratio (SNR) improvement. The results consistently demonstrate that the acausal optimization strategy yields superior performance across all metrics compared to the causal approach, particularly in accurately characterizing the desired source's acoustic path."
+  },
+  {
+    "slug": "xiao2026robust",
+    "path": "pending/xiao2026robust.md",
+    "folder": "pending",
+    "title": "Robust Soft-Constrained Spatially Selective Active Noise Control for Hearables Under Secondary Path Variations",
+    "type": "paper",
+    "domain": "active-noise-control",
+    "source_type": "paper",
+    "status": "pending",
+    "tags": [
+      "audio",
+      "noise-control",
+      "hearables",
+      "anc"
+    ],
+    "authors": [
+      "Tong Xiao",
+      "Reinhild Roden",
+      "Matthias Blau",
+      "Simon Doclo"
+    ],
+    "year": 2026,
+    "citation_key": "xiao2026robust",
+    "related": [],
+    "drive": [
+      "https://drive.google.com/file/d/169kOYOzTtUgqYjPNuKq5fUHW2Si3_OLR/view?usp=drivesdk"
+    ],
+    "created": "2026-06-13",
+    "summary": "This paper addresses the challenge of secondary path variations in spatially selective active noise control (SSANC) for hearables. SSANC aims to attenuate noise from specific directions while preserving desired speech. A key practical issue is that the acoustic path from the hearable's loudspeaker to the inner error microphone (the secondary path) can vary significantly between users and due to device fit. This variation can degrade SSANC performance and compromise system stability. The authors propose a robust soft-constrained optimization framework that computes a single control filter by minimizing the average cost over a set of secondary path estimates derived from human measurements. This approach aims to provide consistent performance even when the exact secondary path is unknown."
   }
 ]
