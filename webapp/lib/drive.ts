@@ -6,19 +6,25 @@
 export interface DriveResult {
   id: string;
   link: string;
+  name: string;
 }
 
-export async function uploadToDrive(file: File): Promise<DriveResult> {
+export async function uploadToDrive(
+  file: File,
+  base: string,
+  sourceType: string,
+): Promise<DriveResult> {
   const sess = await fetch("/api/drive/session", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      name: file.name,
+      base,
+      sourceType,
       mimeType: file.type || "application/pdf",
       size: file.size,
     }),
   });
-  const sd = (await sess.json()) as { uploadUrl?: string; error?: string };
+  const sd = (await sess.json()) as { uploadUrl?: string; name?: string; error?: string };
   if (!sess.ok || !sd.uploadUrl) throw new Error(sd.error || "could not start upload");
 
   const put = await fetch(sd.uploadUrl, {
@@ -28,5 +34,9 @@ export async function uploadToDrive(file: File): Promise<DriveResult> {
   });
   if (!put.ok) throw new Error(`Drive upload ${put.status}: ${(await put.text()).slice(0, 200)}`);
   const meta = (await put.json()) as { id: string; webViewLink?: string };
-  return { id: meta.id, link: meta.webViewLink || `https://drive.google.com/file/d/${meta.id}/view` };
+  return {
+    id: meta.id,
+    link: meta.webViewLink || `https://drive.google.com/file/d/${meta.id}/view`,
+    name: sd.name || file.name,
+  };
 }

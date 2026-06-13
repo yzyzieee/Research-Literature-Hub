@@ -56,7 +56,7 @@ export default function NewCardWizard() {
       `title: ${JSON.stringify(title)}`,
       `type: ${type}`,
       `domain: ${domain}`,
-      ...(type === "paper" ? [`source_type: ${sourceType}`] : []),
+      `source_type: ${sourceType}`,
       "status: pending",
       ...(type === "paper"
         ? [`citation_key: ${citationKey.trim()}`, `authors: ${yamlList(authorList)}`, `year: ${year || "null"}`]
@@ -99,7 +99,8 @@ export default function NewCardWizard() {
     setBusy("drive");
     setMsg(null);
     try {
-      const { id, link } = await uploadToDrive(pdfFile);
+      const base = slug || pdfFile.name.replace(/\.pdf$/i, "");
+      const { id, link } = await uploadToDrive(pdfFile, base, sourceType);
       setDrive(link);
       // Re-analyse from the original PDF (Gemini reads figures/equations).
       const res = await fetch("/api/extract", {
@@ -279,15 +280,15 @@ export default function NewCardWizard() {
           ))}
         </select>
 
+        <label>{t("new.sourceType")}</label>
+        <select value={sourceType} onChange={(e) => setSourceType(e.target.value)}>
+          {SOURCE_TYPES.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+
         {type === "paper" && (
           <>
-            <label>{t("new.sourceType")}</label>
-            <select value={sourceType} onChange={(e) => setSourceType(e.target.value)}>
-              {SOURCE_TYPES.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-
             <label>{t("new.doi")}</label>
             <div style={{ display: "flex", gap: 8 }}>
               <input value={doi} onChange={(e) => setDoi(e.target.value)} placeholder="10.1109/PROC.1975.10036" />
