@@ -4,11 +4,11 @@ export const runtime = "nodejs";
 
 const GH = "https://api.github.com";
 
-async function gh(path: string, init?: RequestInit) {
+async function gh(path: string, token: string, init?: RequestInit) {
   const res = await fetch(`${GH}${path}`, {
     ...init,
     headers: {
-      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+      Authorization: `Bearer ${token}`,
       Accept: "application/vnd.github+json",
       "X-GitHub-Api-Version": "2022-11-28",
       ...(init?.body ? { "Content-Type": "application/json" } : {}),
@@ -22,13 +22,26 @@ async function gh(path: string, init?: RequestInit) {
 }
 
 export async function POST(req: NextRequest) {
-  const repo = process.env.GITHUB_REPO;
-  if (!process.env.GITHUB_TOKEN || !repo) {
+  const token = process.env.GITHUB_TOKEN;
+  const repo = process.env.GITHUB_REPO || process.env.NEXT_PUBLIC_GITHUB_REPO;
+  const missing = [
+    !token ? "GITHUB_TOKEN" : "",
+    !repo ? "GITHUB_REPO (or NEXT_PUBLIC_GITHUB_REPO)" : "",
+  ].filter(Boolean);
+
+  if (missing.length) {
     return NextResponse.json(
-      { error: "GITHUB_TOKEN / GITHUB_REPO not configured — download the card and commit it manually" },
+      {
+        error: `Server configuration missing: ${missing.join(
+          ", ",
+        )}. Add it to the Vercel Production environment and redeploy.`,
+      },
       { status: 501 },
     );
   }
+  const githubToken = token as string;
+  const repository = repo as string;
+
   const { slug, content, author } = (await req.json()) as {
     slug: string;
     content: string;
@@ -42,12 +55,12 @@ export async function POST(req: NextRequest) {
   const branch = `card/${slug}-${Date.now().toString(36)}`;
 
   try {
-    const baseRef = await gh(`/repos/${repo}/git/ref/heads/${base}`);
-    await gh(`/repos/${repo}/git/refs`, {
+    const baseRef = await gh(`/repos/${repository}/git/ref/heads/${base}`, githubToken);
+    await gh(`/repos/${repository}/git/refs`, githubToken, {
       method: "POST",
       body: JSON.stringify({ ref: `refs/heads/${branch}`, sha: baseRef.object.sha }),
     });
-    await gh(`/repos/${repo}/contents/pending/${slug}.md`, {
+    await gh(`/repos/${repository}/contents/pending/${slug}.md`, githubToken, {
       method: "PUT",
       body: JSON.stringify({
         message: `draft: add card ${slug}`,
@@ -55,7 +68,7 @@ export async function POST(req: NextRequest) {
         branch,
       }),
     });
-    const pr = await gh(`/repos/${repo}/pulls`, {
+    const pr = await gh(`/repos/${repository}/pulls`, githubToken, {
       method: "POST",
       body: JSON.stringify({
         title: `Card: ${slug}`,
@@ -64,11 +77,11 @@ export async function POST(req: NextRequest) {
         body: [
           `New draft card \`pending/${slug}.md\`${author ? ` by ${author}` : ""}.`,
           "",
-          "Review checklist 审核清单:",
-          "- [ ] Metadata complete (bilingual titles, type, tags, citation key) 元数据完整",
-          "- [ ] Content verified (equations, claims, references) 内容已核对",
-          "- [ ] Knowledge value & cross-links 知识价值与互链",
-          "- [ ] Reviewer set `status: official` before approving 审核人已将 status 改为 official",
+          "Review checklist:",
+          "- [ ] Domain, type, tags, citation key, and source type are correct",
+          "- [ ] Equations, claims, figures, and references have been verified",
+          "- [ ] The card adds reusable knowledge and useful cross-links",
+          "- [ ] Reviewer sets `status: official` before approving",
         ].join("\n"),
       }),
     });
