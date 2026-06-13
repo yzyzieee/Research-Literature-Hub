@@ -23,7 +23,7 @@ export default function SiteHeader({ repo, gated }: { repo?: string; gated?: boo
         {!onLogin && (
           <>
             <Link href="/cards">{t("nav.library")}</Link>
-            <Link href="/pending">{t("nav.review")}</Link>
+            <Link href="/review">{t("nav.review")}</Link>
             <Link href="/new">{t("nav.new")}</Link>
             <Link href="/export">{t("nav.export")}</Link>
             {repo && (

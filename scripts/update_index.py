@@ -31,6 +31,7 @@ def main() -> None:
             "related": meta.get("related") or [],
             "drive": meta.get("drive") or [],
             "created": str(meta.get("created", "")),
+            "rating": meta.get("rating"),
             "summary": paras[0] if paras else "",
         })
     index.sort(key=lambda c: (c["domain"], c["type"], c["slug"]))

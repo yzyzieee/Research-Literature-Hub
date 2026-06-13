@@ -44,6 +44,15 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
         {card.citation_key && (
           <div className="kv"><b><T k="detail.citationKey" /></b> · <code>{card.citation_key}</code></div>
         )}
+        {card.rating && (
+          <div className="rating-summary detail-rating">
+            <span><T k="review.weight" />: <b>{card.rating.weight}/100</b></span>
+            <span><T k="review.recommendation" />: <b>{card.rating.recommendation}</b></span>
+            <span><T k="review.innovation" />: <b>{card.rating.innovation}</b></span>
+            <span><T k="review.rigor" />: <b>{card.rating.rigor}</b></span>
+            <span>{card.rating.count} <T k="review.votes" /></span>
+          </div>
+        )}
         {card.drive.length > 0 && (
           <div className="kv">
             <b><T k="detail.fulltext" /></b> ·{" "}

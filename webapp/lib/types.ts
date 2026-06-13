@@ -2,6 +2,22 @@ export type CardType = "concept" | "algorithm" | "paper" | "resource" | "synthes
 export type CardStatus = "pending" | "reviewed" | "official";
 export type SourceType = "paper" | "conference" | "book" | "patent" | "other";
 
+export interface RatingEntry {
+  reviewer: string;
+  recommendation: number;
+  innovation: number;
+  rigor: number;
+  updated: string;
+}
+
+export interface RatingAggregate {
+  recommendation: number;
+  innovation: number;
+  rigor: number;
+  weight: number;
+  count: number;
+}
+
 export interface CardMeta {
   slug: string;
   folder: string;
@@ -18,6 +34,8 @@ export interface CardMeta {
   drive: string[];
   created: string;
   summary: string;
+  rating: RatingAggregate | null;
+  ratings: RatingEntry[];
 }
 
 export interface Card extends CardMeta {

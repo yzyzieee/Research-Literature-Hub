@@ -12,7 +12,7 @@ title: Adaptive noise cancelling: principles and applications   # required
 type: paper            # paper | concept | algorithm | resource | synthesis (required)
 domain: active-noise-control   # required — one of the DOMAINS in scripts/kblib.py
 source_type: paper     # paper | conference | book | patent | other (optional; the Drive doc kind)
-status: pending        # pending | reviewed | official (required)
+status: official       # new app submissions publish directly as official
 citation_key: widrow1975adaptive   # Better BibTeX key — required for type: paper
 authors: [B. Widrow, J. R. Glover] # required for paper
 year: 1975                         # required for paper
@@ -21,6 +21,8 @@ drive: []              # Google Drive links to PDFs / data / audio
 related: []            # slugs of related cards, e.g. [fxlms, active-noise-control]
 created: 2026-06-12    # YYYY-MM-DD (required)
 reviewed_by: []        # GitHub usernames of reviewers
+rating: null           # aggregate team score, added after the first rating
+ratings: []            # individual ratings; the same reviewer name replaces its prior entry
 ---
 ```
 
@@ -35,15 +37,15 @@ reviewed_by: []        # GitHub usernames of reviewers
 - File name = slug = `citation_key` for papers, lowercase-kebab-case English for everything else. Unique across the repo.
 - Wiki links in the body — `[[slug]]` — must point to an existing card slug.
 
-## Status lifecycle
+## Team rating
 
-| status | meaning | location |
-|---|---|---|
-| `pending` | draft, not yet reviewed | `pending/` |
-| `reviewed` | reviewed, changes requested or awaiting promotion | `pending/` |
-| `official` | approved | moved by CI into `official/` |
+The app publishes checked cards directly into `official/`. Members then rate literature on three 1–5 dimensions:
 
-The reviewer — not the author — flips `status` to `official` during PR review. After merge, CI moves the card from `pending/` to `official/`.
+- recommendation
+- innovation
+- rigor
+
+The three team averages are equally weighted and converted to a 0–100 `rating.weight`. Individual entries are stored in `ratings`; submitting again with the same reviewer name updates that member's entry.
 
 ## Body layout
 

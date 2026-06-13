@@ -1,11 +1,13 @@
+import matter from "gray-matter";
 import { NextRequest, NextResponse } from "next/server";
+import { DOMAINS, SOURCE_TYPES, TYPE_LABELS } from "@/lib/types";
 
 export const runtime = "nodejs";
 
 const GH = "https://api.github.com";
 
-async function gh(path: string, token: string, init?: RequestInit) {
-  const res = await fetch(`${GH}${path}`, {
+async function github(path: string, token: string, init?: RequestInit) {
+  const response = await fetch(`${GH}${path}`, {
     ...init,
     headers: {
       Authorization: `Bearer ${token}`,
@@ -13,17 +15,19 @@ async function gh(path: string, token: string, init?: RequestInit) {
       "X-GitHub-Api-Version": "2022-11-28",
       ...(init?.body ? { "Content-Type": "application/json" } : {}),
     },
+    cache: "no-store",
   });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`GitHub ${init?.method ?? "GET"} ${path} -> ${res.status}: ${text.slice(0, 300)}`);
+  const text = await response.text();
+  const data = text ? JSON.parse(text) : {};
+  if (!response.ok) {
+    throw new Error(`GitHub ${init?.method ?? "GET"} ${path} -> ${response.status}: ${text.slice(0, 300)}`);
   }
-  return res.json();
+  return data;
 }
 
-async function ghFileExists(repo: string, path: string, ref: string, token: string): Promise<boolean> {
+async function fileExists(repo: string, path: string, ref: string, token: string): Promise<boolean> {
   const params = new URLSearchParams({ ref });
-  const res = await fetch(`${GH}/repos/${repo}/contents/${path}?${params}`, {
+  const response = await fetch(`${GH}/repos/${repo}/contents/${path}?${params}`, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/vnd.github+json",
@@ -31,11 +35,44 @@ async function ghFileExists(repo: string, path: string, ref: string, token: stri
     },
     cache: "no-store",
   });
-  if (res.status === 404) return false;
-  if (!res.ok) {
-    throw new Error(`GitHub duplicate check -> ${res.status}: ${(await res.text()).slice(0, 300)}`);
+  if (response.status === 404) return false;
+  if (!response.ok) {
+    throw new Error(`GitHub duplicate check -> ${response.status}: ${(await response.text()).slice(0, 300)}`);
   }
   return true;
+}
+
+function validatedOfficialCard(slug: string, content: string): string {
+  const parsed = matter(content);
+  const data = parsed.data as Record<string, unknown>;
+  const type = String(data.type || "");
+  const domain = String(data.domain || "");
+  const sourceType = String(data.source_type || "");
+  const tags = Array.isArray(data.tags) ? data.tags : [];
+  const errors: string[] = [];
+
+  if (!String(data.title || "").trim()) errors.push("title");
+  if (!Object.prototype.hasOwnProperty.call(TYPE_LABELS, type)) errors.push("valid card type");
+  if (!DOMAINS.includes(domain)) errors.push("valid domain");
+  if (sourceType && !SOURCE_TYPES.includes(sourceType as (typeof SOURCE_TYPES)[number])) {
+    errors.push("valid source type");
+  }
+  if (!tags.length) errors.push("at least one keyword tag");
+  if (!parsed.content.includes("## Summary")) errors.push("Summary section");
+  if (!parsed.content.includes("## Key points")) errors.push("Key points section");
+  if (type === "paper") {
+    if (String(data.citation_key || "") !== slug) errors.push("citation key matching the file name");
+    if (!Array.isArray(data.authors) || !data.authors.length) errors.push("authors");
+    if (!Number(data.year)) errors.push("year");
+  }
+  if (errors.length) throw new Error(`Card is incomplete: ${errors.join(", ")}.`);
+
+  if (data.created instanceof Date) data.created = data.created.toISOString().slice(0, 10);
+  data.status = "official";
+  data.reviewed_by = Array.isArray(data.reviewed_by) ? data.reviewed_by : [];
+  data.rating = data.rating || null;
+  data.ratings = Array.isArray(data.ratings) ? data.ratings : [];
+  return matter.stringify(parsed.content.trimStart(), data);
 }
 
 export async function POST(req: NextRequest) {
@@ -48,72 +85,42 @@ export async function POST(req: NextRequest) {
 
   if (missing.length) {
     return NextResponse.json(
-      {
-        error: `Server configuration missing: ${missing.join(
-          ", ",
-        )}. Add it to the Vercel Production environment and redeploy.`,
-      },
+      { error: `Server configuration missing: ${missing.join(", ")}. Add it to Vercel Production and redeploy.` },
       { status: 501 },
     );
   }
-  const githubToken = token as string;
-  const repository = repo as string;
 
-  const { slug, content, author } = (await req.json()) as {
-    slug: string;
-    content: string;
-    author?: string;
-  };
+  const { slug, content } = (await req.json()) as { slug?: string; content?: string };
   if (!slug || !content || !/^[a-z0-9][a-z0-9-]*$/.test(slug)) {
-    return NextResponse.json({ error: "valid slug and content are required" }, { status: 400 });
+    return NextResponse.json({ error: "A valid slug and card content are required." }, { status: 400 });
   }
 
   const base = process.env.GITHUB_BASE || "main";
-  const branch = `card/${slug}-${Date.now().toString(36)}`;
-
   try {
-    const duplicatePaths = [`official/${slug}.md`, `pending/${slug}.md`];
-    for (const path of duplicatePaths) {
-      if (await ghFileExists(repository, path, base, githubToken)) {
+    for (const path of [`official/${slug}.md`, `pending/${slug}.md`]) {
+      if (await fileExists(repo!, path, base, token!)) {
         return NextResponse.json(
-          { error: `A card for "${slug}" already exists at ${path}. Review the existing card instead of creating a duplicate.` },
+          { error: `A card for "${slug}" already exists at ${path}. Open and update that card instead.` },
           { status: 409 },
         );
       }
     }
 
-    const baseRef = await gh(`/repos/${repository}/git/ref/heads/${base}`, githubToken);
-    await gh(`/repos/${repository}/git/refs`, githubToken, {
-      method: "POST",
-      body: JSON.stringify({ ref: `refs/heads/${branch}`, sha: baseRef.object.sha }),
-    });
-    await gh(`/repos/${repository}/contents/pending/${slug}.md`, githubToken, {
+    const officialContent = validatedOfficialCard(slug, content);
+    const result = await github(`/repos/${repo}/contents/official/${slug}.md`, token!, {
       method: "PUT",
       body: JSON.stringify({
-        message: `draft: add card ${slug}`,
-        content: Buffer.from(content, "utf-8").toString("base64"),
-        branch,
+        message: `card: add ${slug} to official library`,
+        content: Buffer.from(officialContent, "utf-8").toString("base64"),
+        branch: base,
       }),
     });
-    const pr = await gh(`/repos/${repository}/pulls`, githubToken, {
-      method: "POST",
-      body: JSON.stringify({
-        title: `Card: ${slug}`,
-        head: branch,
-        base,
-        body: [
-          `New draft card \`pending/${slug}.md\`${author ? ` by ${author}` : ""}.`,
-          "",
-          "Review checklist:",
-          "- [ ] Domain, type, tags, citation key, and source type are correct",
-          "- [ ] Equations, claims, figures, and references have been verified",
-          "- [ ] The card adds reusable knowledge and useful cross-links",
-          "- [ ] Reviewer sets `status: official` before approving",
-        ].join("\n"),
-      }),
+    return NextResponse.json({
+      card_url: result.content?.html_url || `https://github.com/${repo}/blob/${base}/official/${slug}.md`,
+      commit_sha: result.commit?.sha,
     });
-    return NextResponse.json({ pr_url: pr.html_url, branch });
   } catch (error) {
-    return NextResponse.json({ error: String(error) }, { status: 502 });
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: message }, { status: message.startsWith("Card is incomplete") ? 400 : 502 });
   }
 }

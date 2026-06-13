@@ -53,11 +53,19 @@ export default function NewCardWizard() {
   const driveUploadEnabled = process.env.NEXT_PUBLIC_DRIVE_UPLOAD === "1";
 
   const slug = type === "paper" ? citationKey.trim() : kebab(title);
-  const ready = Boolean(title.trim() && domain && slug && /^[a-z0-9][a-z0-9-]*$/.test(slug));
-  const archiveSignature = `${sourceType}:${slug}`;
   const authorList = authors.split(/[;,]/).map((a) => a.trim()).filter(Boolean);
   const tagList = tags.split(/[,，\s]+/).map((t) => t.trim().toLowerCase()).filter(Boolean);
   const driveList = drive.split(/\s+/).map((d) => d.trim()).filter(Boolean);
+  const paperMetadataReady = type !== "paper" || Boolean(authorList.length && Number(year));
+  const ready = Boolean(
+    title.trim() &&
+      domain &&
+      tagList.length &&
+      paperMetadataReady &&
+      slug &&
+      /^[a-z0-9][a-z0-9-]*$/.test(slug),
+  );
+  const archiveSignature = `${sourceType}:${slug}`;
   const archiveCurrent = Boolean(
     archived &&
       archived.signature === archiveSignature &&
@@ -74,7 +82,7 @@ export default function NewCardWizard() {
       `type: ${type}`,
       `domain: ${domain}`,
       `source_type: ${sourceType}`,
-      "status: pending",
+      "status: official",
       ...(type === "paper"
         ? [`citation_key: ${citationKey.trim()}`, `authors: ${yamlList(authorList)}`, `year: ${year || "null"}`]
         : []),
@@ -83,6 +91,8 @@ export default function NewCardWizard() {
       "related: []",
       `created: ${today}`,
       "reviewed_by: []",
+      "rating: null",
+      "ratings: []",
       "---",
       "",
     ].join("\n");
@@ -210,7 +220,7 @@ export default function NewCardWizard() {
     }
   };
 
-  const submitPr = async () => {
+  const submitCard = async () => {
     setBusy("commit");
     setMsg(null);
     try {
@@ -221,7 +231,7 @@ export default function NewCardWizard() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      setMsg({ kind: "ok", text: `${t("new.prOk")}:`, link: data.pr_url });
+      setMsg({ kind: "ok", text: `${t("new.prOk")}:`, link: data.card_url });
     } catch (e) {
       setMsg({ kind: "warn", text: `${t("new.prFail")}: ${e}` });
     } finally {
@@ -327,7 +337,7 @@ export default function NewCardWizard() {
         <label>{t("new.notes")}</label>
         <textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t("new.notesPh")} />
 
-        {slug && <p className="subtitle" style={{ margin: "10px 0 0" }}>{t("new.fileName")}: <code>pending/{slug}.md</code></p>}
+        {slug && <p className="subtitle" style={{ margin: "10px 0 0" }}>{t("new.fileName")}: <code>official/{slug}.md</code></p>}
       </div>
 
       <div className="form-card">
@@ -383,7 +393,7 @@ export default function NewCardWizard() {
       )}
 
       <div className="btn-row">
-        <button className="btn primary" onClick={submitPr} disabled={!readyToSubmit || busy !== ""}>
+        <button className="btn primary" onClick={submitCard} disabled={!readyToSubmit || busy !== ""}>
           {busy === "commit" ? t("new.submitting") : t("new.submitPr")}
         </button>
         <button className="btn" onClick={download} disabled={!ready}>{t("new.download")}</button>

@@ -1,13 +1,13 @@
 [
   {
     "slug": "fxlms",
-    "path": "pending/fxlms.md",
-    "folder": "pending",
+    "path": "official/fxlms.md",
+    "folder": "official",
     "title": "Filtered-x LMS (FxLMS)",
     "type": "algorithm",
     "domain": "active-noise-control",
     "source_type": "",
-    "status": "reviewed",
+    "status": "official",
     "tags": [
       "anc",
       "adaptive-filter",
@@ -22,6 +22,7 @@
     ],
     "drive": [],
     "created": "2026-06-12",
+    "rating": null,
     "summary": "FxLMS is the workhorse adaptive algorithm of active noise control: standard LMS diverges when a secondary path S(z) sits between the controller output and the error sensor, so FxLMS filters the reference signal through an estimate Ŝ(z) before the weight update, restoring gradient alignment."
   },
   {
@@ -46,6 +47,7 @@
     ],
     "drive": [],
     "created": "2026-06-12",
+    "rating": null,
     "summary": "Active noise control cancels unwanted sound by generating an \"anti-noise\" signal of equal amplitude and opposite phase through secondary sources (loudspeakers), exploiting destructive interference. It is most effective at low frequencies where passive absorption is bulky and inefficient."
   },
   {
@@ -81,17 +83,18 @@
     ],
     "drive": [],
     "created": "2026-06-12",
+    "rating": null,
     "summary": "The foundational paper on adaptive noise cancelling: a reference input correlated with the noise (but not the signal) is adaptively filtered and subtracted from the primary input, with the LMS algorithm driving the filter towards the Wiener solution without prior knowledge of signal statistics."
   },
   {
     "slug": "xiao2025spatially",
-    "path": "pending/xiao2025spatially.md",
-    "folder": "pending",
+    "path": "official/xiao2025spatially.md",
+    "folder": "official",
     "title": "Spatially Selective Active Noise Control for Open-Fitting Hearables with Acausal Optimization",
     "type": "paper",
     "domain": "active-noise-control",
     "source_type": "conference",
-    "status": "pending",
+    "status": "official",
     "tags": [
       "audio",
       "noise-control",
@@ -107,17 +110,18 @@
     "related": [],
     "drive": [],
     "created": "2026-06-13",
+    "rating": null,
     "summary": "This paper proposes an enhanced approach to Spatially Selective Active Noise Control (SSANC) for open-fitting hearables. The core innovation is the incorporation of acausal relative impulse responses (ReIRs) into the optimization process, aiming to improve performance over existing causal methods. The system is evaluated through simulations using a KEMAR dummy head with open-fitting hearables, considering both speech and noise sources at various locations. Performance is measured by speech distortion, noise reduction, and signal-to-noise ratio (SNR) improvement. The results consistently demonstrate that the acausal optimization strategy yields superior performance across all metrics compared to the causal approach, particularly in accurately characterizing the desired source's acoustic path."
   },
   {
     "slug": "xiao2026robust",
-    "path": "pending/xiao2026robust.md",
-    "folder": "pending",
+    "path": "official/xiao2026robust.md",
+    "folder": "official",
     "title": "Robust Soft-Constrained Spatially Selective Active Noise Control for Hearables Under Secondary Path Variations",
     "type": "paper",
     "domain": "active-noise-control",
     "source_type": "paper",
-    "status": "pending",
+    "status": "official",
     "tags": [
       "audio",
       "noise-control",
@@ -137,6 +141,7 @@
       "https://drive.google.com/file/d/169kOYOzTtUgqYjPNuKq5fUHW2Si3_OLR/view?usp=drivesdk"
     ],
     "created": "2026-06-13",
+    "rating": null,
     "summary": "This paper addresses the challenge of secondary path variations in spatially selective active noise control (SSANC) for hearables. SSANC aims to attenuate noise from specific directions while preserving desired speech. A key practical issue is that the acoustic path from the hearable's loudspeaker to the inner error microphone (the secondary path) can vary significantly between users and due to device fit. This variation can degrade SSANC performance and compromise system stability. The authors propose a robust soft-constrained optimization framework that computes a single control filter by minimizing the average cost over a set of secondary path estimates derived from human measurements. This approach aims to provide consistent performance even when the exact secondary path is unknown."
   }
 ]

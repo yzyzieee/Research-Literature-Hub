@@ -2,7 +2,7 @@
 title: Filtered-x LMS (FxLMS)
 type: algorithm
 domain: active-noise-control
-status: reviewed
+status: official
 tags: [anc, adaptive-filter, fxlms]
 drive: []
 related: [active-noise-control, widrow1975adaptive]

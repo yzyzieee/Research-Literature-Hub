@@ -10,7 +10,7 @@ export const dynamic = "force-static";
 export default function HomePage() {
   const cards = getCards();
   const official = cards.filter((c) => c.folder !== "pending");
-  const pending = cards.filter((c) => c.folder === "pending");
+  const rated = official.filter((c) => c.rating);
   const byType = (Object.keys(TYPE_LABELS) as CardType[]).map((t) => ({
     type: t,
     count: official.filter((c) => c.type === t).length,
@@ -30,8 +30,8 @@ export default function HomePage() {
           <div className="label"><T k="home.official" /></div>
         </div>
         <div className="stat">
-          <div className="num">{pending.length}</div>
-          <div className="label"><T k="home.pending" /></div>
+          <div className="num">{rated.length}</div>
+          <div className="label"><T k="home.rated" /></div>
         </div>
         {byType
           .filter((t) => t.count > 0)
@@ -42,19 +42,6 @@ export default function HomePage() {
             </div>
           ))}
       </div>
-
-      {pending.length > 0 && (
-        <>
-          <h2>
-            <T k="home.pendingReview" /> <Link href="/pending" style={{ fontSize: 14 }}><T k="home.viewQueue" /></Link>
-          </h2>
-          <div className="card-grid">
-            {pending.slice(0, 3).map((c) => (
-              <CardListItem key={c.slug} card={toMeta(c)} />
-            ))}
-          </div>
-        </>
-      )}
 
       <h2>
         <T k="home.recent" /> <Link href="/cards" style={{ fontSize: 14 }}><T k="home.browseAll" /></Link>

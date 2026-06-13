@@ -3,7 +3,7 @@ title: "Robust Soft-Constrained Spatially Selective Active Noise Control for Hea
 type: paper
 domain: active-noise-control
 source_type: paper
-status: pending
+status: official
 citation_key: xiao2026robust
 authors: ["Tong Xiao", "Reinhild Roden", "Matthias Blau", "Simon Doclo"]
 year: 2026

@@ -12,6 +12,11 @@ export function cardToPrompt(card: Card, repo?: string): string {
   if (card.year) meta.push(`Year: ${card.year}`);
   if (card.citation_key) meta.push(`Citation key: ${card.citation_key}`);
   if (card.tags.length) meta.push(`Tags: ${card.tags.join(", ")}`);
+  if (card.rating) {
+    meta.push(
+      `Team weight: ${card.rating.weight}/100 (${card.rating.count} rating${card.rating.count === 1 ? "" : "s"})`,
+    );
+  }
   meta.push(`Status: ${card.status}`);
 
   const lines = [

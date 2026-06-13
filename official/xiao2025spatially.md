@@ -3,7 +3,7 @@ title: "Spatially Selective Active Noise Control for Open-Fitting Hearables with
 type: paper
 domain: active-noise-control
 source_type: conference
-status: pending
+status: official
 citation_key: xiao2025spatially
 authors: ["Tong Xiao", "Simon Doclo"]
 year: 2025

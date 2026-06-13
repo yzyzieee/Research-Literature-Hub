@@ -21,6 +21,7 @@ export default function CardListItem({ card }: { card: CardMeta }) {
         {card.domain && <span className="badge domain">{domainLabel(card.domain)}</span>}
         <span className="badge type">{TYPE_LABELS[card.type]}</span>
         <span className={`badge ${card.status}`}>{STATUS_LABELS[card.status]}</span>
+        {card.rating && <span className="badge weight">Weight {card.rating.weight}</span>}
         {card.tags.map((t) => (
           <span key={t} className="badge">#{t}</span>
         ))}

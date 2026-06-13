@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import type { Card, CardMeta, CardStatus, CardType } from "./types";
+import type { Card, CardMeta, CardStatus, CardType, RatingAggregate, RatingEntry } from "./types";
 
 const KB_ROOT = process.env.KB_PATH || path.resolve(process.cwd(), "..");
 const CARD_DIRS = ["official", "pending"];
@@ -21,6 +21,42 @@ function summaryText(body: string): string {
     else if (para.length) break;
   }
   return para.join(" ");
+}
+
+function score(value: unknown): number {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+}
+
+function parseRatings(value: unknown): RatingEntry[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object") return [];
+    const rating = item as Record<string, unknown>;
+    const reviewer = String(rating.reviewer || "").trim();
+    if (!reviewer) return [];
+    return [{
+      reviewer,
+      recommendation: score(rating.recommendation),
+      innovation: score(rating.innovation),
+      rigor: score(rating.rigor),
+      updated: String(rating.updated || ""),
+    }];
+  });
+}
+
+function parseAggregate(value: unknown): RatingAggregate | null {
+  if (!value || typeof value !== "object") return null;
+  const rating = value as Record<string, unknown>;
+  const count = score(rating.count);
+  if (!count) return null;
+  return {
+    recommendation: score(rating.recommendation),
+    innovation: score(rating.innovation),
+    rigor: score(rating.rigor),
+    weight: score(rating.weight),
+    count,
+  };
 }
 
 function parseCard(filePath: string, folder: string): Card | null {
@@ -43,6 +79,8 @@ function parseCard(filePath: string, folder: string): Card | null {
       drive: Array.isArray(data.drive) ? data.drive.map(String) : [],
       created: String(data.created ?? ""),
       summary: summaryText(content),
+      rating: parseAggregate(data.rating),
+      ratings: parseRatings(data.ratings),
       body: content,
     };
   } catch {
