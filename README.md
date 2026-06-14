@@ -65,24 +65,34 @@ layer. Vercel hosts the application that writes to both destinations.
 
 ```mermaid
 flowchart TB
-    U["Team member chooses a PDF"] --> APP["Research Literature Hub"]
-    APP --> X["Optional AI-assisted extraction"]
-    X --> V["Human verifies metadata, domains, tags, and summary"]
+    A["1 · Choose PDF"] --> B["2 · Optional AI draft"]
+    B --> C["3 · Human verification"]
 
-    V --> PDF["Team file storage<br/>Original PDF · normalized filename"]
-    V --> CARD["Public GitHub repository<br/>Structured Markdown literature record"]
-    PDF -. "file ID + download/reference URL" .-> CARD
+    C --> D["Original PDF"]
+    C --> E["Structured record"]
 
-    CARD --> CI["GitHub Actions<br/>validate · rebuild indexes · generate LLM catalog"]
-    CI --> CAT["Public catalog<br/>llm_catalog.md + llm_catalog.json"]
+    D --> F["Team file storage<br/>Google Drive"]
+    E --> G["Public knowledge repository<br/>GitHub Markdown"]
+    F -. "PDF reference" .-> G
 
-    CARD --> REVIEW["Team review<br/>ratings · comments · activity"]
-    REVIEW -->|"write back"| CARD
+    G --> R["Team review<br/>ratings + comments"]
+    R -->|"write back"| G
+    G --> I["GitHub Actions<br/>validate + build indexes"]
+    I --> J["Public LLM catalog"]
 
-    CAT --> LLM["Member's own ChatGPT / Claude / Gemini / Kimi"]
-    CARD --> PACK["Selected full-record context pack"]
-    PACK --> LLM
-    PDF -. "open original when permission allows" .-> LLM
+    G --> P["Selected record pack"]
+    J --> L["Member's own LLM"]
+    P --> L
+    F -. "permitted original" .-> L
+
+    classDef intake fill:#F2EEFF,stroke:#7051D6,color:#17213A;
+    classDef files fill:#EEF2FF,stroke:#4967D8,color:#17213A;
+    classDef knowledge fill:#EAF8F3,stroke:#2F9B76,color:#17213A;
+    classDef output fill:#17213A,stroke:#17213A,color:#FFFFFF;
+    class A,B,C intake;
+    class D,F files;
+    class E,G,R,I,J,P knowledge;
+    class L output;
 ```
 
 The split happens only after a human verifies the draft:
