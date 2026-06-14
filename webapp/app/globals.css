@@ -306,6 +306,14 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
 .domain-picker label { display: flex; align-items: center; gap: 8px; margin: 0; padding: 9px 11px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; }
 .domain-picker input { width: auto; margin: 0; }
 .member-list { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 18px; }
+.team-directory { display: grid; gap: 10px; margin-top: 14px; }
+.team-member { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); }
+.team-member > div:first-child { display: grid; gap: 3px; min-width: 140px; }
+.team-member .meta-row { justify-content: flex-end; }
+@media (max-width: 680px) {
+  .team-member { align-items: flex-start; flex-direction: column; }
+  .team-member .meta-row { justify-content: flex-start; }
+}
 .comments-panel { margin-top: 24px; padding: 20px 24px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); scroll-margin-top: 80px; }
 .comments-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .comments-heading h2 { margin: 0 0 4px; }

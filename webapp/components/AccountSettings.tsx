@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DOMAIN_LABELS, DOMAINS } from "@/lib/types";
+import { domainLabel, DOMAIN_LABELS, DOMAINS } from "@/lib/types";
 import type { TeamMember } from "@/lib/types";
 import { useLang } from "@/lib/i18n";
 
@@ -34,7 +34,6 @@ export default function AccountSettings() {
   const [domains, setDomains] = useState<string[]>([]);
   const [newId, setNewId] = useState("");
   const [newName, setNewName] = useState("");
-  const [newDomains, setNewDomains] = useState<string[]>([]);
   const [busy, setBusy] = useState<"" | "save" | "add">("");
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
@@ -62,6 +61,9 @@ export default function AccountSettings() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       setMember(data.member);
+      setMembers((current) =>
+        current.map((item) => (item.id === data.member.id ? data.member : item)),
+      );
       setMessage({ ok: true, text: t("settings.saved") });
     } catch (error) {
       setMessage({ ok: false, text: `${t("settings.failed")}: ${error instanceof Error ? error.message : error}` });
@@ -77,14 +79,13 @@ export default function AccountSettings() {
       const response = await fetch("/api/team", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: newId, name: newName, domains: newDomains }),
+        body: JSON.stringify({ id: newId, name: newName }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
-      setMembers(data.members || []);
+      setMembers((data.members || []).filter((item: TeamMember) => item.active));
       setNewId("");
       setNewName("");
-      setNewDomains([]);
       setMessage({ ok: true, text: t("settings.memberAdded") });
     } catch (error) {
       setMessage({ ok: false, text: `${t("settings.failed")}: ${error instanceof Error ? error.message : error}` });
@@ -106,6 +107,32 @@ export default function AccountSettings() {
         </div>
       </div>
 
+      <div className="form-card">
+        <h2 style={{ marginTop: 0 }}>{t("settings.teamDirectory")}</h2>
+        <p className="subtitle">{t("settings.teamDirectoryHint")}</p>
+        <div className="team-directory">
+          {members.map((item) => (
+            <div className="team-member" key={item.id}>
+              <div>
+                <b>{item.name}</b>
+                <span className="subtitle">
+                  {item.id}{item.role === "admin" ? ` · ${t("settings.admin")}` : ""}
+                </span>
+              </div>
+              <div className="meta-row">
+                {item.domains.length ? (
+                  item.domains.map((domain) => (
+                    <span className="badge domain" key={domain}>{domainLabel(domain)}</span>
+                  ))
+                ) : (
+                  <span className="badge">{t("settings.domainsPending")}</span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {member?.role === "admin" && (
         <div className="form-card">
           <h2 style={{ marginTop: 0 }}>{t("settings.addMember")}</h2>
@@ -114,20 +141,11 @@ export default function AccountSettings() {
           <input value={newId} onChange={(event) => setNewId(event.target.value.toUpperCase())} placeholder="ABC" />
           <label>{t("settings.displayName")}</label>
           <input value={newName} onChange={(event) => setNewName(event.target.value)} placeholder="Alice" />
-          <label>{t("settings.initialDomains")}</label>
-          <DomainPicker selected={newDomains} onChange={setNewDomains} />
           <div className="btn-row">
             <button className="btn primary" onClick={add} disabled={newId.length < 2 || busy !== ""}>
               {busy === "add" ? t("settings.adding") : t("settings.add")}
             </button>
           </div>
-          {members.length > 0 && (
-            <div className="member-list">
-              {members.map((item) => (
-                <span className="badge" key={item.id}>{item.name} · {item.role}</span>
-              ))}
-            </div>
-          )}
         </div>
       )}
 

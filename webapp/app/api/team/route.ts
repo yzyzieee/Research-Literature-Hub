@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     if (!member) return NextResponse.json({ error: "Account not found." }, { status: 404 });
     return NextResponse.json({
       member,
-      members: member.role === "admin" ? config.members : undefined,
+      members: config.members.filter((item) => item.active),
     });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 502 });
@@ -53,13 +53,12 @@ export async function PATCH(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const username = req.headers.get("x-kb-user");
-  const body = (await req.json()) as { id?: string; name?: string; domains?: string[] };
+  const body = (await req.json()) as { id?: string; name?: string };
   const id = String(body.id || "").trim().toUpperCase();
   const name = String(body.name || id).trim().slice(0, 60);
-  const domains = validDomains(body.domains || []);
   if (!username) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!/^[A-Z0-9][A-Z0-9_-]{1,31}$/.test(id) || !name || !domains) {
-    return NextResponse.json({ error: "Use a 2-32 character account ID and valid domains." }, { status: 400 });
+  if (!/^[A-Z0-9][A-Z0-9_-]{1,31}$/.test(id) || !name) {
+    return NextResponse.json({ error: "Use a 2-32 character account ID and display name." }, { status: 400 });
   }
 
   for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -76,7 +75,7 @@ export async function POST(req: NextRequest) {
         id,
         name,
         role: "member" as const,
-        domains,
+        domains: [],
         active: true,
         created: new Date().toISOString().slice(0, 10),
       };

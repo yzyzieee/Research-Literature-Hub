@@ -51,6 +51,10 @@ This username-only login is lightweight team identification, not a high-assuranc
 identity provider. Put the deployment behind appropriate Vercel access controls when
 stronger protection is required.
 
+Administrators create only an account ID and display name. New members are redirected
+to Settings on first login to choose their own research domains. Every active member can
+view the team's names and selected domains in the team directory.
+
 ## 5. Configure optional LLM extraction
 
 Set `LLM_PROVIDER` and only the matching provider key/model variables. Use a low-cost
