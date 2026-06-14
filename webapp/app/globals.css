@@ -232,6 +232,44 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
   font-size: 22px;
   font-weight: 700;
 }
+.llm-workflow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+.llm-mode-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.llm-mode-card:hover, .llm-mode-card.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+.llm-mode-card small { display: block; margin-top: 5px; color: var(--text-2); line-height: 1.45; }
+.llm-mode-number {
+  display: grid;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  font-weight: 700;
+}
+@media (max-width: 800px) {
+  .llm-workflow { grid-template-columns: 1fr; }
+}
 
 .checklist { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 24px; font-size: 14px; color: var(--text-2); }
 .checklist p { margin-bottom: 0; }

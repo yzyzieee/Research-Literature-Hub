@@ -1,10 +1,88 @@
-import type { Card } from "./types";
+import type { Card, ExportCardMeta } from "./types";
 import { domainLabel, publicationTypeLabel } from "./types";
 
-/** Turn a Drive view link into a direct-download link (one-click PDF download). */
+const DEFAULT_REPO = "yzyzieee/Literature_ANC_Database";
+
+export function catalogUrls(repo = DEFAULT_REPO) {
+  const base = `https://raw.githubusercontent.com/${repo}/main/index`;
+  return {
+    markdown: `${base}/llm_catalog.md`,
+    json: `${base}/llm_catalog.json`,
+  };
+}
+
+export function libraryAccessPrompt(idea: string, repo?: string): string {
+  const urls = catalogUrls(repo);
+  return [
+    "I want you to use our internal literature library as your main source.",
+    "",
+    `Library catalog: ${urls.markdown}`,
+    `Machine-readable catalog: ${urls.json}`,
+    "",
+    "Rules:",
+    "1. Start from the catalog.",
+    "2. Search only inside this library first.",
+    "3. Select relevant papers based on title, summary, domains, tags, venue, year, and team weight.",
+    "4. Then open only the most relevant card files.",
+    "5. Do not claim that a paper exists unless it appears in the catalog or a linked card.",
+    "6. Treat team comments as attributed interpretation, not source-paper claims.",
+    "7. Drive PDF links may be private; do not assume you can access them.",
+    "",
+    "My research idea:",
+    idea.trim() || "[Describe your research idea here]",
+    "",
+    "Please return:",
+    "1. relevant papers from our library",
+    "2. why each paper is relevant",
+    "3. suggested reading order",
+    "4. which papers are core vs background",
+    "5. useful keywords for the next discussion",
+    "6. each paper's title, citation key, and card URL",
+  ].join("\n");
+}
+
+function compactSummary(value: string, limit = 420): string {
+  const text = value.replace(/\s+/g, " ").trim();
+  return text.length <= limit ? text : `${text.slice(0, limit - 1).trim()}…`;
+}
+
+export function compactCatalogPrompt(cards: ExportCardMeta[], idea: string, repo?: string): string {
+  const repository = repo || DEFAULT_REPO;
+  const lines = [
+    "# Audio Literature Hub — compact catalog pack",
+    "",
+    "Use only this internal catalog for the first-pass literature search.",
+    "Do not invent papers. Ask for selected full card records before making detailed technical claims.",
+    "",
+    "Research idea:",
+    idea.trim() || "[Describe the research idea here]",
+    "",
+    `Catalog entries: ${cards.length}`,
+    "",
+  ];
+  for (const card of cards) {
+    const weight = card.rating ? String(card.rating.weight) : "unrated";
+    lines.push(
+      `## ${card.citation_key || card.slug}`,
+      `Title: ${card.title}`,
+      `Year: ${card.year || "unknown"} | Venue: ${card.venue || "unknown"} | Type: ${publicationTypeLabel(card.publication_type)}`,
+      `Primary domain: ${card.primary_domain} | Domains: ${card.domains.join(", ")}`,
+      `Tags: ${card.tags.join(", ")} | Team weight: ${weight}`,
+      `Summary: ${compactSummary(card.summary)}`,
+      `Card: https://raw.githubusercontent.com/${repository}/main/${card.folder}/${card.slug}.md`,
+      "",
+    );
+  }
+  lines.push(
+    "Return the most relevant papers, relevance reasons, reading order, core/background grouping, and citation keys.",
+  );
+  return lines.join("\n");
+}
+
+/** Turn a Drive view link into a direct-download link. */
 export function driveDownloadUrl(link: string): string {
-  const m = link.match(/\/d\/([a-zA-Z0-9_-]+)/) || link.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  return m ? `https://drive.google.com/uc?export=download&id=${m[1]}` : link;
+  const match = link.match(/\/d\/([a-zA-Z0-9_-]+)/) || link.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  return match ? `https://drive.google.com/uc?export=download&id=${match[1]}` : link;
 }
 
 export function cardToPrompt(card: Card, repo?: string): string {
@@ -27,17 +105,14 @@ export function cardToPrompt(card: Card, repo?: string): string {
   if (card.uploaded_by) meta.push(`Uploaded by: ${card.uploaded_by}`);
   meta.push(`Status: ${card.status}`);
 
-  const lines = [
-    `## ${card.title}`,
-    "",
-    meta.join(" · "),
-  ];
+  const lines = [`## ${card.title}`, "", meta.join(" · ")];
   if (card.drive.length) {
-    const dl = card.drive.map(driveDownloadUrl).join(" , ");
-    lines.push(`Download original PDF 下载原文: ${dl}`);
+    lines.push(`Download original PDF: ${card.drive.map(driveDownloadUrl).join(", ")}`);
   }
   if (repo) {
-    lines.push(`Card source 卡片源文件: https://github.com/${repo}/blob/main/${card.folder}/${card.slug}.md`);
+    lines.push(
+      `Card source: https://raw.githubusercontent.com/${repo}/main/${card.folder}/${card.slug}.md`,
+    );
   }
   lines.push("", card.body.trim());
   if (card.comments.length) {
@@ -60,48 +135,44 @@ export function cardToPrompt(card: Card, repo?: string): string {
   return lines.join("\n");
 }
 
-export function bundlePrompt(cards: Card[], repo?: string): string {
+export function bundlePrompt(cards: Card[], repo = DEFAULT_REPO): string {
   const header = [
-    "# Audio Literature Hub export — use this as trusted group context",
+    "# Audio Literature Hub — selected full paper pack",
     "",
-    `Below are ${cards.length} English literature records from our group's audio research library.`,
-    "Each record has publication metadata, a structured reading summary, attributed team comments, and — when available — a direct PDF link.",
+    `Below are ${cards.length} full literature records from our group's audio research library.`,
+    "Use these records for deep discussion after the catalog has narrowed the candidate set.",
     "",
-    "How to work with me:",
-    "- Treat these records as trusted group context. I will tell you what direction or question I want to research.",
-    "- Answer using these records as the primary source. If the library does not cover something I ask, say so explicitly rather than guessing.",
-    "- Treat `Team member comments` as attributed interpretation and practical experience, not as verified claims from the original paper.",
-    "- Whenever you recommend or cite a paper, ALWAYS list it as: `<title> — <citation_key> — <download link>`, so I can fetch the originals. Only use links and papers that appear in these records; never invent them.",
-    "- A good answer usually ends with a short reference list in that format.",
+    "Rules:",
+    "- Treat these records as trusted group context.",
+    "- If the selected records do not cover the question, say so explicitly.",
+    "- Treat team comments as attributed interpretation, not verified paper claims.",
+    "- Cite papers as `<title> — <citation_key> — <card or PDF link>`.",
+    "- Never invent papers, links, results, or claims.",
     "",
     "---",
     "",
   ].join("\n");
-  return header + cards.map((c) => cardToPrompt(c, repo)).join("\n\n---\n\n") + "\n";
+  return header + cards.map((card) => cardToPrompt(card, repo)).join("\n\n---\n\n") + "\n";
 }
 
-/**
- * Match cards against a free-text reference list pasted back from an LLM,
- * by citation key, slug, or title. Returns matched cards (deduped, order kept).
- */
-export function matchCardsFromText(cards: Card[], text: string): Card[] {
-  const hay = text.toLowerCase();
+export function matchCardsFromText<T extends ExportCardMeta>(cards: T[], text: string): T[] {
+  const haystack = text.toLowerCase();
   const seen = new Set<string>();
-  const out: Card[] = [];
-  for (const c of cards) {
-    const keys = [c.citation_key, c.slug].filter(Boolean).map((s) => s.toLowerCase());
-    const byKey = keys.some((k) => hay.includes(k));
-    const byTitle = c.title.length > 8 && hay.includes(c.title.toLowerCase());
-    if ((byKey || byTitle) && !seen.has(c.slug)) {
-      seen.add(c.slug);
-      out.push(c);
+  const output: T[] = [];
+  for (const card of cards) {
+    const keys = [card.citation_key, card.slug].filter(Boolean).map((value) => value.toLowerCase());
+    const byKey = keys.some((key) => haystack.includes(key));
+    const byTitle = card.title.length > 8 && haystack.includes(card.title.toLowerCase());
+    if ((byKey || byTitle) && !seen.has(card.slug)) {
+      seen.add(card.slug);
+      output.push(card);
     }
   }
-  return out;
+  return output;
 }
 
-/** Rough token estimate: CJK ≈ 0.6 tok/char, other text ≈ 0.25 tok/char. */
+/** Rough token estimate: CJK ~0.6 token/char, other text ~0.25 token/char. */
 export function estimateTokens(text: string): number {
-  const cjk = (text.match(/[一-鿿　-〿]/g) ?? []).length;
+  const cjk = (text.match(/[\u3400-\u9fff\u3000-\u303f]/g) ?? []).length;
   return Math.round(cjk * 0.6 + (text.length - cjk) * 0.25);
 }

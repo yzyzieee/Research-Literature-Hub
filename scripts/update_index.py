@@ -2,10 +2,20 @@
 from __future__ import annotations
 
 import json
+import os
+import re
 from datetime import date
 
 from kblib import (DOMAINS, PENDING_DIR, ROOT, first_section_paragraphs,
                    iter_cards, utf8_stdout)
+
+REPOSITORY = os.getenv(
+    "GITHUB_REPOSITORY", "yzyzieee/Literature_ANC_Database")
+
+
+def compact_summary(value: str, limit: int = 420) -> str:
+    text = re.sub(r"\s+", " ", value or "").strip()
+    return text if len(text) <= limit else text[:limit - 1].rstrip() + "…"
 
 
 def main() -> None:
@@ -55,6 +65,65 @@ def main() -> None:
     (out_dir / "cards.json").write_text(
         json.dumps(index, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+    catalog = []
+    for item in index:
+        if item["entry_type"] != "literature" or item["folder"] == PENDING_DIR:
+            continue
+        rating = item.get("rating")
+        team_weight = rating.get("weight") if isinstance(rating, dict) else None
+        catalog.append({
+            "slug": item["slug"],
+            "title": item["title"],
+            "year": item["year"],
+            "venue": item["venue"],
+            "publication_type": item["publication_type"],
+            "primary_domain": item["primary_domain"],
+            "domains": item["domains"],
+            "tags": item["tags"],
+            "team_weight": team_weight,
+            "summary": compact_summary(item["summary"]),
+            "card_url": (
+                f"https://raw.githubusercontent.com/{REPOSITORY}/main/"
+                f"{item['path']}"),
+        })
+
+    (out_dir / "llm_catalog.json").write_text(
+        json.dumps(catalog, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8")
+
+    catalog_lines = [
+        "# Audio Literature Hub — LLM Catalog",
+        "",
+        "Use this file as the entry point for searching our internal literature library.",
+        "Search this catalog first, then open only the most relevant card files.",
+        "Do not assume private Google Drive PDFs are accessible.",
+        "",
+        f"Papers: {len(catalog)}",
+        "",
+        "## Papers",
+        "",
+    ]
+    for item in catalog:
+        weight = (
+            str(item["team_weight"])
+            if item["team_weight"] is not None else "unrated")
+        catalog_lines += [
+            f"### {item['slug']}",
+            f"- Title: {item['title']}",
+            f"- Year: {item['year'] or 'unknown'}",
+            f"- Venue: {item['venue'] or 'unknown'}",
+            f"- Publication type: {item['publication_type'] or 'unknown'}",
+            f"- Primary domain: {item['primary_domain']}",
+            f"- Domains: {', '.join(item['domains'])}",
+            f"- Tags: {', '.join(item['tags'])}",
+            f"- Team weight: {weight}",
+            f"- Summary: {item['summary']}",
+            f"- Card: {item['card_url']}",
+            "",
+        ]
+    (out_dir / "llm_catalog.md").write_text(
+        "\n".join(catalog_lines), encoding="utf-8")
+
     literature_count = sum(item["entry_type"] == "literature" for item in index)
     lines = [
         "# Literature index",
@@ -100,7 +169,9 @@ def main() -> None:
         lines.append("")
 
     (out_dir / "INDEX.md").write_text("\n".join(lines), encoding="utf-8")
-    print(f"Indexed {len(index)} records -> index/cards.json, index/INDEX.md")
+    print(
+        f"Indexed {len(index)} records -> index/cards.json, index/INDEX.md, "
+        "index/llm_catalog.md, index/llm_catalog.json")
 
 
 if __name__ == "__main__":

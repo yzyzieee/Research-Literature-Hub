@@ -18,6 +18,8 @@ Markdown records in the parent repository remain the source of truth.
 - **Comments and audit**: attributed team comments and append-only activity history.
 - **External LLM export**: bundle records, ratings, comments, GitHub sources, and
   direct PDF links for ChatGPT, Claude, Kimi, or another subscribed LLM.
+- **Three-stage context delivery**: copy a GitHub catalog prompt, paste a filtered
+  compact catalog, or prepare up to 25 selected full records for deep discussion.
 
 Legacy concept and algorithm notes remain directly readable but are excluded from
 the main Library, Ratings, and Export workflows.

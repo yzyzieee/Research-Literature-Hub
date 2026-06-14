@@ -96,6 +96,25 @@ export interface Card extends CardMeta {
   body: string;
 }
 
+export type ExportCardMeta = Pick<
+  CardMeta,
+  | "slug"
+  | "folder"
+  | "title"
+  | "publication_type"
+  | "primary_domain"
+  | "domains"
+  | "venue"
+  | "year"
+  | "citation_key"
+  | "tags"
+  | "drive"
+  | "summary"
+  | "rating"
+> & {
+  comment_count: number;
+};
+
 export const STATUS_LABELS: Record<CardStatus, string> = {
   pending: "pending",
   reviewed: "reviewed",

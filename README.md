@@ -56,6 +56,17 @@ reading template.
 6. Team members rate and comment from their domain-specific queues.
 7. Export selected records, comments, scores, and PDF links to an external LLM.
 
+## External LLM workflow
+
+The app is a context provider, not a group-funded chatbot:
+
+1. `index/llm_catalog.md` and `index/llm_catalog.json` provide compact, generated
+   entry points for web-enabled LLMs and future tooling.
+2. The **Use with my LLM** page creates a GitHub-access prompt or a filtered
+   compact catalog for first-pass retrieval.
+3. After narrowing the list, members can prepare a full context pack for up to
+   25 selected papers.
+
 ## Maintenance
 
 ```bash

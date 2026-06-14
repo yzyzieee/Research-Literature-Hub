@@ -8,6 +8,7 @@ import type {
   CardStatus,
   CommentEntry,
   EntryType,
+  ExportCardMeta,
   PublicationType,
   RatingAggregate,
   RatingEntry,
@@ -191,4 +192,23 @@ export function getCard(slug: string): Card | null {
 export function toMeta(card: Card): CardMeta {
   const { body: _body, ...meta } = card;
   return meta;
+}
+
+export function toExportMeta(card: Card): ExportCardMeta {
+  return {
+    slug: card.slug,
+    folder: card.folder,
+    title: card.title,
+    publication_type: card.publication_type,
+    primary_domain: card.primary_domain,
+    domains: card.domains,
+    venue: card.venue,
+    year: card.year,
+    citation_key: card.citation_key,
+    tags: card.tags,
+    drive: card.drive,
+    summary: card.summary,
+    rating: card.rating,
+    comment_count: card.comments.length,
+  };
 }

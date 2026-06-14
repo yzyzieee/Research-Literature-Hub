@@ -1,4 +1,4 @@
-import { getCards } from "@/lib/kb";
+import { getCards, toExportMeta } from "@/lib/kb";
 import { T } from "@/lib/i18n";
 import ExportBuilder from "@/components/ExportBuilder";
 import { isLiterature } from "@/lib/types";
@@ -6,7 +6,7 @@ import { isLiterature } from "@/lib/types";
 export const dynamic = "force-static";
 
 export default function ExportPage() {
-  const cards = getCards().filter(isLiterature);
+  const cards = getCards().filter(isLiterature).map(toExportMeta);
   const repo = process.env.NEXT_PUBLIC_GITHUB_REPO;
   return (
     <>
