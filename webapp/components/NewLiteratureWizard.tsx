@@ -64,6 +64,8 @@ export default function NewLiteratureWizard() {
   } | null>(null);
   const [currentUser, setCurrentUser] = useState("");
   const [msg, setMsg] = useState<{ kind: "ok" | "warn"; text: string; link?: string } | null>(null);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const [published, setPublished] = useState<{ slug: string; url: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const driveFolder = process.env.NEXT_PUBLIC_DRIVE_FOLDER_URL;
   const driveUploadEnabled = process.env.NEXT_PUBLIC_DRIVE_UPLOAD === "1";
@@ -102,7 +104,10 @@ export default function NewLiteratureWizard() {
       driveList.includes(archived.link),
   );
   const needsArchive = Boolean(pdfFile && driveUploadEnabled);
-  const readyToSubmit = ready && (!needsArchive || archiveCurrent);
+  const submissionErrors = [
+    ...missingRequirements,
+    needsArchive && !archiveCurrent ? t("new.missingArchive") : "",
+  ].filter(Boolean);
 
   const fullMarkdown = () => {
     const today = new Date().toISOString().slice(0, 10);
@@ -304,6 +309,12 @@ export default function NewLiteratureWizard() {
   };
 
   const submitLiterature = async () => {
+    if (published) return;
+    setSubmitAttempted(true);
+    if (submissionErrors.length) {
+      setMsg(null);
+      return;
+    }
     setBusy("commit");
     setMsg(null);
     try {
@@ -325,7 +336,8 @@ export default function NewLiteratureWizard() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
-      setMsg({ kind: "ok", text: `${t("new.prOk")}:`, link: data.card_url });
+      setPublished({ slug, url: data.card_url });
+      setSubmitAttempted(false);
     } catch (error) {
       setMsg({ kind: "warn", text: `${t("new.prFail")}: ${error}` });
     } finally {
@@ -517,15 +529,45 @@ export default function NewLiteratureWizard() {
         </div>
       )}
 
-      {msg && (
+      {msg && !published && (
         <div className={`notice ${msg.kind}`}>
           {msg.text} {msg.link && <a href={msg.link} target="_blank" rel="noreferrer">{msg.link}</a>}
         </div>
       )}
 
+      {submitAttempted && submissionErrors.length > 0 && (
+        <div className="publish-validation" role="alert">
+          <h2>{t("new.validationTitle")}</h2>
+          <p>{t("new.validationHint")}</p>
+          <ul>
+            {submissionErrors.map((item) => <li key={item}>{item}</li>)}
+          </ul>
+        </div>
+      )}
+
+      {published && (
+        <div className="publish-success" role="status">
+          <div className="publish-success-mark" aria-hidden="true">✓</div>
+          <div>
+            <h2>{t("new.publishedTitle")}</h2>
+            <p>{t("new.publishedHint")}</p>
+            <div className="btn-row">
+              <a className="btn" href={published.url} target="_blank" rel="noreferrer">
+                {t("new.openPublished")}
+              </a>
+              <a className="btn" href="/cards">{t("new.returnLibrary")}</a>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="btn-row">
-        <button className="btn primary" onClick={submitLiterature} disabled={!readyToSubmit || busy !== ""}>
-          {busy === "commit" ? t("new.submitting") : t("new.submitPr")}
+        <button className="btn primary" onClick={submitLiterature} disabled={busy !== "" || Boolean(published)}>
+          {published
+            ? t("new.publishedButton")
+            : busy === "commit"
+              ? t("new.submitting")
+              : t("new.submitPr")}
         </button>
         <button className="btn" onClick={download} disabled={!ready}>{t("new.download")}</button>
         <button className="btn" onClick={() => navigator.clipboard.writeText(fullMarkdown())} disabled={!ready}>
@@ -533,12 +575,6 @@ export default function NewLiteratureWizard() {
         </button>
       </div>
       {currentUser && <p className="subtitle">{t("new.publishingAs")}: <b>{currentUser}</b></p>}
-      {!ready && (
-        <p className="subtitle">
-          {t("new.publishBlocked")}: {missingRequirements.join(", ")}
-        </p>
-      )}
-      {ready && needsArchive && !archiveCurrent && <p className="subtitle">{t("new.submitNeedsArchive")}</p>}
     </>
   );
 }

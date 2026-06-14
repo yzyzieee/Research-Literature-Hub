@@ -198,6 +198,40 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
 .notice { padding: 10px 16px; border-radius: 8px; font-size: 14px; margin: 12px 0; }
 .notice.ok { background: var(--green-soft); color: var(--green); }
 .notice.warn { background: var(--amber-soft); color: var(--amber); }
+.publish-validation {
+  margin: 18px 0;
+  padding: 18px 22px;
+  border: 1px solid #f0b44d;
+  border-radius: 10px;
+  background: var(--amber-soft);
+  color: var(--text);
+}
+.publish-validation h2, .publish-success h2 { margin: 0 0 6px; font-size: 18px; }
+.publish-validation p, .publish-success p { margin: 0 0 10px; color: var(--text-2); }
+.publish-validation ul { margin: 0; padding-left: 20px; }
+.publish-success {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin: 18px 0;
+  padding: 22px;
+  border: 1px solid #63b68a;
+  border-radius: 12px;
+  background: var(--green-soft);
+  color: var(--text);
+}
+.publish-success-mark {
+  display: grid;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--green);
+  color: white;
+  font-size: 22px;
+  font-weight: 700;
+}
 
 .checklist { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 24px; font-size: 14px; color: var(--text-2); }
 .checklist p { margin-bottom: 0; }
