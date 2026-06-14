@@ -177,5 +177,5 @@ export async function POST(req: NextRequest) {
       }
     }
   }
-  return NextResponse.json({ error: "The card changed while saving. Please retry." }, { status: 409 });
+  return NextResponse.json({ error: "The literature record changed while saving. Please retry." }, { status: 409 });
 }

@@ -50,7 +50,7 @@ function LoginForm() {
   return (
     <div className="login-wrap">
       <form className="form-card login-card" onSubmit={submit}>
-        <h1>Audio Literature Hub</h1>
+        <h1>Research Literature Hub</h1>
         <p className="subtitle">{t("login.subtitle")}</p>
         <label>{t("login.account")}</label>
         <select value={username} onChange={(event) => setUsername(event.target.value)} autoFocus>

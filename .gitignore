@@ -5,6 +5,26 @@ node_modules/
 .next/
 .vercel/
 .env
+.env.*
+!.env.example
 .env.local
 .env*.local
 .DS_Store
+
+# Credentials and private keys
+*.pem
+*.key
+*.p12
+*.pfx
+client_secret*.json
+credentials*.json
+*service-account*.json
+*service_account*.json
+oauth*.json
+token*.json
+
+# Original research files belong in external storage, not Git
+*.pdf
+*.doc
+*.docx
+*.zip

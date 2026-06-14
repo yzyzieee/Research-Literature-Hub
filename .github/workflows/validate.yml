@@ -1,4 +1,4 @@
-name: Validate cards
+name: Validate literature records
 
 on:
   pull_request:
@@ -13,4 +13,5 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r scripts/requirements.txt
+      - run: python scripts/check_secrets.py
       - run: python scripts/check_cards.py

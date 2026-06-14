@@ -4,7 +4,7 @@ export const AUTH_COOKIE = "kb_session";
 const SESSION_DAYS = 30;
 
 function secret(): string {
-  return process.env.AUTH_SECRET || process.env.APP_PASSWORD || "audio-kb-local-development";
+  return process.env.AUTH_SECRET || process.env.APP_PASSWORD || "research-literature-hub-local-development";
 }
 
 async function signature(value: string): Promise<string> {

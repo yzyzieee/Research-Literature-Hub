@@ -35,7 +35,7 @@ DOMAINS = [
     "other",
 ]
 
-# Publication kind is card metadata only; Drive remains a flat PDF repository.
+# Publication kind is literature-record metadata only; Drive remains a flat PDF repository.
 PUBLICATION_TYPES = {
     "journal-paper",
     "conference-paper",

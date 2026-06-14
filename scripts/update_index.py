@@ -10,7 +10,7 @@ from kblib import (DOMAINS, PENDING_DIR, ROOT, first_section_paragraphs,
                    iter_cards, utf8_stdout)
 
 REPOSITORY = os.getenv(
-    "GITHUB_REPOSITORY", "yzyzieee/Literature_ANC_Database")
+    "GITHUB_REPOSITORY", "your-org/research-literature-hub")
 
 
 def compact_summary(value: str, limit: int = 420) -> str:
@@ -92,10 +92,10 @@ def main() -> None:
         encoding="utf-8")
 
     catalog_lines = [
-        "# Audio Literature Hub — LLM Catalog",
+        "# Research Literature Hub — LLM Catalog",
         "",
         "Use this file as the entry point for searching our internal literature library.",
-        "Search this catalog first, then open only the most relevant card files.",
+        "Search this catalog first, then open only the most relevant literature record files.",
         "Do not assume private Google Drive PDFs are accessible.",
         "",
         f"Papers: {len(catalog)}",
@@ -118,7 +118,7 @@ def main() -> None:
             f"- Tags: {', '.join(item['tags'])}",
             f"- Team weight: {weight}",
             f"- Summary: {item['summary']}",
-            f"- Card: {item['card_url']}",
+            f"- Record: {item['card_url']}",
             "",
         ]
     (out_dir / "llm_catalog.md").write_text(

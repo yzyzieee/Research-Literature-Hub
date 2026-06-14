@@ -1,7 +1,8 @@
 import type { Card, ExportCardMeta } from "./types";
 import { domainLabel, publicationTypeLabel } from "./types";
 
-const DEFAULT_REPO = "yzyzieee/Literature_ANC_Database";
+const DEFAULT_REPO =
+  process.env.NEXT_PUBLIC_GITHUB_REPO || "your-org/research-literature-hub";
 
 export function catalogUrls(repo = DEFAULT_REPO) {
   const base = `https://raw.githubusercontent.com/${repo}/main/index`;
@@ -23,8 +24,8 @@ export function libraryAccessPrompt(idea: string, repo?: string): string {
     "1. Start from the catalog.",
     "2. Search only inside this library first.",
     "3. Select relevant papers based on title, summary, domains, tags, venue, year, and team weight.",
-    "4. Then open only the most relevant card files.",
-    "5. Do not claim that a paper exists unless it appears in the catalog or a linked card.",
+    "4. Then open only the most relevant literature record files.",
+    "5. Do not claim that a paper exists unless it appears in the catalog or a linked record.",
     "6. Treat team comments as attributed interpretation, not source-paper claims.",
     "7. Drive PDF links may be private; do not assume you can access them.",
     "",
@@ -37,7 +38,7 @@ export function libraryAccessPrompt(idea: string, repo?: string): string {
     "3. suggested reading order",
     "4. which papers are core vs background",
     "5. useful keywords for the next discussion",
-    "6. each paper's title, citation key, and card URL",
+    "6. each paper's title, citation key, and record URL",
   ].join("\n");
 }
 
@@ -49,10 +50,10 @@ function compactSummary(value: string, limit = 420): string {
 export function compactCatalogPrompt(cards: ExportCardMeta[], idea: string, repo?: string): string {
   const repository = repo || DEFAULT_REPO;
   const lines = [
-    "# Audio Literature Hub — compact catalog pack",
+    "# Research Literature Hub — compact catalog pack",
     "",
     "Use only this internal catalog for the first-pass literature search.",
-    "Do not invent papers. Ask for selected full card records before making detailed technical claims.",
+    "Do not invent papers. Ask for selected full literature records before making detailed technical claims.",
     "",
     "Research idea:",
     idea.trim() || "[Describe the research idea here]",
@@ -69,7 +70,7 @@ export function compactCatalogPrompt(cards: ExportCardMeta[], idea: string, repo
       `Primary domain: ${card.primary_domain} | Domains: ${card.domains.join(", ")}`,
       `Tags: ${card.tags.join(", ")} | Team weight: ${weight}`,
       `Summary: ${compactSummary(card.summary)}`,
-      `Card: https://raw.githubusercontent.com/${repository}/main/${card.folder}/${card.slug}.md`,
+      `Record: https://raw.githubusercontent.com/${repository}/main/${card.folder}/${card.slug}.md`,
       "",
     );
   }
@@ -111,7 +112,7 @@ export function cardToPrompt(card: Card, repo?: string): string {
   }
   if (repo) {
     lines.push(
-      `Card source: https://raw.githubusercontent.com/${repo}/main/${card.folder}/${card.slug}.md`,
+      `Record source: https://raw.githubusercontent.com/${repo}/main/${card.folder}/${card.slug}.md`,
     );
   }
   lines.push("", card.body.trim());
@@ -137,7 +138,7 @@ export function cardToPrompt(card: Card, repo?: string): string {
 
 export function bundlePrompt(cards: Card[], repo = DEFAULT_REPO): string {
   const header = [
-    "# Audio Literature Hub — selected full paper pack",
+    "# Research Literature Hub — selected full paper pack",
     "",
     `Below are ${cards.length} full literature records from our group's audio research library.`,
     "Use these records for deep discussion after the catalog has narrowed the candidate set.",
@@ -146,7 +147,7 @@ export function bundlePrompt(cards: Card[], repo = DEFAULT_REPO): string {
     "- Treat these records as trusted group context.",
     "- If the selected records do not cover the question, say so explicitly.",
     "- Treat team comments as attributed interpretation, not verified paper claims.",
-    "- Cite papers as `<title> — <citation_key> — <card or PDF link>`.",
+    "- Cite papers as `<title> — <citation_key> — <record or PDF link>`.",
     "- Never invent papers, links, results, or claims.",
     "",
     "---",

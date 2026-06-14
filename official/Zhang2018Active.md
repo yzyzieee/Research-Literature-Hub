@@ -38,9 +38,7 @@ tags:
   - spatial-noise
   - multichannel
   - reverberant-room
-drive:
-  - >-
-    https://drive.google.com/file/d/1_1lODaviOAezdyq8q5-TKP8Kr9v98rDg/view?usp=drivesdk
+drive: []
 related: []
 created: '2026-06-14'
 reviewed_by: []
