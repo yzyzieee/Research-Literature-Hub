@@ -4,16 +4,6 @@ import { activeMembers, readTeam } from "@/lib/team";
 
 export const runtime = "nodejs";
 
-function allowedAccounts(): Set<string> {
-  const configured = process.env.LOGIN_ALLOWED_ACCOUNTS || "YZY";
-  return new Set(
-    configured
-      .split(",")
-      .map((value) => value.trim().toUpperCase())
-      .filter(Boolean),
-  );
-}
-
 export async function GET() {
   return NextResponse.json({ login: "manual" });
 }
@@ -23,9 +13,7 @@ export async function POST(req: NextRequest) {
   const username = String(raw || "").trim().toUpperCase();
   try {
     const { config } = await readTeam();
-    const member = activeMembers(config).find(
-      (item) => item.id === username && allowedAccounts().has(item.id),
-    );
+    const member = activeMembers(config).find((item) => item.id === username);
     if (!member) {
       return NextResponse.json({ error: "unknown account" }, { status: 401 });
     }

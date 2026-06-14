@@ -81,7 +81,6 @@ The complete template is [webapp/.env.example](webapp/.env.example). Core variab
 | Variable | Purpose |
 |---|---|
 | `AUTH_SECRET` | Signs team login session cookies |
-| `LOGIN_ALLOWED_ACCOUNTS` | Comma-separated account IDs allowed to sign in; defaults to `YZY` |
 | `GITHUB_TOKEN` | Fine-grained token with repository Contents read/write |
 | `GITHUB_REPO` | Target repository in `owner/repository` form |
 | `NEXT_PUBLIC_GITHUB_REPO` | Repository used for public links and LLM catalogs |
