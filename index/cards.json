@@ -87,7 +87,13 @@
     ],
     "drive": [],
     "created": "2026-06-12",
-    "rating": null,
+    "rating": {
+      "recommendation": 3,
+      "innovation": 3,
+      "rigor": 3,
+      "weight": 60,
+      "count": 1
+    },
     "uploaded_by": "",
     "uploaded_at": "",
     "summary": "The foundational paper on adaptive noise cancelling: a reference input correlated with the noise (but not the signal) is adaptively filtered and subtracted from the primary input, with the LMS algorithm driving the filter towards the Wiener solution without prior knowledge of signal statistics."
