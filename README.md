@@ -10,7 +10,7 @@ to ChatGPT, Claude, Gemini, Kimi, or another external LLM.
 
 [**Live App**](https://research-literature-hub.vercel.app) ·
 [**Documentation**](docs/DEPLOYMENT.md) ·
-[**中文说明**](README.zh-CN.md)
+[**切换到中文 →**](README.zh-CN.md)
 
 [![Maintain literature hub](https://github.com/yzyzieee/Research-Literature-Hub/actions/workflows/maintain.yml/badge.svg)](https://github.com/yzyzieee/Research-Literature-Hub/actions/workflows/maintain.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-2f855a.svg)](LICENSE)
@@ -21,7 +21,7 @@ to ChatGPT, Claude, Gemini, Kimi, or another external LLM.
 
 </div>
 
-![Research Literature Hub workflow](docs/assets/hero.svg)
+![Research Literature Hub: private PDF storage and public knowledge repository](docs/assets/hero-en.svg)
 
 > [!NOTE]
 > The hosted app is the maintainer's team deployment. Fork this repository and connect
@@ -42,24 +42,57 @@ Research Literature Hub gives the group one durable workflow:
 The web app is an **LLM context provider**, not another AI chat product. Your team keeps
 using its existing LLM subscriptions while the hub supplies reliable internal context.
 
-## Core workflow
+## Two storage destinations are required
+
+The hub connects two different storage layers. They have different responsibilities and
+should not be merged:
+
+| Destination | Recommended service | Stores | Access model |
+|---|---|---|---|
+| **1. Team file storage** | A shared Google Drive folder | Original paper PDFs | Controlled by your team; it can remain private or shared only with members |
+| **2. Public summary repository** | A public GitHub repository | Structured literature records, reviews, comments, indexes, and PDF references | Public, versioned, and directly readable by web-enabled LLMs |
+
+The GitHub repository stores a **reference to the PDF**, not the PDF itself. Google Drive
+remains the original-file repository; GitHub remains the searchable knowledge and audit
+layer. Vercel hosts the application that writes to both destinations.
+
+> [!IMPORTANT]
+> A Drive URL written into a public literature record is publicly visible even when the
+> file itself requires permission. Configure Drive sharing according to your team's
+> copyright and access policy.
+
+## Core workflow and data layers
 
 ```mermaid
-flowchart LR
-    A["Choose PDF"] --> B["AI-assisted extraction"]
-    B --> C["Verify metadata and summary"]
-    C --> D["Archive original PDF"]
-    D --> E["Publish literature record"]
-    E --> F["Team review and comments"]
-    F --> G["Export context to your own LLM"]
+flowchart TB
+    U["Team member chooses a PDF"] --> APP["Research Literature Hub"]
+    APP --> X["Optional AI-assisted extraction"]
+    X --> V["Human verifies metadata, domains, tags, and summary"]
+
+    V --> PDF["Team file storage<br/>Original PDF · normalized filename"]
+    V --> CARD["Public GitHub repository<br/>Structured Markdown literature record"]
+    PDF -. "file ID + download/reference URL" .-> CARD
+
+    CARD --> CI["GitHub Actions<br/>validate · rebuild indexes · generate LLM catalog"]
+    CI --> CAT["Public catalog<br/>llm_catalog.md + llm_catalog.json"]
+
+    CARD --> REVIEW["Team review<br/>ratings · comments · activity"]
+    REVIEW -->|"write back"| CARD
+
+    CAT --> LLM["Member's own ChatGPT / Claude / Gemini / Kimi"]
+    CARD --> PACK["Selected full-record context pack"]
+    PACK --> LLM
+    PDF -. "open original when permission allows" .-> LLM
 ```
 
-1. Choose a PDF. Extraction starts only when the user explicitly requests it.
-2. Verify title, authors, venue, DOI, citation key, domains, tags, and summary.
-3. Archive the original PDF in external storage with a normalized filename.
-4. Publish the Markdown literature record to GitHub.
-5. Team members review papers from their own research-domain queue.
-6. Export a library prompt, compact catalog, or selected full-record pack.
+The split happens only after a human verifies the draft:
+
+1. The **original PDF** goes to the team's file storage.
+2. The **structured summary and metadata** go to the public GitHub repository.
+3. The literature record keeps the PDF reference, provenance, and normalized filename.
+4. Reviews and comments are written back into the public record.
+5. GitHub Actions rebuild compact catalogs for search and external LLM access.
+6. External LLMs start from the catalog, then open selected records or permitted PDFs.
 
 ## Features
 
@@ -100,19 +133,17 @@ See [Using the Hub with an LLM](docs/LLM_USAGE.md).
 ## Architecture
 
 ```text
-Next.js web app
-    |
-    +-- GitHub repository
-    |     +-- official/    published literature records
-    |     +-- team/        team account configuration
-    |     +-- index/       generated search and LLM catalogs
-    |     +-- bib/         merged bibliography
-    |
-    +-- External PDF storage
-    |     +-- Google Drive adapter included
-    |
-    +-- Optional LLM provider
-          +-- metadata and structured-record drafting
+                         Research Literature Hub (Vercel)
+                         /                              \
+                        /                                \
+   Team file storage (Google Drive)          Public summary storage (GitHub)
+   - original PDF files                      - structured Markdown records
+   - normalized global filenames             - team reviews and comments
+   - team-controlled permissions              - generated indexes and LLM catalogs
+   - duplicate metadata                       - PDF references and provenance
+                                                        |
+                                                        v
+                                             Members' external LLMs
 ```
 
 Markdown literature records remain the source of truth. GitHub Actions validate records,
@@ -125,7 +156,8 @@ Requirements:
 
 - Node.js 20+
 - Python 3.12+
-- A GitHub repository for published records
+- A shared team file-storage destination for original PDFs
+- A public GitHub repository for summaries and generated catalogs
 
 ```bash
 git clone https://github.com/yzyzieee/Research-Literature-Hub.git

@@ -3,6 +3,20 @@
 This guide deploys Research Literature Hub with GitHub as the record store, Vercel as the
 web runtime, and optional Google Drive storage.
 
+## Storage topology
+
+Prepare two destinations before deployment:
+
+1. A **team file-storage address** for original PDFs. The included adapter uses a shared
+   Google Drive folder. This layer can remain private or team-only.
+2. A **public summary-repository address** for structured literature records, reviews,
+   comments, indexes, and LLM catalogs. The included implementation uses a public GitHub
+   repository.
+
+The application writes each confirmed paper to both layers: the PDF is archived in file
+storage, while its structured Markdown record and PDF reference are published to GitHub.
+PDF binaries are not committed to the repository.
+
 ## 1. Prepare the repository
 
 1. Clone the software into a repository you control, such as
