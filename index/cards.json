@@ -1,5 +1,50 @@
 [
   {
+    "slug": "Zhang2018Active",
+    "path": "official/Zhang2018Active.md",
+    "folder": "official",
+    "title": "Active Noise Control Over Space: A Wave Domain Approach",
+    "entry_type": "literature",
+    "publication_type": "journal-paper",
+    "primary_domain": "active-noise-control",
+    "domains": [
+      "active-noise-control",
+      "beamforming-arrays",
+      "room-acoustics"
+    ],
+    "venue": "IEEE/ACM Transactions on Audio, Speech, and Language Processing",
+    "doi": "10.1109/TASLP.2018.2795756",
+    "abstract": "Noise control and cancellation over a spatial region is a fundamental problem in acoustic signal processing. In this paper, we utilize wave-domain adaptive algorithms to iteratively calculate the secondary source driving signals and to cancel the primary noise field over the control region. We propose wave-domain active noise control algorithms based on two minimization problems: first, minimizing the wave-domain residual signal coefficients, and second, minimizing the acoustic potential energy over the region, and derive the update equations with respect to two variables, the loudspeaker weights and wave-domain secondary source coefficients. Simulation results demonstrate the effectiveness of the proposed algorithms, more specifically the convergence speed and the noise cancellation performance in terms of the noise reduction level and acoustic potential energy reduction level over the entire spatial region.",
+    "status": "official",
+    "tags": [
+      "active-noise-control",
+      "wave-domain",
+      "spatial-noise",
+      "multichannel",
+      "reverberant-room"
+    ],
+    "authors": [
+      "Jihui Zhang",
+      "Thushara D. Abhayapala",
+      "Wen Zhang",
+      "Prasanga N. Samarasinghe",
+      "Shouda Jiang"
+    ],
+    "year": 2018,
+    "citation_key": "Zhang2018Active",
+    "related": [],
+    "drive": [
+      "https://drive.google.com/file/d/1_1lODaviOAezdyq8q5-TKP8Kr9v98rDg/view?usp=drivesdk"
+    ],
+    "created": "2026-06-14",
+    "rating": null,
+    "comments": [],
+    "uploaded_by": "YZY",
+    "uploaded_at": "2026-06-14T12:28:12.917Z",
+    "summary": "This paper introduces and evaluates four novel adaptive wave-domain active noise control (ANC) algorithms designed for noise cancellation over a spatial region. The proposed methods leverage cylindrical harmonic expansions to represent sound fields and adaptively adjust secondary source signals. Two primary cost functions are explored: minimizing the wave-domain residual signal coefficients and minimizing the acoustic potential energy within the control region. The algorithms are further differentiated by whether they update loudspeaker driving signals directly or update the wave-domain secondary sound field coefficients. Simulation results in both free-field and reverberant environments demonstrate that these wave-domain approaches achieve superior noise reduction and faster convergence compared to conventional multi-point methods, particularly when the number of secondary sources is limited.",
+    "legacy_type": ""
+  },
+  {
     "slug": "widrow1975adaptive",
     "path": "official/widrow1975adaptive.md",
     "folder": "official",
