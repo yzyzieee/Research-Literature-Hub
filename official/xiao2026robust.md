@@ -12,7 +12,7 @@ citation_key: xiao2026robust
 authors: ["Tong Xiao", "Reinhild Roden", "Matthias Blau", "Simon Doclo"]
 year: 2026
 tags: ["anc", "spatially-selective-anc", "secondary-path", "robust-optimization", "hearables"]
-drive: []
+drive: ["https://drive.google.com/file/d/169kOYOzTtUgqYjPNuKq5fUHW2Si3_OLR/view?usp=drivesdk"]
 related: []
 created: 2026-06-13
 reviewed_by: []

@@ -44,9 +44,11 @@ name.
 ## 4. Configure authentication
 
 Generate a long random `AUTH_SECRET`. Team accounts are stored in `team/members.json`;
-the current login is lightweight team identification, not a high-assurance identity
-provider. Put the deployment behind appropriate Vercel access controls when stronger
-protection is required.
+the login form does not enumerate them. `LOGIN_ALLOWED_ACCOUNTS` controls which active
+account IDs may sign in and defaults to `YZY`. Account matching is case-insensitive.
+This username-only login is lightweight team identification, not a high-assurance
+identity provider. Put the deployment behind appropriate Vercel access controls when
+stronger protection is required.
 
 ## 5. Configure optional LLM extraction
 

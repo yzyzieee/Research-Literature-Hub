@@ -4,15 +4,18 @@ import { activeMembers, readTeam } from "@/lib/team";
 
 export const runtime = "nodejs";
 
+function allowedAccounts(): Set<string> {
+  const configured = process.env.LOGIN_ALLOWED_ACCOUNTS || "YZY";
+  return new Set(
+    configured
+      .split(",")
+      .map((value) => value.trim().toUpperCase())
+      .filter(Boolean),
+  );
+}
+
 export async function GET() {
-  try {
-    const { config } = await readTeam();
-    return NextResponse.json({
-      members: activeMembers(config).map(({ id, name }) => ({ id, name })),
-    });
-  } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 502 });
-  }
+  return NextResponse.json({ login: "manual" });
 }
 
 export async function POST(req: NextRequest) {
@@ -20,7 +23,9 @@ export async function POST(req: NextRequest) {
   const username = String(raw || "").trim().toUpperCase();
   try {
     const { config } = await readTeam();
-    const member = activeMembers(config).find((item) => item.id === username);
+    const member = activeMembers(config).find(
+      (item) => item.id === username && allowedAccounts().has(item.id),
+    );
     if (!member) {
       return NextResponse.json({ error: "unknown account" }, { status: 401 });
     }

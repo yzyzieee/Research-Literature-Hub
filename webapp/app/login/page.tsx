@@ -1,31 +1,15 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLang } from "@/lib/i18n";
-
-interface LoginMember {
-  id: string;
-  name: string;
-}
 
 function LoginForm() {
   const { t } = useLang();
   const params = useSearchParams();
-  const [members, setMembers] = useState<LoginMember[]>([]);
   const [username, setUsername] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    fetch("/api/auth")
-      .then(async (response) => {
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "Could not load accounts.");
-        setMembers(data.members || []);
-      })
-      .catch((reason) => setError(String(reason)));
-  }, []);
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -38,7 +22,9 @@ function LoginForm() {
         body: JSON.stringify({ username }),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || t("login.wrong"));
+      if (!response.ok) {
+        throw new Error(response.status === 401 ? t("login.wrong") : data.error || t("login.wrong"));
+      }
       const requested = params.get("from");
       window.location.assign(data.needs_setup ? "/settings" : requested || "/");
     } catch (reason) {
@@ -53,12 +39,15 @@ function LoginForm() {
         <h1>Research Literature Hub</h1>
         <p className="subtitle">{t("login.subtitle")}</p>
         <label>{t("login.account")}</label>
-        <select value={username} onChange={(event) => setUsername(event.target.value)} autoFocus>
-          <option value="">{t("login.pick")}</option>
-          {members.map((member) => (
-            <option value={member.id} key={member.id}>{member.name}</option>
-          ))}
-        </select>
+        <input
+          value={username}
+          onChange={(event) => setUsername(event.target.value)}
+          placeholder={t("login.placeholder")}
+          autoComplete="username"
+          autoCapitalize="characters"
+          spellCheck={false}
+          autoFocus
+        />
         {error && <div className="notice warn">{error}</div>}
         <div className="btn-row">
           <button className="btn primary" type="submit" disabled={!username || busy}>

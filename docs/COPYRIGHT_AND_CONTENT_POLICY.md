@@ -7,7 +7,9 @@ a paper-distribution service.
 
 - Do not commit copyrighted paper PDFs, book chapters, scans, or publisher downloads.
 - Do not commit confidential manuscripts, peer-review material, or restricted datasets.
-- Do not commit private storage links that reveal protected files.
+- Storage links may be committed only when the repository operator understands that
+  the URL becomes public and the linked file remains protected by its own sharing
+  permissions.
 - Prefer DOI and publisher landing-page links for public bibliographic references.
 - Keep quotations short, necessary, attributed, and compatible with applicable law.
 - Write summaries, strengths, limitations, and team notes in original language.
