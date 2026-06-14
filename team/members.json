@@ -5,7 +5,10 @@
       "id": "YZY",
       "name": "YZY",
       "role": "admin",
-      "domains": [],
+      "domains": [
+        "active-noise-control",
+        "machine-learning-audio"
+      ],
       "active": true,
       "created": "2026-06-14"
     },
