@@ -31,6 +31,7 @@ export default function AccountSettings() {
   const { t } = useLang();
   const [member, setMember] = useState<TeamMember | null>(null);
   const [members, setMembers] = useState<TeamMember[]>([]);
+  const [displayName, setDisplayName] = useState("");
   const [domains, setDomains] = useState<string[]>([]);
   const [newId, setNewId] = useState("");
   const [newName, setNewName] = useState("");
@@ -43,6 +44,7 @@ export default function AccountSettings() {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error);
         setMember(data.member);
+        setDisplayName(data.member.name || "");
         setDomains(data.member.domains || []);
         setMembers(data.members || []);
       })
@@ -56,11 +58,12 @@ export default function AccountSettings() {
       const response = await fetch("/api/team", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ domains }),
+        body: JSON.stringify({ name: displayName, domains }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       setMember(data.member);
+      window.dispatchEvent(new CustomEvent("team-profile-updated", { detail: data.member.name }));
       setMembers((current) =>
         current.map((item) => (item.id === data.member.id ? data.member : item)),
       );
@@ -98,10 +101,22 @@ export default function AccountSettings() {
     <>
       <div className="form-card">
         <h2 style={{ marginTop: 0 }}>{member?.name || t("settings.loading")}</h2>
+        <p className="subtitle">{t("settings.profileHint")}</p>
+        <label>{t("settings.displayName")}</label>
+        <input
+          value={displayName}
+          onChange={(event) => setDisplayName(event.target.value)}
+          maxLength={60}
+          placeholder={member?.id || ""}
+        />
         <p className="subtitle">{t("settings.domainsHint")}</p>
         <DomainPicker selected={domains} onChange={setDomains} />
         <div className="btn-row">
-          <button className="btn primary" onClick={save} disabled={!member || !domains.length || busy !== ""}>
+          <button
+            className="btn primary"
+            onClick={save}
+            disabled={!member || !displayName.trim() || !domains.length || busy !== ""}
+          >
             {busy === "save" ? t("settings.saving") : t("settings.save")}
           </button>
         </div>

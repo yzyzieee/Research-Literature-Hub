@@ -28,9 +28,12 @@ export async function GET(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   const username = req.headers.get("x-kb-user");
-  const { domains: rawDomains } = (await req.json()) as { domains?: string[] };
+  const body = (await req.json()) as { name?: string; domains?: string[] };
+  const name = String(body.name || "").trim().slice(0, 60);
+  const rawDomains = body.domains;
   const domains = validDomains(rawDomains);
   if (!username) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!name) return NextResponse.json({ error: "Display name is required." }, { status: 400 });
   if (!domains) return NextResponse.json({ error: "Invalid research domains." }, { status: 400 });
 
   for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -38,6 +41,7 @@ export async function PATCH(req: NextRequest) {
       const { config, sha } = await readTeam();
       const member = config.members.find((item) => item.id === username && item.active);
       if (!member) return NextResponse.json({ error: "Account not found." }, { status: 404 });
+      member.name = name;
       member.domains = domains;
       await writeTeam(config, sha);
       return NextResponse.json({ member });

@@ -14,10 +14,15 @@ export default function SiteHeader({ repo }: { repo?: string }) {
 
   useEffect(() => {
     if (onLogin) return;
+    const profileUpdated = (event: Event) => {
+      setUsername((event as CustomEvent<string>).detail || "");
+    };
     fetch("/api/me")
       .then((response) => response.ok ? response.json() : null)
       .then((data) => setUsername(data?.member?.name || ""))
       .catch(() => {});
+    window.addEventListener("team-profile-updated", profileUpdated);
+    return () => window.removeEventListener("team-profile-updated", profileUpdated);
   }, [onLogin]);
 
   const logout = async () => {
