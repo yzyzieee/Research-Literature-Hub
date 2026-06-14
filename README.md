@@ -1,138 +1,176 @@
+<div align="center">
+
 # Research Literature Hub
 
-A paper-first research literature management and LLM-context hub for research groups.
+### Turn scattered papers into a trusted, team-reviewed knowledge base for your own LLM.
 
-Research Literature Hub stores structured paper records, links to externally stored
-PDFs, supports team ratings and attributed comments, and exports LLM-ready literature
-context for research discussion.
+A paper-first literature workflow for research groups: archive PDFs, extract structured
+records, organize by research domain, collect team reviews, and export grounded context
+to ChatGPT, Claude, Gemini, Kimi, or another external LLM.
 
-它是一个面向研究组、以论文为核心的文献管理与 LLM 上下文平台。系统保存结构化
-文献记录和外部 PDF 链接，支持团队评分与署名评论，并导出适合交给外部 LLM 使用的
-可信文献上下文。
+[**Live App**](https://research-literature-hub.vercel.app) ·
+[**Documentation**](docs/DEPLOYMENT.md) ·
+[**中文说明**](README.zh-CN.md)
 
-## Why this project
+[![Maintain literature hub](https://github.com/yzyzieee/Research-Literature-Hub/actions/workflows/maintain.yml/badge.svg)](https://github.com/yzyzieee/Research-Literature-Hub/actions/workflows/maintain.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-2f855a.svg)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](webapp)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white)](webapp)
+[![Python](https://img.shields.io/badge/Python-3.12-3776ab?logo=python&logoColor=white)](scripts)
+[![Vercel](https://img.shields.io/badge/Deploy-Vercel-black?logo=vercel)](docs/DEPLOYMENT.md)
 
-Research groups often spread paper PDFs, reading notes, ratings, and discussion across
-personal drives and chat histories. This project keeps the durable record in GitHub,
-stores original PDFs outside the repository, and gives each member a consistent way to
-reuse the group's literature context with their own ChatGPT, Claude, Gemini, Kimi, or
-other LLM subscription.
+</div>
 
-The web app is a context provider, not a built-in research chatbot. API-backed extraction
-is optional and is used only to draft structured records from uploaded papers.
+![Research Literature Hub workflow](docs/assets/hero.svg)
+
+> [!NOTE]
+> The hosted app is the maintainer's team deployment. Fork this repository and connect
+> your own GitHub repository, storage, and optional LLM provider to run an independent hub.
+
+## What problem does it solve?
+
+Research groups often keep PDFs, reading notes, ratings, and useful discussion in
+different personal drives and chat histories. The result is duplicated reading,
+untraceable conclusions, and poor context when a member starts a new LLM conversation.
+
+Research Literature Hub gives the group one durable workflow:
+
+| Collect | Review | Reuse |
+|---|---|---|
+| Upload the original PDF and extract structured metadata. | Let members score recommendation, innovation, and rigor, then add attributed comments. | Give each member's own LLM a compact catalog or selected-paper context pack. |
+
+The web app is an **LLM context provider**, not another AI chat product. Your team keeps
+using its existing LLM subscriptions while the hub supplies reliable internal context.
+
+## Core workflow
+
+```mermaid
+flowchart LR
+    A["Choose PDF"] --> B["AI-assisted extraction"]
+    B --> C["Verify metadata and summary"]
+    C --> D["Archive original PDF"]
+    D --> E["Publish literature record"]
+    E --> F["Team review and comments"]
+    F --> G["Export context to your own LLM"]
+```
+
+1. Choose a PDF. Extraction starts only when the user explicitly requests it.
+2. Verify title, authors, venue, DOI, citation key, domains, tags, and summary.
+3. Archive the original PDF in external storage with a normalized filename.
+4. Publish the Markdown literature record to GitHub.
+5. Team members review papers from their own research-domain queue.
+6. Export a library prompt, compact catalog, or selected full-record pack.
 
 ## Features
 
-- PDF-first paper intake with explicit AI extraction, metadata review, and publication.
-- One primary research domain plus optional cross-domain classification.
-- DOI, citation-key, normalized-title, and storage-metadata duplicate checks.
-- Structured summaries covering problem, method, results, strengths, and limitations.
-- Team ratings for recommendation, innovation, and rigor.
-- Attributed comments and append-only activity history.
-- Generated Markdown and JSON catalogs for external LLMs.
-- Compact catalog and selected-record context packs for large libraries.
-- English and Chinese interface with English academic metadata.
-- GitHub-backed records and configurable Google Drive PDF storage.
+| Area | Included |
+|---|---|
+| **Paper intake** | PDF-first upload, optional LLM extraction, DOI metadata, explicit confirmation |
+| **Organization** | One primary domain, multiple cross-domains, technical tags, publication type |
+| **Deduplication** | DOI, citation key, normalized title, and Drive metadata checks |
+| **Knowledge records** | Problem, method, key results, strengths, limitations, relevance, and notes |
+| **Team workflow** | Named accounts, self-managed research domains, reviews, comments, and activity history |
+| **Original files** | Configurable Google Drive storage, normalized filenames, and download links |
+| **LLM context** | Markdown/JSON catalog, browsing prompt, compact pack, and selected full-record pack |
+| **Interface** | English/Chinese UI with standardized English academic metadata |
+| **Data ownership** | GitHub Markdown records are the source of truth; no separate application database |
+
+## Use it with your own LLM
+
+The hub avoids paying for an embedded chatbot on every research question.
+
+### 1. Repository access prompt
+
+For browsing-capable LLMs. Point the model to
+[`index/llm_catalog.md`](index/llm_catalog.md), retrieve candidates first, and open only
+the most relevant records.
+
+### 2. Compact catalog pack
+
+For LLMs that cannot reliably access GitHub. Copy filtered metadata, team weight,
+one-line summaries, tags, and record links into the conversation.
+
+### 3. Selected full-record pack
+
+For deeper discussion after initial retrieval. Export a small set with structured
+summaries, reviews, comments, record URLs, and available PDF links.
+
+See [Using the Hub with an LLM](docs/LLM_USAGE.md).
 
 ## Architecture
 
 ```text
-Browser / Next.js web app
-        |
-        +-- GitHub repository
-        |     +-- official/         published literature records
-        |     +-- team/             team account configuration
-        |     +-- index/            generated indexes and LLM catalogs
-        |     +-- bib/              merged bibliography data
-        |
-        +-- External PDF storage
-        |     +-- Google Drive adapter included
-        |
-        +-- Optional LLM provider
-              +-- metadata and structured-record drafting
+Next.js web app
+    |
+    +-- GitHub repository
+    |     +-- official/    published literature records
+    |     +-- team/        team account configuration
+    |     +-- index/       generated search and LLM catalogs
+    |     +-- bib/         merged bibliography
+    |
+    +-- External PDF storage
+    |     +-- Google Drive adapter included
+    |
+    +-- Optional LLM provider
+          +-- metadata and structured-record drafting
 ```
 
-Markdown literature records are the source of truth. The web app does not maintain a
-separate database.
+Markdown literature records remain the source of truth. GitHub Actions validate records,
+scan tracked files for common secrets, rebuild indexes, merge bibliography data, and
+update the application version.
 
 ## Quick start
 
 Requirements:
 
-- Node.js 20 or newer
-- Python 3.12 or newer
+- Node.js 20+
+- Python 3.12+
 - A GitHub repository for published records
 
 ```bash
-git clone https://github.com/your-org/research-literature-hub.git
-cd research-literature-hub/webapp
+git clone https://github.com/yzyzieee/Research-Literature-Hub.git
+cd Research-Literature-Hub/webapp
 npm install
 copy .env.example .env.local
 npm run dev
 ```
 
-Open `http://localhost:3000`. Without GitHub, Drive, or LLM credentials, the repository
-can still be browsed locally and the validation/index scripts can be used.
+Open `http://localhost:3000`. The public records can be browsed locally without Drive or
+LLM credentials; publishing and team collaboration require GitHub configuration.
 
 ## Configuration
 
-The complete template is [webapp/.env.example](webapp/.env.example). Core variables:
+Use [`webapp/.env.example`](webapp/.env.example) as the complete template.
 
 | Variable | Purpose |
 |---|---|
 | `AUTH_SECRET` | Signs team login session cookies |
 | `GITHUB_TOKEN` | Fine-grained token with repository Contents read/write |
 | `GITHUB_REPO` | Target repository in `owner/repository` form |
-| `NEXT_PUBLIC_GITHUB_REPO` | Repository used for public links and LLM catalogs |
+| `NEXT_PUBLIC_GITHUB_REPO` | Repository used for public record and catalog links |
 | `LLM_PROVIDER` | Optional extraction provider |
-| Provider API key | Key matching the selected LLM provider |
+| Provider API key | Server-only key matching the selected provider |
 | `DRIVE_FOLDER_ID` | Google Drive folder used by the included storage adapter |
-| Google OAuth or service-account variables | Server-side Drive authorization |
+| Google OAuth/service-account variables | Server-side Drive authorization |
 
-Never commit `.env.local`, OAuth refresh tokens, service-account JSON files, API keys,
-or PDF files.
+Never commit `.env.local`, OAuth tokens, service-account JSON, API keys, or PDF files.
 
-## Literature workflow
+For a complete Vercel setup, see [Deployment](docs/DEPLOYMENT.md).
 
-1. Choose a PDF.
-2. Explicitly start AI extraction, if configured.
-3. Verify bibliographic metadata and the structured reading record.
-4. Select one primary domain and optional cross-domains.
-5. Archive the PDF in external storage.
-6. Publish the Markdown literature record to GitHub.
-7. Team members rate and comment on the paper.
-8. Use **Use with My LLM** to export a catalog prompt or selected-paper context pack.
+## Repository layout
 
-## Data model
+```text
+official/       Published literature records
+index/          Generated indexes and LLM catalogs
+bib/            Shared and personal BibTeX sources
+team/           Team account registry
+webapp/         Next.js application
+scripts/        Validation, indexing, promotion, and bibliography tools
+docs/           Deployment, schema, LLM usage, and content policy
+examples/       Example literature record
+```
 
-Important fields include:
-
-- `entry_type: literature`
-- `primary_domain` and `domains`
-- `publication_type`
-- `title`, `authors`, `year`, `venue`, `doi`, and `citation_key`
-- `tags`
-- `rating`, `ratings`, and `comments`
-- PDF provenance and `activity`
-
-See [Literature Record Specification](docs/LITERATURE_RECORD_SPEC.md).
-
-## LLM context workflow
-
-Generated files:
-
-- `index/llm_catalog.md` for browsing-capable LLMs
-- `index/llm_catalog.json` for tools, scripts, and future integrations
-
-Recommended usage:
-
-1. Start with the catalog for retrieval across 100-500+ papers.
-2. Select a small relevant set.
-3. Export full structured records only for deeper discussion.
-
-See [Using the Hub with an LLM](docs/LLM_USAGE.md).
-
-## Validation and maintenance
+## Validation
 
 ```bash
 pip install -r scripts/requirements.txt
@@ -144,35 +182,14 @@ cd webapp
 npm run build
 ```
 
-GitHub Actions validates records, scans tracked files for common secret patterns,
-rebuilds indexes, merges bibliography data, bumps the patch version, and publishes
-generated changes after updates reach `main`.
+## Project policy
 
-## Deployment
+This is a maintainer-controlled open-source project published for transparency,
+self-hosting, and reuse. It is not an invitation to modify the maintainer's hosted
+library, team registry, or deployment. Users with different workflows should fork the
+software and operate their own repository and storage.
 
-The included web app is designed for Vercel with `webapp` as the project root. See
-[Deployment](docs/DEPLOYMENT.md) for GitHub, Vercel, environment variable, and
-post-deployment verification steps.
-
-## Project governance
-
-This is a maintainer-controlled project published for transparency, reuse, and
-self-hosting. The public repository is not an invitation to modify the maintainer's
-hosted literature library, team records, or deployment.
-
-External pull requests and feature requests are not actively solicited and may be
-closed without review. Users who need different workflows should fork the software and
-operate their own repository and storage configuration.
-
-## Security and content policy
-
-- Security reports: [SECURITY.md](SECURITY.md)
-- Copyright and content boundaries:
-  [docs/COPYRIGHT_AND_CONTENT_POLICY.md](docs/COPYRIGHT_AND_CONTENT_POLICY.md)
-
-## License
-
-MIT License. Copyright (c) 2026 Ziyi Yang.
-
-The license does not grant rights to third-party papers, PDFs, publisher content, or
-external datasets referenced by literature records. See [NOTICE](NOTICE).
+- [Literature record specification](docs/LITERATURE_RECORD_SPEC.md)
+- [Security policy](SECURITY.md)
+- [Copyright and content policy](docs/COPYRIGHT_AND_CONTENT_POLICY.md)
+- [MIT License](LICENSE) and [third-party notice](NOTICE)

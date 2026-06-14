@@ -1,0 +1,103 @@
+<svg width="1200" height="620" viewBox="0 0 1200 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="80" y1="40" x2="1120" y2="580" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F4F8FF"/>
+      <stop offset="0.52" stop-color="#F8F7FF"/>
+      <stop offset="1" stop-color="#F1FBF7"/>
+    </linearGradient>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#3157D5"/>
+      <stop offset="1" stop-color="#6D4CE8"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#25355D" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="7" refY="5" orient="auto">
+      <path d="M0 0L10 5L0 10V0Z" fill="#8B98B8"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="620" rx="28" fill="url(#bg)"/>
+  <circle cx="1085" cy="95" r="122" fill="#DDF5EB" fill-opacity="0.7"/>
+  <circle cx="95" cy="555" r="145" fill="#E1E9FF" fill-opacity="0.65"/>
+
+  <g transform="translate(72 57)">
+    <rect width="52" height="52" rx="14" fill="url(#brand)"/>
+    <path d="M15 15H37V39H15V15Z" fill="white" fill-opacity="0.18"/>
+    <path d="M20 12V36M27 17V41M34 14V38" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+    <text x="70" y="25" fill="#17213A" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="27" font-weight="700">Research Literature Hub</text>
+    <text x="70" y="49" fill="#65708A" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="15">Trusted literature context for research teams and their LLMs</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="70" y="190" width="270" height="270" rx="22" fill="white"/>
+    <rect x="465" y="150" width="270" height="350" rx="22" fill="white"/>
+    <rect x="860" y="190" width="270" height="270" rx="22" fill="white"/>
+  </g>
+
+  <path d="M350 325H447" stroke="#8B98B8" stroke-width="3" stroke-linecap="round" stroke-dasharray="7 9" marker-end="url(#arrow)"/>
+  <path d="M745 325H842" stroke="#8B98B8" stroke-width="3" stroke-linecap="round" stroke-dasharray="7 9" marker-end="url(#arrow)"/>
+
+  <g transform="translate(96 214)">
+    <rect width="54" height="54" rx="14" fill="#E9EEFF"/>
+    <path d="M17 11H36L43 18V43H17V11Z" fill="#4967D8"/>
+    <path d="M36 11V19H43" fill="#AFC0FF"/>
+    <text x="0" y="92" fill="#17213A" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="21" font-weight="700">1. Collect papers</text>
+    <text x="0" y="122" fill="#65708A" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="15">Upload the original PDF</text>
+    <text x="0" y="146" fill="#65708A" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="15">Extract and verify metadata</text>
+    <g transform="translate(0 174)">
+      <rect width="98" height="30" rx="15" fill="#F1F4FF"/>
+      <text x="18" y="20" fill="#4967D8" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="12" font-weight="600">PDF-first</text>
+      <rect x="108" width="116" height="30" rx="15" fill="#F1F4FF"/>
+      <text x="124" y="20" fill="#4967D8" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="12" font-weight="600">Deduplicated</text>
+    </g>
+  </g>
+
+  <g transform="translate(491 174)">
+    <rect width="54" height="54" rx="14" fill="#EFEAFF"/>
+    <path d="M17 15H39V42H17V15Z" stroke="#7051D6" stroke-width="3"/>
+    <path d="M22 22H34M22 28H34M22 34H30" stroke="#7051D6" stroke-width="2.5" stroke-linecap="round"/>
+    <text x="0" y="92" fill="#17213A" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="21" font-weight="700">2. Build trusted records</text>
+    <text x="0" y="122" fill="#65708A" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="15">Structured summaries in GitHub</text>
+
+    <g transform="translate(0 148)">
+      <rect width="218" height="42" rx="9" fill="#F7F5FF"/>
+      <circle cx="21" cy="21" r="7" fill="#7051D6"/>
+      <text x="39" y="26" fill="#39425A" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="13">Research domains and tags</text>
+
+      <rect y="52" width="218" height="42" rx="9" fill="#F7F5FF"/>
+      <circle cx="21" cy="73" r="7" fill="#31A47C"/>
+      <text x="39" y="78" fill="#39425A" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="13">Team reviews and comments</text>
+
+      <rect y="104" width="218" height="42" rx="9" fill="#F7F5FF"/>
+      <circle cx="21" cy="125" r="7" fill="#E49A3A"/>
+      <text x="39" y="130" fill="#39425A" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="13">Original PDF provenance</text>
+    </g>
+  </g>
+
+  <g transform="translate(886 214)">
+    <rect width="54" height="54" rx="14" fill="#E4F7F0"/>
+    <path d="M16 18H38V35H28L22 41V35H16V18Z" fill="#2F9B76"/>
+    <circle cx="22" cy="26" r="1.7" fill="white"/>
+    <circle cx="27" cy="26" r="1.7" fill="white"/>
+    <circle cx="32" cy="26" r="1.7" fill="white"/>
+    <text x="0" y="92" fill="#17213A" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="21" font-weight="700">3. Use your own LLM</text>
+    <text x="0" y="122" fill="#65708A" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="15">Copy catalog access prompts</text>
+    <text x="0" y="146" fill="#65708A" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="15">Export selected paper context</text>
+    <g transform="translate(0 174)">
+      <rect width="104" height="30" rx="15" fill="#EBF8F3"/>
+      <text x="18" y="20" fill="#2F8B6B" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="12" font-weight="600">Low API cost</text>
+      <rect x="114" width="102" height="30" rx="15" fill="#EBF8F3"/>
+      <text x="132" y="20" fill="#2F8B6B" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="12" font-weight="600">Grounded</text>
+    </g>
+  </g>
+
+  <g transform="translate(337 552)">
+    <rect width="526" height="38" rx="19" fill="white" fill-opacity="0.88"/>
+    <text x="31" y="25" fill="#58647E" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="13" font-weight="600">GitHub records</text>
+    <circle cx="147" cy="19" r="3" fill="#AAB3C6"/>
+    <text x="167" y="25" fill="#58647E" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="13" font-weight="600">External PDF storage</text>
+    <circle cx="321" cy="19" r="3" fill="#AAB3C6"/>
+    <text x="341" y="25" fill="#58647E" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="13" font-weight="600">LLM-ready catalogs</text>
+  </g>
+</svg>
