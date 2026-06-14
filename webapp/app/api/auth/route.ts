@@ -1,36 +1,56 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AUTH_COOKIE, authToken } from "@/lib/auth";
+import { AUTH_COOKIE, sessionToken } from "@/lib/auth";
+import { activeMembers, readTeam } from "@/lib/team";
 
 export const runtime = "nodejs";
 
-export async function POST(req: NextRequest) {
-  const password = process.env.APP_PASSWORD;
-  if (!password) return NextResponse.json({ ok: true, disabled: true });
-
-  const { password: input } = (await req.json()) as { password?: string };
-  if (!input || input !== password) {
-    return NextResponse.json({ error: "wrong password" }, { status: 401 });
+export async function GET() {
+  try {
+    const { config } = await readTeam();
+    return NextResponse.json({
+      members: activeMembers(config).map(({ id, name }) => ({ id, name })),
+    });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 502 });
   }
+}
 
-  const res = NextResponse.json({ ok: true });
-  res.cookies.set(AUTH_COOKIE, await authToken(password), {
-    httpOnly: true,
-    secure: req.nextUrl.protocol === "https:",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 30,
-  });
-  return res;
+export async function POST(req: NextRequest) {
+  const { username: raw } = (await req.json()) as { username?: string };
+  const username = String(raw || "").trim().toUpperCase();
+  try {
+    const { config } = await readTeam();
+    const member = activeMembers(config).find((item) => item.id === username);
+    if (!member) {
+      return NextResponse.json({ error: "unknown account" }, { status: 401 });
+    }
+
+    const response = NextResponse.json({
+      ok: true,
+      member,
+      needs_setup: member.domains.length === 0,
+    });
+    response.cookies.set(AUTH_COOKIE, await sessionToken(member.id), {
+      httpOnly: true,
+      secure: req.nextUrl.protocol === "https:",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 30,
+    });
+    return response;
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 502 });
+  }
 }
 
 export async function DELETE(req: NextRequest) {
-  const res = NextResponse.json({ ok: true });
-  res.cookies.set(AUTH_COOKIE, "", {
+  const response = NextResponse.json({ ok: true });
+  response.cookies.set(AUTH_COOKIE, "", {
     httpOnly: true,
     secure: req.nextUrl.protocol === "https:",
     sameSite: "lax",
     path: "/",
     maxAge: 0,
   });
-  return res;
+  return response;
 }

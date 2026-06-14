@@ -1,14 +1,24 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { LangToggle, useLang } from "@/lib/i18n";
 
-export default function SiteHeader({ repo, gated }: { repo?: string; gated?: boolean }) {
+export default function SiteHeader({ repo }: { repo?: string }) {
   const { t } = useLang();
   const pathname = usePathname();
   const router = useRouter();
   const onLogin = pathname === "/login";
+  const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    if (onLogin) return;
+    fetch("/api/me")
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => setUsername(data?.member?.name || ""))
+      .catch(() => {});
+  }, [onLogin]);
 
   const logout = async () => {
     await fetch("/api/auth", { method: "DELETE" });
@@ -26,16 +36,16 @@ export default function SiteHeader({ repo, gated }: { repo?: string; gated?: boo
             <Link href="/review">{t("nav.review")}</Link>
             <Link href="/new">{t("nav.new")}</Link>
             <Link href="/export">{t("nav.export")}</Link>
+            <Link href="/settings">{t("nav.settings")}</Link>
             {repo && (
               <a href={`https://github.com/${repo}`} target="_blank" rel="noreferrer">
                 GitHub ↗
               </a>
             )}
-            {gated && (
-              <button className="lang-toggle" onClick={logout}>
-                {t("login.logout")}
-              </button>
-            )}
+            {username && <span className="user-chip">{username}</span>}
+            <button className="lang-toggle" onClick={logout}>
+              {t("login.logout")}
+            </button>
           </>
         )}
         <LangToggle />

@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import type { Card, CardMeta, CardStatus, CardType, RatingAggregate, RatingEntry } from "./types";
+import type { ActivityEntry, Card, CardMeta, CardStatus, CardType, RatingAggregate, RatingEntry } from "./types";
 
 const KB_ROOT = process.env.KB_PATH || path.resolve(process.cwd(), "..");
 const CARD_DIRS = ["official", "pending"];
@@ -59,6 +59,21 @@ function parseAggregate(value: unknown): RatingAggregate | null {
   };
 }
 
+function parseActivity(value: unknown): ActivityEntry[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object") return [];
+    const entry = item as Record<string, unknown>;
+    if (!entry.action || !entry.by || !entry.at) return [];
+    return [{
+      action: String(entry.action),
+      by: String(entry.by),
+      at: String(entry.at),
+      ...(entry.detail ? { detail: String(entry.detail) } : {}),
+    }];
+  });
+}
+
 function parseCard(filePath: string, folder: string): Card | null {
   try {
     const raw = fs.readFileSync(filePath, "utf-8");
@@ -81,6 +96,13 @@ function parseCard(filePath: string, folder: string): Card | null {
       summary: summaryText(content),
       rating: parseAggregate(data.rating),
       ratings: parseRatings(data.ratings),
+      uploaded_by: String(data.uploaded_by ?? ""),
+      uploaded_at: String(data.uploaded_at ?? ""),
+      pdf_uploaded_by: String(data.pdf_uploaded_by ?? ""),
+      pdf_uploaded_at: String(data.pdf_uploaded_at ?? ""),
+      pdf_file_name: String(data.pdf_file_name ?? ""),
+      pdf_reused: Boolean(data.pdf_reused),
+      activity: parseActivity(data.activity),
       body: content,
     };
   } catch {

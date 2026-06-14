@@ -1,6 +1,7 @@
 import matter from "gray-matter";
 import { NextRequest, NextResponse } from "next/server";
 import type { RatingAggregate, RatingEntry } from "@/lib/types";
+import { readTeam } from "@/lib/team";
 
 export const runtime = "nodejs";
 
@@ -87,19 +88,18 @@ export async function POST(req: NextRequest) {
 
   const body = (await req.json()) as {
     slug?: string;
-    reviewer?: string;
     recommendation?: number;
     innovation?: number;
     rigor?: number;
   };
   const slug = String(body.slug || "").trim();
-  const reviewer = String(body.reviewer || "").trim().replace(/\s+/g, " ").slice(0, 60);
+  const reviewer = req.headers.get("x-kb-user") || "";
   const recommendation = valueInRange(body.recommendation);
   const innovation = valueInRange(body.innovation);
   const rigor = valueInRange(body.rigor);
-  if (!/^[a-z0-9][a-z0-9-]*$/.test(slug) || reviewer.length < 2 || !recommendation || !innovation || !rigor) {
+  if (!/^[a-z0-9][a-z0-9-]*$/.test(slug) || !reviewer || !recommendation || !innovation || !rigor) {
     return NextResponse.json(
-      { error: "Card, reviewer name, and three integer scores from 1 to 5 are required." },
+      { error: "A valid card and three integer scores from 1 to 5 are required." },
       { status: 400 },
     );
   }
@@ -108,10 +108,19 @@ export async function POST(req: NextRequest) {
   const path = `official/${slug}.md`;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
+      const { config } = await readTeam();
+      const member = config.members.find((item) => item.id === reviewer && item.active);
+      if (!member) return NextResponse.json({ error: "Team account not found." }, { status: 403 });
       const file = await getFile(repo, path, ref, token);
       const raw = Buffer.from(file.content.replace(/\n/g, ""), file.encoding as BufferEncoding).toString("utf-8");
       const parsed = matter(raw);
       const existing = Array.isArray(parsed.data.ratings) ? parsed.data.ratings : [];
+      const previous = existing.find(
+        (item) =>
+          item &&
+          typeof item === "object" &&
+          String(item.reviewer || "").toLocaleLowerCase() === reviewer.toLocaleLowerCase(),
+      );
       const ratings: RatingEntry[] = existing
         .filter((item): item is RatingEntry => Boolean(item && typeof item === "object" && item.reviewer))
         .map((item) => ({
@@ -123,7 +132,7 @@ export async function POST(req: NextRequest) {
         }))
         .filter((item) => item.reviewer.toLocaleLowerCase() !== reviewer.toLocaleLowerCase());
       ratings.push({
-        reviewer,
+        reviewer: member.id,
         recommendation,
         innovation,
         rigor,
@@ -138,6 +147,15 @@ export async function POST(req: NextRequest) {
       parsed.data.rating = rating;
       parsed.data.ratings = ratings;
       parsed.data.reviewed_by = ratings.map((item) => item.reviewer);
+      parsed.data.activity = [
+        ...(Array.isArray(parsed.data.activity) ? parsed.data.activity : []),
+        {
+          action: previous ? "rating_updated" : "rating_added",
+          by: member.id,
+          at: new Date().toISOString(),
+          detail: `recommendation=${recommendation}, innovation=${innovation}, rigor=${rigor}`,
+        },
+      ];
       const updated = matter.stringify(parsed.content.trimStart(), parsed.data);
       const response = await putFile(repo, path, ref, file.sha, updated, reviewer, token);
       if (response.status === 409) continue;

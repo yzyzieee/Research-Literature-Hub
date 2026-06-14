@@ -1,6 +1,21 @@
 export type CardType = "concept" | "algorithm" | "paper" | "resource" | "synthesis";
 export type CardStatus = "pending" | "reviewed" | "official";
 export type SourceType = "paper" | "conference" | "book" | "patent" | "other";
+export type TeamRole = "admin" | "member";
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: TeamRole;
+  domains: string[];
+  active: boolean;
+  created: string;
+}
+
+export interface TeamConfig {
+  version: number;
+  members: TeamMember[];
+}
 
 export interface RatingEntry {
   reviewer: string;
@@ -16,6 +31,13 @@ export interface RatingAggregate {
   rigor: number;
   weight: number;
   count: number;
+}
+
+export interface ActivityEntry {
+  action: string;
+  by: string;
+  at: string;
+  detail?: string;
 }
 
 export interface CardMeta {
@@ -36,6 +58,13 @@ export interface CardMeta {
   summary: string;
   rating: RatingAggregate | null;
   ratings: RatingEntry[];
+  uploaded_by: string;
+  uploaded_at: string;
+  pdf_uploaded_by: string;
+  pdf_uploaded_at: string;
+  pdf_file_name: string;
+  pdf_reused: boolean;
+  activity: ActivityEntry[];
 }
 
 export interface Card extends CardMeta {

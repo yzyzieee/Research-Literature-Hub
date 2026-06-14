@@ -63,6 +63,36 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
             ))}
           </div>
         )}
+        {(card.uploaded_by || card.pdf_uploaded_by) && (
+          <div className="audit-box">
+            <b><T k="detail.activity" /></b>
+            {card.uploaded_by && (
+              <span><T k="detail.uploadedBy" />: {card.uploaded_by}{card.uploaded_at ? ` · ${card.uploaded_at}` : ""}</span>
+            )}
+            {card.pdf_uploaded_by && (
+              <span>
+                <T k="detail.pdfUploadedBy" />: {card.pdf_uploaded_by}
+                {card.pdf_uploaded_at ? ` · ${card.pdf_uploaded_at}` : ""}
+                {card.pdf_file_name ? ` · ${card.pdf_file_name}` : ""}
+              </span>
+            )}
+          </div>
+        )}
+        {card.activity.length > 0 && (
+          <div className="audit-box">
+            <b><T k="detail.auditTrail" /></b>
+            <ol className="audit-list">
+              {[...card.activity].reverse().map((entry, index) => (
+                <li key={`${entry.at}-${entry.action}-${index}`}>
+                  <span>{entry.action.replaceAll("_", " ")}</span>
+                  <strong>{entry.by}</strong>
+                  <time>{entry.at}</time>
+                  {entry.detail && <small>{entry.detail}</small>}
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
         {related.length > 0 && (
           <div className="kv">
             <b><T k="detail.related" /></b> ·{" "}

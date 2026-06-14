@@ -9,6 +9,8 @@ export interface DriveResult {
   link: string;
   name: string;
   reused: boolean;
+  uploadedBy: string;
+  uploadedAt: string;
 }
 
 export async function uploadToDrive(
@@ -32,8 +34,16 @@ export async function uploadToDrive(
   const session = (await sess.json()) as {
     uploadUrl?: string;
     name?: string;
+    uploadedBy?: string;
+    uploadedAt?: string;
     error?: string;
-    existing?: { id: string; name: string; link: string };
+    existing?: {
+      id: string;
+      name: string;
+      link: string;
+      uploadedBy: string;
+      uploadedAt: string;
+    };
   };
   if (sess.ok && session.existing) {
     onProgress?.(100);
@@ -77,5 +87,11 @@ export async function uploadToDrive(
   }
 
   if (!final) throw new Error("Drive did not confirm the completed upload.");
-  return { ...final, name: session.name || file.name, reused: false };
+  return {
+    ...final,
+    name: session.name || file.name,
+    reused: false,
+    uploadedBy: session.uploadedBy || "",
+    uploadedAt: session.uploadedAt || "",
+  };
 }

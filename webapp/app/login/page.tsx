@@ -1,36 +1,48 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLang } from "@/lib/i18n";
+
+interface LoginMember {
+  id: string;
+  name: string;
+}
 
 function LoginForm() {
   const { t } = useLang();
   const params = useSearchParams();
-  const [password, setPassword] = useState("");
+  const [members, setMembers] = useState<LoginMember[]>([]);
+  const [username, setUsername] = useState("");
   const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState(false);
+  const [error, setError] = useState("");
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    fetch("/api/auth")
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Could not load accounts.");
+        setMembers(data.members || []);
+      })
+      .catch((reason) => setError(String(reason)));
+  }, []);
+
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setBusy(true);
-    setErr(false);
+    setError("");
     try {
-      const res = await fetch("/api/auth", {
+      const response = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ username }),
       });
-      if (!res.ok) {
-        setErr(true);
-        setBusy(false);
-        return;
-      }
-      // Full-page navigation forces a fresh middleware check with the new cookie.
-      const from = params.get("from") || "/";
-      window.location.assign(from);
-    } catch {
-      setErr(true);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || t("login.wrong"));
+      const requested = params.get("from");
+      window.location.assign(data.needs_setup ? "/settings" : requested || "/");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
       setBusy(false);
     }
   };
@@ -38,19 +50,19 @@ function LoginForm() {
   return (
     <div className="login-wrap">
       <form className="form-card login-card" onSubmit={submit}>
-        <h1>🎧 Audio Research KB</h1>
+        <h1>Audio Research KB</h1>
         <p className="subtitle">{t("login.subtitle")}</p>
-        <label>{t("login.password")}</label>
-        <input
-          type="password"
-          value={password}
-          autoFocus
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        {err && <div className="notice warn">{t("login.wrong")}</div>}
+        <label>{t("login.account")}</label>
+        <select value={username} onChange={(event) => setUsername(event.target.value)} autoFocus>
+          <option value="">{t("login.pick")}</option>
+          {members.map((member) => (
+            <option value={member.id} key={member.id}>{member.name}</option>
+          ))}
+        </select>
+        {error && <div className="notice warn">{error}</div>}
         <div className="btn-row">
-          <button className="btn primary" type="submit" disabled={!password || busy}>
-            {busy ? "…" : t("login.submit")}
+          <button className="btn primary" type="submit" disabled={!username || busy}>
+            {busy ? t("login.entering") : t("login.submit")}
           </button>
         </div>
       </form>

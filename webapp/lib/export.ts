@@ -17,6 +17,7 @@ export function cardToPrompt(card: Card, repo?: string): string {
       `Team weight: ${card.rating.weight}/100 (${card.rating.count} rating${card.rating.count === 1 ? "" : "s"})`,
     );
   }
+  if (card.uploaded_by) meta.push(`Uploaded by: ${card.uploaded_by}`);
   meta.push(`Status: ${card.status}`);
 
   const lines = [

@@ -22,7 +22,14 @@ related: []            # slugs of related cards, e.g. [fxlms, active-noise-contr
 created: 2026-06-12    # YYYY-MM-DD (required)
 reviewed_by: []        # GitHub usernames of reviewers
 rating: null           # aggregate team score, added after the first rating
-ratings: []            # individual ratings; the same reviewer name replaces its prior entry
+ratings: []            # current individual ratings; the same account replaces its prior entry
+uploaded_by: YZY       # account that published the card
+uploaded_at: 2026-06-14T12:00:00.000Z
+pdf_uploaded_by: YZY   # original PDF uploader (or original owner when reused)
+pdf_uploaded_at: 2026-06-14T11:55:00.000Z
+pdf_file_name: 0001_widrow1975adaptive.pdf
+pdf_reused: false
+activity: []           # append-only PDF, publication, and rating audit events
 ---
 ```
 
@@ -45,7 +52,15 @@ The app publishes checked cards directly into `official/`. Members then rate lit
 - innovation
 - rigor
 
-The three team averages are equally weighted and converted to a 0–100 `rating.weight`. Individual entries are stored in `ratings`; submitting again with the same reviewer name updates that member's entry.
+The three team averages are equally weighted and converted to a 0–100 `rating.weight`. Current individual entries are stored in `ratings`; submitting again from the same signed-in account updates that member's entry. Every addition and update is also appended to `activity`, so rating history remains auditable.
+
+## Team identity and audit
+
+Members select an account at login. The registry and each member's research
+domains live in `team/members.json`. New cards record the publishing account,
+the original or reused Drive PDF owner, timestamps, and file name. The
+append-only `activity` list records `pdf_uploaded`, `pdf_reused`,
+`card_published`, `rating_added`, and `rating_updated` events.
 
 ## Body layout
 

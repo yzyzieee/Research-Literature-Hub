@@ -129,6 +129,8 @@ export async function POST(req: NextRequest) {
     .replace(/^-+|-+$/g, "") || "file";
   const sourceType = SOURCE_TYPES.has(body.sourceType || "") ? body.sourceType! : "other";
   const doi = normalizedDoi(body.doi);
+  const username = req.headers.get("x-kb-user") || "unknown";
+  const uploadedAt = new Date().toISOString();
 
   let token: string;
   try {
@@ -149,6 +151,8 @@ export async function POST(req: NextRequest) {
           id: duplicate.id,
           name: duplicate.name,
           link: duplicate.webViewLink || `https://drive.google.com/file/d/${duplicate.id}/view`,
+          uploadedBy: duplicate.appProperties?.uploadedBy || "unknown",
+          uploadedAt: duplicate.appProperties?.uploadedAt || "",
         },
       });
     }
@@ -174,6 +178,8 @@ export async function POST(req: NextRequest) {
           ...(parentId ? { parents: [parentId] } : {}),
           appProperties: {
             literatureKey: base,
+            uploadedBy: username,
+            uploadedAt,
             ...(doi ? { doi } : {}),
           },
         }),
@@ -189,7 +195,7 @@ export async function POST(req: NextRequest) {
     if (!uploadUrl) {
       return NextResponse.json({ error: "Drive returned no resumable session URL." }, { status: 502 });
     }
-    return NextResponse.json({ uploadUrl, name });
+    return NextResponse.json({ uploadUrl, name, uploadedBy: username, uploadedAt });
   } catch (error) {
     return NextResponse.json(
       { error: `Drive setup failed: ${error instanceof Error ? error.message : error}` },

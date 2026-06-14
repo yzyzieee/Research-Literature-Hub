@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BODY_TEMPLATES } from "@/lib/templates";
 import type { CardType } from "@/lib/types";
 import { DOMAINS, DOMAIN_LABELS, SOURCE_TYPES, TYPE_LABELS } from "@/lib/types";
@@ -45,12 +45,22 @@ export default function NewCardWizard() {
     name: string;
     link: string;
     reused: boolean;
+    uploadedBy: string;
+    uploadedAt: string;
     signature: string;
   } | null>(null);
+  const [currentUser, setCurrentUser] = useState("");
   const [msg, setMsg] = useState<{ kind: "ok" | "warn"; text: string; link?: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const driveFolder = process.env.NEXT_PUBLIC_DRIVE_FOLDER_URL;
   const driveUploadEnabled = process.env.NEXT_PUBLIC_DRIVE_UPLOAD === "1";
+
+  useEffect(() => {
+    fetch("/api/me")
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => setCurrentUser(data?.member?.name || ""))
+      .catch(() => {});
+  }, []);
 
   const slug = type === "paper" ? citationKey.trim() : kebab(title);
   const authorList = authors.split(/[;,]/).map((a) => a.trim()).filter(Boolean);
@@ -227,7 +237,18 @@ export default function NewCardWizard() {
       const res = await fetch("/api/commit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug, content: fullMarkdown() }),
+        body: JSON.stringify({
+          slug,
+          content: fullMarkdown(),
+          archive: archived
+            ? {
+                name: archived.name,
+                uploadedBy: archived.uploadedBy,
+                uploadedAt: archived.uploadedAt,
+                reused: archived.reused,
+              }
+            : null,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -401,6 +422,7 @@ export default function NewCardWizard() {
           {t("new.copyMd")}
         </button>
       </div>
+      {currentUser && <p className="subtitle">{t("new.publishingAs")}: <b>{currentUser}</b></p>}
       {ready && needsArchive && !archiveCurrent && (
         <p className="subtitle">{t("new.submitNeedsArchive")}</p>
       )}

@@ -12,6 +12,7 @@ Collaborative knowledge base for audio / ANC / signal processing research. Cards
 00_templates/   Card templates 卡片模板 (paper / concept / algorithm / resource / synthesis)
 official/       Approved cards 正式卡片 (flat; organised by domain/type in frontmatter)
 pending/        Legacy drafts only; new app submissions publish directly
+team/           Member accounts, roles and selected research domains
 bib/personal/   Each member's Better BibTeX export 个人 .bib 导出
 bib/library.bib Merged bibliography (generated) 合并书目（自动生成）
 index/          Generated index 自动生成的索引 (cards.json / INDEX.md)
@@ -27,7 +28,8 @@ Cards are stored flat and **organised by `domain` (research field) and `type` vi
 1. **Prepare source | 准备资料** — upload PDF to Google Drive, normalize the file name.
 2. **Create metadata | 整理元数据** — add the item to Zotero, verify the Better BibTeX citation key, export your personal `.bib` into `bib/personal/<yourname>.bib`.
 3. **Publish card | 发布卡片** — review the generated metadata and English card in the web app, then publish it directly into `official/`.
-4. **Rate | 团队评分** — teammates score recommendation, innovation, and rigor; the aggregate weight is written back into the card.
+4. **Personal queue | 个性化队列** — each member chooses research domains in Settings and sees only matching papers they have not rated.
+5. **Rate | 团队评分** — teammates score recommendation, innovation, and rigor; History allows updates and every change is audited.
 6. **Maintain & reuse | 维护与复用** — CI regenerates `index/` and `bib/library.bib` on every merge. Browse and search via the web app.
 
 ## Scripts | 脚本

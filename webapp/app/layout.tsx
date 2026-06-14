@@ -11,12 +11,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const repo = process.env.NEXT_PUBLIC_GITHUB_REPO;
-  const gated = Boolean(process.env.APP_PASSWORD);
   return (
     <html lang="en">
       <body>
         <LangProvider>
-          <SiteHeader repo={repo} gated={gated} />
+          <SiteHeader repo={repo} />
           <main className="container">{children}</main>
           <footer className="footer">
             <span><T k="footer" /></span>

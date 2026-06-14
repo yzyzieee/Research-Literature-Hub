@@ -51,6 +51,7 @@ a:hover { text-decoration: underline; }
   min-width: 48px;
 }
 .lang-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.user-chip { padding: 3px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 600; }
 
 .container { max-width: 1000px; margin: 0 auto; padding: 28px 20px 60px; }
 
@@ -197,6 +198,11 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
 .reviewer-box label { display: block; font-size: 13px; color: var(--text-2); margin-bottom: 5px; }
 .reviewer-box input { width: min(100%, 420px); padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font: inherit; }
 .reviewer-box .subtitle { margin: 8px 0 0; font-size: 13px; }
+.review-profile { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; margin: 18px 0 10px; color: var(--text-2); font-size: 13px; }
+.review-profile b { color: var(--text); font-size: 15px; }
+.review-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+.review-tabs button { padding: 8px 15px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text-2); cursor: pointer; }
+.review-tabs button.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 600; }
 .rating-list { display: grid; gap: 14px; }
 .rating-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 22px; }
 .rating-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; }
@@ -207,9 +213,19 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
 .weight-box span, .weight-box small { color: var(--text-2); font-size: 11px; }
 .rating-summary { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 14px; color: var(--text-2); font-size: 13px; }
 .detail-rating { padding: 10px 12px; border-radius: 8px; background: var(--accent-soft); }
+.audit-box { display: grid; gap: 4px; margin-top: 12px; padding: 10px 12px; border-radius: 8px; background: var(--bg); color: var(--text-2); font-size: 12px; }
+.audit-box b { color: var(--text); }
+.audit-list { margin: .7rem 0 0; padding-left: 1.25rem; }
+.audit-list li { margin: .45rem 0; }
+.audit-list span, .audit-list strong, .audit-list time, .audit-list small { display: inline; margin-right: .5rem; }
+.audit-list time, .audit-list small { color: var(--muted); font-size: .82rem; }
 .rating-inputs { display: grid; grid-template-columns: repeat(3, minmax(120px, 1fr)); gap: 12px; margin-top: 14px; }
 .rating-inputs label { color: var(--text-2); font-size: 13px; }
 .rating-inputs select { width: 100%; margin-top: 4px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); font: inherit; }
+.domain-picker { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin: 12px 0; }
+.domain-picker label { display: flex; align-items: center; gap: 8px; margin: 0; padding: 9px 11px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; }
+.domain-picker input { width: auto; margin: 0; }
+.member-list { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 18px; }
 
 .pdf-zone {
   background: var(--accent-soft);
