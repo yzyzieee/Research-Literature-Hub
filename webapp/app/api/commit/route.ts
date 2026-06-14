@@ -1,6 +1,7 @@
 import matter from "gray-matter";
 import { NextRequest, NextResponse } from "next/server";
 import { DOMAINS, PUBLICATION_TYPES } from "@/lib/types";
+import { isGuest } from "@/lib/guest";
 import { readTeam } from "@/lib/team";
 
 export const runtime = "nodejs";
@@ -170,6 +171,32 @@ function validatedOfficialCard(
 }
 
 export async function POST(req: NextRequest) {
+  const username = req.headers.get("x-kb-user") || "";
+  const { slug, content, archive } = (await req.json()) as {
+    slug?: string;
+    content?: string;
+    archive?: { name?: string; uploadedBy?: string; uploadedAt?: string; reused?: boolean } | null;
+  };
+  if (!slug || !content || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(slug)) {
+    return NextResponse.json({ error: "A valid slug and card content are required." }, { status: 400 });
+  }
+  if (isGuest(username)) {
+    try {
+      validatedOfficialCard(slug, content, username, archive);
+      return NextResponse.json({
+        card_url: "/cards",
+        commit_sha: null,
+        demo: true,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      return NextResponse.json(
+        { error: message },
+        { status: message.startsWith("Card is incomplete") ? 400 : 502 },
+      );
+    }
+  }
+
   const token = process.env.GITHUB_TOKEN;
   const repo = process.env.GITHUB_REPO || process.env.NEXT_PUBLIC_GITHUB_REPO;
   const missing = [
@@ -182,16 +209,6 @@ export async function POST(req: NextRequest) {
       { error: `Server configuration missing: ${missing.join(", ")}. Add it to Vercel Production and redeploy.` },
       { status: 501 },
     );
-  }
-
-  const username = req.headers.get("x-kb-user") || "";
-  const { slug, content, archive } = (await req.json()) as {
-    slug?: string;
-    content?: string;
-    archive?: { name?: string; uploadedBy?: string; uploadedAt?: string; reused?: boolean } | null;
-  };
-  if (!slug || !content || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(slug)) {
-    return NextResponse.json({ error: "A valid slug and card content are required." }, { status: 400 });
   }
 
   const base = process.env.GITHUB_BASE || "main";

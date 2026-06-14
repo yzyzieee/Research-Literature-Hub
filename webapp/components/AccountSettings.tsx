@@ -35,6 +35,7 @@ export default function AccountSettings() {
   const [domains, setDomains] = useState<string[]>([]);
   const [newId, setNewId] = useState("");
   const [newName, setNewName] = useState("");
+  const [guest, setGuest] = useState(false);
   const [busy, setBusy] = useState<"" | "save" | "add">("");
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
@@ -47,6 +48,7 @@ export default function AccountSettings() {
         setDisplayName(data.member.name || "");
         setDomains(data.member.domains || []);
         setMembers(data.members || []);
+        setGuest(Boolean(data.demo));
       })
       .catch((error) => setMessage({ ok: false, text: String(error) }));
   }, []);
@@ -67,7 +69,7 @@ export default function AccountSettings() {
       setMembers((current) =>
         current.map((item) => (item.id === data.member.id ? data.member : item)),
       );
-      setMessage({ ok: true, text: t("settings.saved") });
+      setMessage({ ok: true, text: t(data.demo ? "settings.demoSaved" : "settings.saved") });
     } catch (error) {
       setMessage({ ok: false, text: `${t("settings.failed")}: ${error instanceof Error ? error.message : error}` });
     } finally {
@@ -99,6 +101,7 @@ export default function AccountSettings() {
 
   return (
     <>
+      {guest && <div className="notice guest">{t("settings.demoHint")}</div>}
       <div className="form-card">
         <h2 style={{ marginTop: 0 }}>{member?.name || t("settings.loading")}</h2>
         <p className="subtitle">{t("settings.profileHint")}</p>

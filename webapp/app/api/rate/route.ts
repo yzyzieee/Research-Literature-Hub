@@ -1,6 +1,8 @@
 import matter from "gray-matter";
 import { NextRequest, NextResponse } from "next/server";
 import type { RatingAggregate, RatingEntry } from "@/lib/types";
+import { GUEST_MEMBER, isGuest } from "@/lib/guest";
+import { getCard } from "@/lib/kb";
 import { readTeam } from "@/lib/team";
 
 export const runtime = "nodejs";
@@ -80,12 +82,6 @@ async function putFile(
 }
 
 export async function POST(req: NextRequest) {
-  const token = process.env.GITHUB_TOKEN;
-  const repo = process.env.GITHUB_REPO || process.env.NEXT_PUBLIC_GITHUB_REPO;
-  if (!token || !repo) {
-    return NextResponse.json({ error: "GitHub write access is not configured." }, { status: 501 });
-  }
-
   const body = (await req.json()) as {
     slug?: string;
     recommendation?: number;
@@ -102,6 +98,34 @@ export async function POST(req: NextRequest) {
       { error: "A valid card and three integer scores from 1 to 5 are required." },
       { status: 400 },
     );
+  }
+
+  if (isGuest(reviewer)) {
+    const card = getCard(slug);
+    if (!card || card.folder !== "official") {
+      return NextResponse.json({ error: "Card not found in the official library." }, { status: 404 });
+    }
+    const ratings = [
+      ...card.ratings.filter((item) => !isGuest(item.reviewer)),
+      {
+        reviewer: GUEST_MEMBER.id,
+        recommendation,
+        innovation,
+        rigor,
+        updated: new Date().toISOString().slice(0, 10),
+      },
+    ];
+    return NextResponse.json({
+      rating: aggregate(ratings),
+      ratings,
+      demo: true,
+    });
+  }
+
+  const token = process.env.GITHUB_TOKEN;
+  const repo = process.env.GITHUB_REPO || process.env.NEXT_PUBLIC_GITHUB_REPO;
+  if (!token || !repo) {
+    return NextResponse.json({ error: "GitHub write access is not configured." }, { status: 501 });
   }
 
   const ref = process.env.GITHUB_BASE || "main";

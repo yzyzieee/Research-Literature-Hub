@@ -63,9 +63,10 @@ export default function NewLiteratureWizard() {
     signature: string;
   } | null>(null);
   const [currentUser, setCurrentUser] = useState("");
+  const [guest, setGuest] = useState(false);
   const [msg, setMsg] = useState<{ kind: "ok" | "warn"; text: string; link?: string } | null>(null);
   const [submitAttempted, setSubmitAttempted] = useState(false);
-  const [published, setPublished] = useState<{ slug: string; url: string } | null>(null);
+  const [published, setPublished] = useState<{ slug: string; url: string; demo: boolean } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const driveFolder = process.env.NEXT_PUBLIC_DRIVE_FOLDER_URL;
   const driveUploadEnabled = process.env.NEXT_PUBLIC_DRIVE_UPLOAD === "1";
@@ -73,7 +74,10 @@ export default function NewLiteratureWizard() {
   useEffect(() => {
     fetch("/api/me")
       .then((response) => (response.ok ? response.json() : null))
-      .then((data) => setCurrentUser(data?.member?.name || ""))
+      .then((data) => {
+        setCurrentUser(data?.member?.name || "");
+        setGuest(Boolean(data?.demo));
+      })
       .catch(() => {});
   }, []);
 
@@ -186,7 +190,11 @@ export default function NewLiteratureWizard() {
       setArchived({ ...result, signature: archiveSignature });
       setMsg({
         kind: "ok",
-        text: result.reused ? t("new.driveDuplicate") : t("new.driveUploaded"),
+        text: guest
+          ? t("new.demoDriveUploaded")
+          : result.reused
+            ? t("new.driveDuplicate")
+            : t("new.driveUploaded"),
         link: result.link,
       });
     } catch (error) {
@@ -224,7 +232,14 @@ export default function NewLiteratureWizard() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       applyLiterature(data);
-      setMsg({ kind: "ok", text: driveUploadEnabled ? t("new.pdfOkUpload") : t("new.pdfOk") });
+      setMsg({
+        kind: "ok",
+        text: data.demo
+          ? t("new.demoExtracted")
+          : driveUploadEnabled
+            ? t("new.pdfOkUpload")
+            : t("new.pdfOk"),
+      });
     } catch (error) {
       setMsg({
         kind: "warn",
@@ -248,7 +263,11 @@ export default function NewLiteratureWizard() {
       const extracted = await response.json();
       if (!response.ok) throw new Error(extracted.error);
       applyLiterature(extracted, true);
-      setMsg({ kind: "ok", text: t("new.driveVisionOk"), link: archived.link });
+      setMsg({
+        kind: "ok",
+        text: t(extracted.demo ? "new.demoExtracted" : "new.driveVisionOk"),
+        link: archived.link,
+      });
     } catch (error) {
       setMsg({
         kind: "warn",
@@ -300,7 +319,7 @@ export default function NewLiteratureWizard() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       setBody(data.body);
-      setMsg({ kind: "ok", text: t("new.draftOk") });
+      setMsg({ kind: "ok", text: t(data.demo ? "new.demoDrafted" : "new.draftOk") });
     } catch (error) {
       setMsg({ kind: "warn", text: `${t("new.draftFail")}: ${error}` });
     } finally {
@@ -336,7 +355,7 @@ export default function NewLiteratureWizard() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
-      setPublished({ slug, url: data.card_url });
+      setPublished({ slug, url: data.card_url, demo: Boolean(data.demo) });
       setSubmitAttempted(false);
     } catch (error) {
       setMsg({ kind: "warn", text: `${t("new.prFail")}: ${error}` });
@@ -356,6 +375,7 @@ export default function NewLiteratureWizard() {
 
   return (
     <>
+      {guest && <div className="notice guest">{t("new.demoHint")}</div>}
       <div className="pdf-zone">
         <input
           ref={fileRef}
@@ -531,7 +551,7 @@ export default function NewLiteratureWizard() {
 
       {msg && !published && (
         <div className={`notice ${msg.kind}`}>
-          {msg.text} {msg.link && <a href={msg.link} target="_blank" rel="noreferrer">{msg.link}</a>}
+          {msg.text} {msg.link && !guest && <a href={msg.link} target="_blank" rel="noreferrer">{msg.link}</a>}
         </div>
       )}
 
@@ -549,12 +569,14 @@ export default function NewLiteratureWizard() {
         <div className="publish-success" role="status">
           <div className="publish-success-mark" aria-hidden="true">✓</div>
           <div>
-            <h2>{t("new.publishedTitle")}</h2>
-            <p>{t("new.publishedHint")}</p>
+            <h2>{t(published.demo ? "new.demoPublishedTitle" : "new.publishedTitle")}</h2>
+            <p>{t(published.demo ? "new.demoPublishedHint" : "new.publishedHint")}</p>
             <div className="btn-row">
-              <a className="btn" href={published.url} target="_blank" rel="noreferrer">
-                {t("new.openPublished")}
-              </a>
+              {!published.demo && (
+                <a className="btn" href={published.url} target="_blank" rel="noreferrer">
+                  {t("new.openPublished")}
+                </a>
+              )}
               <a className="btn" href="/cards">{t("new.returnLibrary")}</a>
             </div>
           </div>

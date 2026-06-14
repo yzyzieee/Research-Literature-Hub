@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isGuest } from "@/lib/guest";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,6 +16,9 @@ function validDriveUploadUrl(value: string): boolean {
 }
 
 export async function PUT(req: NextRequest) {
+  if (isGuest(req.headers.get("x-kb-user"))) {
+    return NextResponse.json({ error: "Guest uploads are simulated and never forwarded to Drive." }, { status: 403 });
+  }
   const uploadUrl = req.headers.get("x-drive-upload-url") || "";
   const contentRange = req.headers.get("content-range") || "";
 

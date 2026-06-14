@@ -35,6 +35,13 @@ export async function uploadToDrive(
     uploadedBy?: string;
     uploadedAt?: string;
     error?: string;
+    demo?: {
+      id: string;
+      name: string;
+      link: string;
+      uploadedBy: string;
+      uploadedAt: string;
+    };
     existing?: {
       id: string;
       name: string;
@@ -43,6 +50,10 @@ export async function uploadToDrive(
       uploadedAt: string;
     };
   };
+  if (sess.ok && session.demo) {
+    onProgress?.(100);
+    return { ...session.demo, reused: false };
+  }
   if (sess.ok && session.existing) {
     onProgress?.(100);
     return { ...session.existing, reused: true };

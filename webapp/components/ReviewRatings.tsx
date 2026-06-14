@@ -47,7 +47,7 @@ function RatingCard({
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Could not save rating.");
       onSaved(card.slug, data.rating, data.ratings);
-      setMessage({ ok: true, text: t("review.saved") });
+      setMessage({ ok: true, text: t(data.demo ? "review.demoSaved" : "review.saved") });
     } catch (error) {
       setMessage({
         ok: false,

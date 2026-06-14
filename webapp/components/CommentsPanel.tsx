@@ -58,7 +58,10 @@ export default function CommentsPanel({
       setComments(data.comments || []);
       setDraft("");
       setEditing(null);
-      setMessage({ ok: true, text: t(editing ? "comments.updated" : "comments.saved") });
+      setMessage({
+        ok: true,
+        text: t(data.demo ? "comments.demoSaved" : editing ? "comments.updated" : "comments.saved"),
+      });
     } catch (error) {
       setMessage({
         ok: false,

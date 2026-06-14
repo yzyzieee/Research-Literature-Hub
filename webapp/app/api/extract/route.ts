@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { guestLiteratureDraft, isGuest } from "@/lib/guest";
 import { llmChat, llmConfigured, llmProvider, parseJsonLoose } from "@/lib/llm";
 import { driveConfigured, fetchDriveFile } from "@/lib/google";
 import { DOMAINS, PUBLICATION_TYPES } from "@/lib/types";
@@ -199,6 +200,12 @@ function invalidRecordResponse(raw: string, error: unknown, provider: string) {
 
 export async function POST(req: NextRequest) {
   const { text, driveFileId } = (await req.json()) as { text?: string; driveFileId?: string };
+  if (isGuest(req.headers.get("x-kb-user"))) {
+    return NextResponse.json({
+      ...guestLiteratureDraft(text || driveFileId || ""),
+      demo: true,
+    });
+  }
 
   if (driveFileId) {
     if (llmProvider() !== "gemini" || !process.env.GEMINI_API_KEY) {

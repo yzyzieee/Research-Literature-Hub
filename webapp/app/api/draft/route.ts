@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { guestLiteratureDraft, isGuest } from "@/lib/guest";
 import { LITERATURE_BODY_TEMPLATE } from "@/lib/templates";
 import { llmChat, llmConfigured } from "@/lib/llm";
 
@@ -8,12 +9,6 @@ export const maxDuration = 120;
 const MAX_TOKENS = 3500;
 
 export async function POST(req: NextRequest) {
-  if (!llmConfigured()) {
-    return NextResponse.json(
-      { error: "No LLM API key configured. Fill the literature record manually or configure a provider." },
-      { status: 501 },
-    );
-  }
   const { title, authors, year, venue, doi, notes } = (await req.json()) as {
     title: string;
     authors?: string[];
@@ -24,6 +19,18 @@ export async function POST(req: NextRequest) {
   };
   if (!title) {
     return NextResponse.json({ error: "title is required" }, { status: 400 });
+  }
+  if (isGuest(req.headers.get("x-kb-user"))) {
+    return NextResponse.json({
+      body: guestLiteratureDraft([title, notes].filter(Boolean).join("\n")).body,
+      demo: true,
+    });
+  }
+  if (!llmConfigured()) {
+    return NextResponse.json(
+      { error: "No LLM API key configured. Fill the literature record manually or configure a provider." },
+      { status: 501 },
+    );
   }
 
   const system = [

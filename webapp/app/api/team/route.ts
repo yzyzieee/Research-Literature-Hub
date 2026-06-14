@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { GUEST_MEMBER, isGuest } from "@/lib/guest";
 import { DOMAINS } from "@/lib/types";
 import { readTeam, writeTeam } from "@/lib/team";
 
@@ -15,6 +16,13 @@ export async function GET(req: NextRequest) {
   if (!username) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const { config } = await readTeam();
+    if (isGuest(username)) {
+      return NextResponse.json({
+        member: GUEST_MEMBER,
+        members: config.members.filter((item) => item.active),
+        demo: true,
+      });
+    }
     const member = config.members.find((item) => item.id === username && item.active);
     if (!member) return NextResponse.json({ error: "Account not found." }, { status: 404 });
     return NextResponse.json({
@@ -35,6 +43,12 @@ export async function PATCH(req: NextRequest) {
   if (!username) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!name) return NextResponse.json({ error: "Display name is required." }, { status: 400 });
   if (!domains) return NextResponse.json({ error: "Invalid research domains." }, { status: 400 });
+  if (isGuest(username)) {
+    return NextResponse.json({
+      member: { ...GUEST_MEMBER, name, domains },
+      demo: true,
+    });
+  }
 
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
@@ -61,6 +75,12 @@ export async function POST(req: NextRequest) {
   const id = String(body.id || "").trim().toUpperCase();
   const name = String(body.name || id).trim().slice(0, 60);
   if (!username) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (isGuest(username)) {
+    return NextResponse.json(
+      { error: "Guest mode cannot create team accounts." },
+      { status: 403 },
+    );
+  }
   if (!/^[A-Z0-9][A-Z0-9_-]{1,31}$/.test(id) || !name) {
     return NextResponse.json({ error: "Use a 2-32 character account ID and display name." }, { status: 400 });
   }

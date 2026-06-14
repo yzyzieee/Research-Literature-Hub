@@ -11,15 +11,14 @@ function LoginForm() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  const submit = async (event: React.FormEvent) => {
-    event.preventDefault();
+  const enter = async (account: string) => {
     setBusy(true);
     setError("");
     try {
       const response = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username }),
+        body: JSON.stringify({ username: account }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -31,6 +30,11 @@ function LoginForm() {
       setError(reason instanceof Error ? reason.message : String(reason));
       setBusy(false);
     }
+  };
+
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    await enter(username);
   };
 
   return (
@@ -53,6 +57,13 @@ function LoginForm() {
           <button className="btn primary" type="submit" disabled={!username || busy}>
             {busy ? t("login.entering") : t("login.submit")}
           </button>
+        </div>
+        <div className="guest-login">
+          <span>{t("login.guestOr")}</span>
+          <button className="btn guest" type="button" onClick={() => enter("GUEST")} disabled={busy}>
+            {t("login.guest")}
+          </button>
+          <small>{t("login.guestHint")}</small>
         </div>
       </form>
     </div>

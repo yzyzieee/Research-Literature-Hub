@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LangProvider, T } from "@/lib/i18n";
+import GuestModeBanner from "@/components/GuestModeBanner";
 import SiteHeader from "@/components/SiteHeader";
 import packageJson from "@/package.json";
 import "./globals.css";
@@ -16,6 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <LangProvider>
           <SiteHeader repo={repo} />
+          <GuestModeBanner />
           <main className="container">{children}</main>
           <footer className="footer">
             <span><T k="footer" /></span>

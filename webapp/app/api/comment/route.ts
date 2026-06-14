@@ -1,6 +1,7 @@
 import matter from "gray-matter";
 import { NextRequest, NextResponse } from "next/server";
 import type { CommentEntry } from "@/lib/types";
+import { GUEST_MEMBER, isGuest } from "@/lib/guest";
 import { getCard } from "@/lib/kb";
 import { readTeam } from "@/lib/team";
 
@@ -67,6 +68,7 @@ async function getFile(repo: string, slug: string, ref: string, token: string): 
 }
 
 async function currentMember(username: string) {
+  if (isGuest(username)) return GUEST_MEMBER;
   const { config } = await readTeam();
   return config.members.find((member) => member.id === username && member.active);
 }
@@ -105,9 +107,6 @@ export async function POST(req: NextRequest) {
   const text = String(body.body || "").trim();
   const { token, repo, ref } = githubConfig();
 
-  if (!token || !repo) {
-    return NextResponse.json({ error: "GitHub write access is not configured." }, { status: 501 });
-  }
   if (!username || !validSlug(slug) || text.length < 2 || text.length > MAX_COMMENT_LENGTH) {
     return NextResponse.json(
       { error: `A valid card and a 2-${MAX_COMMENT_LENGTH} character comment are required.` },
@@ -116,6 +115,28 @@ export async function POST(req: NextRequest) {
   }
   if (commentId && !/^[A-Za-z0-9_-]{4,100}$/.test(commentId)) {
     return NextResponse.json({ error: "Invalid comment ID." }, { status: 400 });
+  }
+  if (isGuest(username)) {
+    const card = getCard(slug);
+    if (!card || card.folder !== "official") {
+      return NextResponse.json({ error: "Card not found in the official library." }, { status: 404 });
+    }
+    const now = new Date().toISOString();
+    const saved: CommentEntry = {
+      id: `GUEST-${Date.now().toString(36)}`,
+      author: GUEST_MEMBER.id,
+      body: text,
+      created: now,
+      updated: now,
+    };
+    return NextResponse.json({
+      comments: [...card.comments, saved],
+      saved,
+      demo: true,
+    });
+  }
+  if (!token || !repo) {
+    return NextResponse.json({ error: "GitHub write access is not configured." }, { status: 501 });
   }
 
   for (let attempt = 0; attempt < 3; attempt += 1) {

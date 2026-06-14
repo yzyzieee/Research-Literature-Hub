@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AUTH_COOKIE, sessionToken } from "@/lib/auth";
+import { GUEST_MEMBER, isGuest } from "@/lib/guest";
 import { activeMembers, readTeam } from "@/lib/team";
 
 export const runtime = "nodejs";
@@ -12,6 +13,22 @@ export async function POST(req: NextRequest) {
   const { username: raw } = (await req.json()) as { username?: string };
   const username = String(raw || "").trim().toUpperCase();
   try {
+    if (isGuest(username)) {
+      const response = NextResponse.json({
+        ok: true,
+        member: GUEST_MEMBER,
+        needs_setup: false,
+        demo: true,
+      });
+      response.cookies.set(AUTH_COOKIE, await sessionToken(GUEST_MEMBER.id), {
+        httpOnly: true,
+        secure: req.nextUrl.protocol === "https:",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24,
+      });
+      return response;
+    }
     const { config } = await readTeam();
     const member = activeMembers(config).find((item) => item.id === username);
     if (!member) {

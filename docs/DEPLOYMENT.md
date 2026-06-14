@@ -69,6 +69,22 @@ Administrators create only an account ID and display name. New members are redir
 to Settings on first login to choose their own research domains. Every active member can
 view the team's names and selected domains in the team directory.
 
+### Guest demo mode
+
+Every deployment includes a virtual `GUEST` account and a **Continue as Guest** button.
+Guest mode is a product demonstration, not a team account:
+
+- extraction and draft generation use deterministic local sample data;
+- PDF archiving and publishing return simulated success results;
+- ratings, comments, and profile changes exist only in the current response/UI state;
+- no guest action writes to GitHub, Google Drive, or `team/members.json`;
+- no configured LLM provider is called for guest extraction.
+
+This allows a public deployment to demonstrate the complete workflow without consuming
+API quota or modifying the real library. It is not a security boundary for the team
+accounts; use Vercel access controls or a real identity provider when stronger
+authentication is required.
+
 ## 5. Configure optional LLM extraction
 
 Set `LLM_PROVIDER` and only the matching provider key/model variables. Use a low-cost

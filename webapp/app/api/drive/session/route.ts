@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { GUEST_MEMBER, isGuest } from "@/lib/guest";
 import { driveConfigured, getDriveAccessToken } from "@/lib/google";
 
 export const runtime = "nodejs";
@@ -72,13 +73,6 @@ function nextId(files: DriveFile[]): string {
 }
 
 export async function POST(req: NextRequest) {
-  if (!driveConfigured()) {
-    return NextResponse.json(
-      { error: "Drive upload not configured (set owner OAuth or a service-account key)." },
-      { status: 501 },
-    );
-  }
-
   const body = (await req.json()) as {
     base?: string;
     mimeType?: string;
@@ -92,6 +86,23 @@ export async function POST(req: NextRequest) {
   const doi = normalizedDoi(body.doi);
   const username = req.headers.get("x-kb-user") || "unknown";
   const uploadedAt = new Date().toISOString();
+  if (isGuest(username)) {
+    return NextResponse.json({
+      demo: {
+        id: `guest-${Date.now().toString(36)}`,
+        name: `DEMO_${base}.pdf`,
+        link: "/new#guest-demo-pdf",
+        uploadedBy: GUEST_MEMBER.id,
+        uploadedAt,
+      },
+    });
+  }
+  if (!driveConfigured()) {
+    return NextResponse.json(
+      { error: "Drive upload not configured (set owner OAuth or a service-account key)." },
+      { status: 501 },
+    );
+  }
 
   let token: string;
   try {

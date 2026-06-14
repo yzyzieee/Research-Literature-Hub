@@ -2,15 +2,16 @@
 
 # Research Literature Hub
 
-### Turn scattered papers into a trusted, team-reviewed knowledge base for your own LLM.
+### Turn the papers your team has read into a trusted research foundation.
 
-A paper-first literature workflow for research groups: archive PDFs, extract structured
-records, organize by research domain, collect team reviews, and export grounded context
-to ChatGPT, Claude, Gemini, Kimi, or another external LLM.
+A paper-first workflow for research groups to archive original PDFs, build structured
+literature records, capture team judgment, and reuse that knowledge with each member's
+own LLM.
 
 [**Live App**](https://research-literature-hub.vercel.app) ·
-[**Documentation**](docs/DEPLOYMENT.md) ·
-[**切换到中文 →**](README.zh-CN.md)
+[**Try Guest Demo**](https://research-literature-hub.vercel.app/login) ·
+[**Deployment Guide**](docs/DEPLOYMENT.md) ·
+[**中文说明 →**](README.zh-CN.md)
 
 [![Maintain literature hub](https://github.com/yzyzieee/Research-Literature-Hub/actions/workflows/maintain.yml/badge.svg)](https://github.com/yzyzieee/Research-Literature-Hub/actions/workflows/maintain.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-2f855a.svg)](LICENSE)
@@ -21,124 +22,88 @@ to ChatGPT, Claude, Gemini, Kimi, or another external LLM.
 
 </div>
 
-![Research Literature Hub: private PDF storage and public knowledge repository](docs/assets/hero-en.svg)
+![Research Literature Hub overview](docs/assets/overview-en.png)
 
-> [!NOTE]
-> The hosted app is the maintainer's team deployment. Fork this repository and connect
-> your own GitHub repository, storage, and optional LLM provider to run an independent hub.
+> [!TIP]
+> Open the hosted app and choose **Continue as Guest** to explore paper intake,
+> extraction, archiving, publishing, reviews, and comments. Guest actions are simulated
+> locally: they do not call the configured LLM and do not write to GitHub, Google Drive,
+> or team records.
 
-## What problem does it solve?
+## Why this exists
 
-Research groups often keep PDFs, reading notes, ratings, and useful discussion in
-different personal drives and chat histories. The result is duplicated reading,
-untraceable conclusions, and poor context when a member starts a new LLM conversation.
+Research knowledge is usually split across personal folders, reading notes, chat
+histories, and repeated LLM conversations. That makes good papers hard to rediscover,
+team judgment easy to lose, and literature research unnecessarily repetitive.
 
-Research Literature Hub gives the group one durable workflow:
+Research Literature Hub gives a group one durable workflow:
 
-| Collect | Review | Reuse |
+| Share papers | Build trusted records | Reuse with personal LLMs |
 |---|---|---|
-| Upload the original PDF and extract structured metadata. | Let members score recommendation, innovation, and rigor, then add attributed comments. | Give each member's own LLM a compact catalog or selected-paper context pack. |
+| Upload papers that members have read or recently discovered. | Extract metadata and summaries, then add human reviews, ratings, tags, and comments. | Export a catalog, reusable prompt, or selected-paper pack to ChatGPT, Claude, Gemini, Kimi, or another LLM. |
 
-The web app is an **LLM context provider**, not another AI chat product. Your team keeps
-using its existing LLM subscriptions while the hub supplies reliable internal context.
+The web app is an **LLM context provider**, not another chatbot. It maintains reliable
+literature context while members continue using the LLM subscriptions they already have.
 
-## Two storage destinations are required
+## Two storage destinations
 
-The hub connects two different storage layers. They have different responsibilities and
-should not be merged:
+The system deliberately separates original files from public knowledge records:
 
-| Destination | Recommended service | Stores | Access model |
+| Layer | Recommended service | Stores | Access |
 |---|---|---|---|
-| **1. Team file storage** | A shared Google Drive folder | Original paper PDFs | Controlled by your team; it can remain private or shared only with members |
-| **2. Public summary repository** | A public GitHub repository | Structured literature records, reviews, comments, indexes, and PDF references | Public, versioned, and directly readable by web-enabled LLMs |
+| **Team file storage** | Shared Google Drive folder | Original paper PDFs with normalized filenames | Private or team-controlled |
+| **Public record storage** | Public GitHub repository | Metadata, summaries, tags, ratings, comments, indexes, prompts, and PDF references | Public, versioned, and LLM-readable |
 
-The GitHub repository stores a **reference to the PDF**, not the PDF itself. Google Drive
-remains the original-file repository; GitHub remains the searchable knowledge and audit
-layer. Vercel hosts the application that writes to both destinations.
+Google Drive is the source-document repository. GitHub is the searchable knowledge and
+audit layer. Vercel hosts the interface that connects them.
 
 > [!IMPORTANT]
-> A Drive URL written into a public literature record is publicly visible even when the
-> file itself requires permission. Configure Drive sharing according to your team's
-> copyright and access policy.
+> A Drive URL stored in a public record is itself public, even when the file still
+> requires permission. Configure file sharing according to your copyright and access
+> policy.
 
-## Core workflow and data layers
+## Core workflow
 
-```mermaid
-flowchart TB
-    A["1 · Choose PDF"] --> B["2 · Optional AI draft"]
-    B --> C["3 · Human verification"]
+![Research Literature Hub core workflow](docs/assets/workflow-en.png)
 
-    C --> D["Original PDF"]
-    C --> E["Structured record"]
+1. Members upload PDFs and supply basic details.
+2. Optional AI extraction drafts metadata, summaries, domains, and technical tags.
+3. A member verifies and improves the structured record.
+4. The original PDF is archived in private team storage, while its literature record is
+   published to the public repository.
+5. Team ratings and attributed comments accumulate shared judgment over time.
+6. Members use catalogs and reusable prompts with their own external LLMs.
 
-    D --> F["Team file storage<br/>Google Drive"]
-    E --> G["Public knowledge repository<br/>GitHub Markdown"]
-    F -. "PDF reference" .-> G
-
-    G --> R["Team review<br/>ratings + comments"]
-    R -->|"write back"| G
-    G --> I["GitHub Actions<br/>validate + build indexes"]
-    I --> J["Public LLM catalog"]
-
-    G --> P["Selected record pack"]
-    J --> L["Member's own LLM"]
-    P --> L
-    F -. "permitted original" .-> L
-
-    classDef intake fill:#F2EEFF,stroke:#7051D6,color:#17213A;
-    classDef files fill:#EEF2FF,stroke:#4967D8,color:#17213A;
-    classDef knowledge fill:#EAF8F3,stroke:#2F9B76,color:#17213A;
-    classDef output fill:#17213A,stroke:#17213A,color:#FFFFFF;
-    class A,B,C intake;
-    class D,F files;
-    class E,G,R,I,J,P knowledge;
-    class L output;
-```
-
-The split happens only after a human verifies the draft:
-
-1. The **original PDF** goes to the team's file storage.
-2. The **structured summary and metadata** go to the public GitHub repository.
-3. The literature record keeps the PDF reference, provenance, and normalized filename.
-4. Reviews and comments are written back into the public record.
-5. GitHub Actions rebuild compact catalogs for search and external LLM access.
-6. External LLMs start from the catalog, then open selected records or permitted PDFs.
+The two storage branches remain linked through DOI, citation key, normalized filename,
+Drive metadata, provenance, and the PDF reference stored in each literature record.
 
 ## Features
 
 | Area | Included |
 |---|---|
-| **Paper intake** | PDF-first upload, optional LLM extraction, DOI metadata, explicit confirmation |
-| **Organization** | One primary domain, multiple cross-domains, technical tags, publication type |
+| **Paper intake** | Explicit PDF selection, optional LLM extraction, DOI metadata, and human confirmation |
+| **Organization** | Primary domain, cross-domains, publication type, venue, year, and technical tags |
 | **Deduplication** | DOI, citation key, normalized title, and Drive metadata checks |
-| **Knowledge records** | Problem, method, key results, strengths, limitations, relevance, and notes |
-| **Team workflow** | Named accounts, self-managed research domains, reviews, comments, and activity history |
-| **Original files** | Configurable Google Drive storage, normalized filenames, and download links |
-| **LLM context** | Markdown/JSON catalog, browsing prompt, compact pack, and selected full-record pack |
+| **Structured records** | Summary, problem, method, key results, strengths, limitations, relevance, and notes |
+| **Team knowledge** | Named accounts, research interests, recommendation/innovation/rigor reviews, comments, and activity history |
+| **Original files** | Google Drive adapter, global filenames, archive provenance, and download links |
+| **LLM context** | Markdown/JSON catalog, repository-access prompt, compact catalog, and selected full-record pack |
 | **Interface** | English/Chinese UI with standardized English academic metadata |
-| **Data ownership** | GitHub Markdown records are the source of truth; no separate application database |
+| **Data ownership** | GitHub Markdown records remain the source of truth; no separate application database |
 
-## Use it with your own LLM
+## Use with your own LLM
 
-The hub avoids paying for an embedded chatbot on every research question.
+The **Use with My LLM** page supports three levels of context:
 
-### 1. Repository access prompt
+1. **Repository access prompt** for web-enabled LLMs. The model starts from
+   [`index/llm_catalog.md`](index/llm_catalog.md) and opens only relevant records.
+2. **Compact catalog pack** for models that cannot reliably browse GitHub. It includes
+   searchable metadata, team weight, one-line summaries, tags, and record links.
+3. **Selected full-record pack** for deeper discussion after retrieval. It includes a
+   small set of structured records, reviews, comments, and available PDF references.
 
-For browsing-capable LLMs. Point the model to
-[`index/llm_catalog.md`](index/llm_catalog.md), retrieve candidates first, and open only
-the most relevant records.
-
-### 2. Compact catalog pack
-
-For LLMs that cannot reliably access GitHub. Copy filtered metadata, team weight,
-one-line summaries, tags, and record links into the conversation.
-
-### 3. Selected full-record pack
-
-For deeper discussion after initial retrieval. Export a small set with structured
-summaries, reviews, comments, record URLs, and available PDF links.
-
-See [Using the Hub with an LLM](docs/LLM_USAGE.md).
+This keeps routine research conversations on each member's own subscription instead of
+charging a shared API for every question. See [Using the Hub with an LLM](docs/LLM_USAGE.md).
 
 ## Architecture
 
@@ -146,19 +111,18 @@ See [Using the Hub with an LLM](docs/LLM_USAGE.md).
                          Research Literature Hub (Vercel)
                          /                              \
                         /                                \
-   Team file storage (Google Drive)          Public summary storage (GitHub)
-   - original PDF files                      - structured Markdown records
-   - normalized global filenames             - team reviews and comments
-   - team-controlled permissions              - generated indexes and LLM catalogs
-   - duplicate metadata                       - PDF references and provenance
+       Private file storage (Google Drive)    Public record storage (GitHub)
+       - original PDFs                        - structured Markdown records
+       - normalized filenames                 - reviews and comments
+       - team-controlled access               - generated indexes and LLM catalogs
+       - duplicate metadata                   - PDF references and provenance
                                                         |
                                                         v
                                              Members' external LLMs
 ```
 
-Markdown literature records remain the source of truth. GitHub Actions validate records,
-scan tracked files for common secrets, rebuild indexes, merge bibliography data, and
-update the application version.
+GitHub Actions validate records, scan tracked files for common secrets, merge
+bibliography data, rebuild indexes and LLM catalogs, and update the application version.
 
 ## Quick start
 
@@ -166,8 +130,8 @@ Requirements:
 
 - Node.js 20+
 - Python 3.12+
-- A shared team file-storage destination for original PDFs
-- A public GitHub repository for summaries and generated catalogs
+- A GitHub repository for records and generated catalogs
+- Optional Google Drive storage and LLM provider credentials
 
 ```bash
 git clone https://github.com/yzyzieee/Research-Literature-Hub.git
@@ -177,8 +141,8 @@ copy .env.example .env.local
 npm run dev
 ```
 
-Open `http://localhost:3000`. The public records can be browsed locally without Drive or
-LLM credentials; publishing and team collaboration require GitHub configuration.
+Open `http://localhost:3000`. Guest mode and public-record browsing work without write
+credentials. Persistent publishing and team collaboration require GitHub configuration.
 
 ## Configuration
 
@@ -188,16 +152,15 @@ Use [`webapp/.env.example`](webapp/.env.example) as the complete template.
 |---|---|
 | `AUTH_SECRET` | Signs team login session cookies |
 | `GITHUB_TOKEN` | Fine-grained token with repository Contents read/write |
-| `GITHUB_REPO` | Target repository in `owner/repository` form |
+| `GITHUB_REPO` | Write target in `owner/repository` form |
 | `NEXT_PUBLIC_GITHUB_REPO` | Repository used for public record and catalog links |
-| `LLM_PROVIDER` | Optional extraction provider |
-| Provider API key | Server-only key matching the selected provider |
+| `LLM_PROVIDER` | Optional metadata and summary extraction provider |
+| Provider API key | Server-only key for the selected provider |
 | `DRIVE_FOLDER_ID` | Google Drive folder used by the included storage adapter |
 | Google OAuth/service-account variables | Server-side Drive authorization |
 
 Never commit `.env.local`, OAuth tokens, service-account JSON, API keys, or PDF files.
-
-For a complete Vercel setup, see [Deployment](docs/DEPLOYMENT.md).
+For the complete setup, see [Deployment](docs/DEPLOYMENT.md).
 
 ## Repository layout
 
@@ -226,10 +189,10 @@ npm run build
 
 ## Project policy
 
-This is a maintainer-controlled open-source project published for transparency,
+This maintainer-controlled open-source project is published for transparency,
 self-hosting, and reuse. It is not an invitation to modify the maintainer's hosted
-library, team registry, or deployment. Users with different workflows should fork the
-software and operate their own repository and storage.
+library, team registry, or deployment. Fork the project to operate an independent
+repository and storage configuration.
 
 - [Literature record specification](docs/LITERATURE_RECORD_SPEC.md)
 - [Security policy](SECURITY.md)
