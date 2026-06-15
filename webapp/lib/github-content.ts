@@ -9,6 +9,11 @@ export interface GitHubContentFile {
   html_url?: string;
 }
 
+interface GitHubContentEntry {
+  path: string;
+  type: "file" | "dir" | "symlink" | "submodule";
+}
+
 function headers(token: string, hasBody = false): HeadersInit {
   return {
     Authorization: `Bearer ${token}`,
@@ -43,6 +48,25 @@ export async function readGitHubFile(
     );
   }
   return response.json();
+}
+
+export async function listGitHubDirectoryPaths(path: string): Promise<string[]> {
+  const { token, repo, ref } = githubServerConfig();
+  if (!token || !repo) throw new Error("GitHub read access is not configured.");
+  const params = new URLSearchParams({ ref });
+  const response = await fetch(`${GH}/repos/${repo}/contents/${path}?${params}`, {
+    headers: headers(token),
+    cache: "no-store",
+  });
+  if (response.status === 404) return [];
+  if (!response.ok) {
+    throw new Error(
+      `GitHub directory read failed (${response.status}): ${(await response.text()).slice(0, 240)}`,
+    );
+  }
+  const entries = (await response.json()) as GitHubContentEntry[];
+  if (!Array.isArray(entries)) return [];
+  return entries.filter((entry) => entry.type === "file").map((entry) => entry.path);
 }
 
 export async function writeGitHubFile({

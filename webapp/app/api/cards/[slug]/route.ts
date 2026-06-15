@@ -9,6 +9,8 @@ import {
   readGitHubFile,
   writeGitHubFile,
 } from "@/lib/github-content";
+import { deleteDriveKeyFigure } from "@/lib/google";
+import { parseKeyFigure } from "@/lib/key-figure";
 import { getCard } from "@/lib/kb";
 
 export const runtime = "nodejs";
@@ -183,6 +185,7 @@ export async function DELETE(
       "Card not found in the official library.",
     );
     const parsed = matter(decodeGitHubFile(file));
+    const keyFigure = parseKeyFigure(parsed.data.key_figure);
     const creator = String(parsed.data.uploaded_by || "").toUpperCase();
     if (context.member.role !== "admin" && creator !== context.member.id.toUpperCase()) {
       return NextResponse.json(
@@ -195,9 +198,18 @@ export async function DELETE(
       sha: file.sha,
       message: `literature: delete ${context.slug} by ${context.member.id}`,
     });
+    let keyFigureDeleted = false;
+    if (keyFigure.image_ref) {
+      try {
+        keyFigureDeleted = await deleteDriveKeyFigure(keyFigure.image_ref);
+      } catch (error) {
+        console.warn(`Key Figure cleanup failed for ${context.slug}:`, error);
+      }
+    }
     return NextResponse.json({
       deleted: true,
       pdf_preserved: true,
+      key_figure_deleted: keyFigureDeleted,
       deploy_pending: true,
     });
   } catch (error) {

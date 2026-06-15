@@ -67,3 +67,38 @@ export async function fetchDriveFile(fileId: string): Promise<Buffer> {
   if (!res.ok) throw new Error(`drive download ${res.status}: ${(await res.text()).slice(0, 200)}`);
   return Buffer.from(await res.arrayBuffer());
 }
+
+/**
+ * Delete a cached Key Figure, but never an archived source PDF.
+ * The appProperty guard keeps card deletion from touching the private paper library.
+ */
+export async function deleteDriveKeyFigure(fileId: string): Promise<boolean> {
+  if (!fileId || !driveConfigured()) return false;
+  const token = await getDriveAccessToken();
+  const metadataResponse = await fetch(
+    `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?fields=id,appProperties&supportsAllDrives=true`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  if (metadataResponse.status === 404) return false;
+  if (!metadataResponse.ok) {
+    throw new Error(
+      `drive metadata ${metadataResponse.status}: ${(await metadataResponse.text()).slice(0, 200)}`,
+    );
+  }
+  const metadata = (await metadataResponse.json()) as {
+    appProperties?: Record<string, string>;
+  };
+  if (metadata.appProperties?.assetKind !== "keyFigure") return false;
+
+  const deletion = await fetch(
+    `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?supportsAllDrives=true`,
+    {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+  if (!deletion.ok && deletion.status !== 404) {
+    throw new Error(`drive delete ${deletion.status}: ${(await deletion.text()).slice(0, 200)}`);
+  }
+  return deletion.status !== 404;
+}

@@ -7,6 +7,8 @@ import {
   deleteGitHubFile,
   readGitHubFile,
 } from "@/lib/github-content";
+import { deleteDriveKeyFigure } from "@/lib/google";
+import { parseKeyFigure } from "@/lib/key-figure";
 import {
   readDeletionRequests,
   writeDeletionRequests,
@@ -159,12 +161,15 @@ export async function PATCH(req: NextRequest) {
         if (!request) {
           return NextResponse.json({ error: "Pending deletion request not found." }, { status: 404 });
         }
+        let keyFigureRef = "";
         if (action === "approve") {
           try {
             const cardFile = await readGitHubFile(
               `official/${request.slug}.md`,
               "Card not found in the official library.",
             );
+            keyFigureRef =
+              parseKeyFigure(matter(decodeGitHubFile(cardFile)).data.key_figure).image_ref || "";
             await deleteGitHubFile({
               path: `official/${request.slug}.md`,
               sha: cardFile.sha,
@@ -178,10 +183,19 @@ export async function PATCH(req: NextRequest) {
         request.reviewed_by = member.id;
         request.reviewed_at = new Date().toISOString();
         await writeDeletionRequests(registry, sha);
+        let keyFigureDeleted = false;
+        if (action === "approve" && keyFigureRef) {
+          try {
+            keyFigureDeleted = await deleteDriveKeyFigure(keyFigureRef);
+          } catch (error) {
+            console.warn(`Key Figure cleanup failed for ${request.slug}:`, error);
+          }
+        }
         return NextResponse.json({
           request,
           deleted: action === "approve",
           pdf_preserved: action === "approve",
+          key_figure_deleted: keyFigureDeleted,
           deploy_pending: true,
         });
       } catch (error) {

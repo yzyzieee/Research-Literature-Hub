@@ -22,6 +22,7 @@ export default function CardActions({
   const [requests, setRequests] = useState<CardDeletionRequest[]>([]);
   const [reason, setReason] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [requestOpen, setRequestOpen] = useState(false);
   const [busy, setBusy] = useState<"" | "delete" | "request">("");
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
@@ -88,6 +89,7 @@ export default function CardActions({
       if (!response.ok) throw new Error(data.error || t("cardActions.requestFailed"));
       setRequests((current) => [...current, data.request]);
       setReason("");
+      setRequestOpen(false);
       setMessage({
         ok: true,
         text: t(data.demo ? "cardActions.requestDemo" : "cardActions.requested"),
@@ -121,6 +123,15 @@ export default function CardActions({
             {t("cardActions.delete")}
           </button>
         )}
+        {member && !canDelete && !pending && (
+          <button
+            className="btn danger"
+            onClick={() => setRequestOpen((current) => !current)}
+            aria-expanded={requestOpen}
+          >
+            {requestOpen ? t("cardActions.cancel") : t("cardActions.requestTitle")}
+          </button>
+        )}
       </div>
 
       {canDelete && confirmDelete && (
@@ -138,34 +149,32 @@ export default function CardActions({
         </div>
       )}
 
-      {member && !canDelete && (
+      {member && !canDelete && pending && (
+        <div className="deletion-request-status">
+          <span className="badge">{t("cardActions.pending")}</span>
+          <span>{pending.reason}</span>
+        </div>
+      )}
+
+      {member && !canDelete && !pending && requestOpen && (
         <div className="deletion-request-panel">
-          <b>{t("cardActions.requestTitle")}</b>
-          {pending ? (
-            <p className="subtitle">
-              {t("cardActions.pending")} · {pending.reason}
-            </p>
-          ) : (
-            <>
-              <p className="subtitle">{t("cardActions.requestHint")}</p>
-              <textarea
-                rows={3}
-                maxLength={500}
-                value={reason}
-                onChange={(event) => setReason(event.target.value)}
-                placeholder={t("cardActions.reasonPlaceholder")}
-              />
-              <div className="btn-row">
-                <button
-                  className="btn danger"
-                  onClick={requestDeletion}
-                  disabled={busy !== "" || reason.trim().length < 5}
-                >
-                  {busy === "request" ? t("cardActions.requesting") : t("cardActions.request")}
-                </button>
-              </div>
-            </>
-          )}
+          <p className="subtitle">{t("cardActions.requestHint")}</p>
+          <textarea
+            rows={3}
+            maxLength={500}
+            value={reason}
+            onChange={(event) => setReason(event.target.value)}
+            placeholder={t("cardActions.reasonPlaceholder")}
+          />
+          <div className="btn-row">
+            <button
+              className="btn danger"
+              onClick={requestDeletion}
+              disabled={busy !== "" || reason.trim().length < 5}
+            >
+              {busy === "request" ? t("cardActions.requesting") : t("cardActions.request")}
+            </button>
+          </div>
         </div>
       )}
       {message && <div className={`notice ${message.ok ? "ok" : "warn"}`}>{message.text}</div>}

@@ -70,6 +70,12 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
             <p>{card.abstract}</p>
           </div>
         )}
+        <KeyFigurePanel
+          slug={card.slug}
+          initialFigure={card.key_figure}
+          pdfLink={card.drive[0] || ""}
+          persist
+        />
         {card.rating && (
           <div className="rating-summary detail-rating">
             <span><T k="review.weight" />: <b>{card.rating.weight}/100</b></span>
@@ -79,12 +85,6 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
             <span>{card.rating.count} <T k="review.votes" /></span>
           </div>
         )}
-        <KeyFigurePanel
-          slug={card.slug}
-          initialFigure={card.key_figure}
-          pdfLink={card.drive[0] || ""}
-          persist
-        />
         {card.drive.length > 0 && (
           <div className="kv">
             <b><T k="detail.fulltext" /></b> ·{" "}

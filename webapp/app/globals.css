@@ -289,6 +289,14 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
 .card-actions { margin-top: 14px; }
+.deletion-request-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--text-2);
+  font-size: 14px;
+}
 .deletion-request-panel,
 .destructive-panel {
   margin-top: 12px;
