@@ -2,6 +2,7 @@ import matter from "gray-matter";
 import { NextRequest, NextResponse } from "next/server";
 import type { CommentEntry } from "@/lib/types";
 import { GUEST_MEMBER, isGuest } from "@/lib/guest";
+import { configuredGithubRepository, githubRef } from "@/lib/github-config";
 import { getCard } from "@/lib/kb";
 import { readTeam } from "@/lib/team";
 
@@ -20,8 +21,8 @@ interface GitHubFile {
 function githubConfig() {
   return {
     token: process.env.GITHUB_TOKEN || "",
-    repo: process.env.GITHUB_REPO || process.env.NEXT_PUBLIC_GITHUB_REPO || "",
-    ref: process.env.GITHUB_BASE || "main",
+    repo: configuredGithubRepository(),
+    ref: githubRef(),
   };
 }
 

@@ -148,10 +148,23 @@ npm run dev
 | `GITHUB_TOKEN` | 拥有仓库 Contents 读写权限的 fine-grained token |
 | `GITHUB_REPO` | `owner/repository` 格式的写入目标 |
 | `NEXT_PUBLIC_GITHUB_REPO` | 公开文献记录和目录链接使用的仓库 |
-| `LLM_PROVIDER` | 可选的元数据与摘要提取服务 |
-| 对应服务商 API Key | 仅服务端使用的提取密钥 |
+| `LLM_PROVIDER` | 选择元数据与摘要提取服务，例如 `gemini`、`deepseek`、`openai` 或 `anthropic` |
+| `GEMINI_API_KEY` / `DEEPSEEK_API_KEY` / `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` | 与 `LLM_PROVIDER` 对应的大模型 API Key，只在服务端使用 |
+| `GEMINI_MODEL` / `DEEPSEEK_MODEL` / `OPENAI_MODEL` / `ANTHROPIC_MODEL` | 对应服务商的模型名称 |
 | `DRIVE_FOLDER_ID` | Google Drive 原文仓库文件夹 |
-| Google OAuth/服务账号变量 | Drive 服务端授权 |
+| `GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET` / `GOOGLE_OAUTH_REFRESH_TOKEN` | 使用个人或 Workspace Drive 时的 OAuth 服务端授权 |
+| `GOOGLE_SERVICE_ACCOUNT_KEY` | 使用服务账号时的一行 JSON 凭据 |
+
+例如使用 Gemini：
+
+```text
+LLM_PROVIDER=gemini
+GEMINI_API_KEY=your-api-key
+GEMINI_MODEL=gemini-2.5-flash-lite
+```
+
+如果改用 DeepSeek，则设置 `LLM_PROVIDER=deepseek`，并填写
+`DEEPSEEK_API_KEY` 与 `DEEPSEEK_MODEL`。只需要配置当前服务商对应的一组 API 变量。
 
 不要提交 `.env.local`、OAuth Token、服务账号 JSON、API Key 或论文 PDF。
 完整配置见[部署指南](docs/DEPLOYMENT.md)。
