@@ -4,9 +4,27 @@ Use this file as the entry point for searching our internal literature library.
 Search this catalog first, then open only the most relevant literature record files.
 Do not assume private Google Drive PDFs are accessible.
 
-Papers: 5
+Papers: 6
 
 ## Papers
+
+### Chen2022Secondary
+- Title: A Secondary Path-Decoupled Active Noise Control Algorithm Based on Deep Learning
+- Year: 2022
+- Venue: IEEE SIGNAL PROCESSING LETTERS
+- Publication type: journal-paper
+- Primary domain: active-noise-control
+- Domains: active-noise-control, machine-learning-audio
+- Tags: active-noise-control, nonlinear-secondary-path, deep-learning, convolutional-recurrent-network, adaptive-filter
+- Team weight: unrated
+- Summary: This paper introduces a novel Secondary Path-Decoupled Active Noise Control (SPD-ANC) algorithm that leverages deep learning to address the performance degradation and filter divergence issues in conventional ANC systems caused by nonlinearities in the secondary path. The proposed method utilizes two time-domain Convolutional Recurrent Networks (CRNs) to model the nonlinear secondary path and its inverse. This allow…
+- Key related papers:
+  - [foundation] Active noise control: A tutorial review (1999, DOI: 10.1109/PROC.1999.769127) - Provides a foundational tutorial on active noise control systems.
+  - [related_work] Nonlinear FXLMS algorithm for active noise control systems with saturation nonlinearity (2012, DOI: 10.1109/IEEJ.2012.2222118) - Discusses nonlinear FXLMS algorithms for ANC, a relevant baseline for handling secondary path nonlinearities.
+  - [related_work] Deep ANC: A deep learning approach to active noise control (2021, DOI: 10.1016/j.neunet.2021.06.014) - Introduces a deep learning approach to ANC, serving as a comparison point for deep learning methods.
+  - [method] A time-domain convolutional recurrent network for packet loss concealment (2021, DOI: 10.1109/ICASSP47223.2021.9438948) - Introduces the time-domain convolutional recurrent network (CRN) architecture used in the proposed method.
+  - [baseline] Performance comparison of the FXLMS, non-linear FXLMS and leaky FXLMS algorithms in nonlinear active control applications (2002, DOI: 10.1109/EUSIPCO.2002.1043226) - Compares traditional and nonlinear FXLMS algorithms, providing context for performance evaluation.
+- Record: https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Chen2022Secondary.md
 
 ### Oh2024Enhancing
 - Title: Enhancing active noise control of road noise using deep neural network to update secondary path estimate in real time

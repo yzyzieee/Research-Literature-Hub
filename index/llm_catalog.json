@@ -1,5 +1,64 @@
 [
   {
+    "slug": "Chen2022Secondary",
+    "title": "A Secondary Path-Decoupled Active Noise Control Algorithm Based on Deep Learning",
+    "year": 2022,
+    "venue": "IEEE SIGNAL PROCESSING LETTERS",
+    "publication_type": "journal-paper",
+    "primary_domain": "active-noise-control",
+    "domains": [
+      "active-noise-control",
+      "machine-learning-audio"
+    ],
+    "tags": [
+      "active-noise-control",
+      "nonlinear-secondary-path",
+      "deep-learning",
+      "convolutional-recurrent-network",
+      "adaptive-filter"
+    ],
+    "team_weight": null,
+    "summary": "This paper introduces a novel Secondary Path-Decoupled Active Noise Control (SPD-ANC) algorithm that leverages deep learning to address the performance degradation and filter divergence issues in conventional ANC systems caused by nonlinearities in the secondary path. The proposed method utilizes two time-domain Convolutional Recurrent Networks (CRNs) to model the nonlinear secondary path and its inverse. This allow…",
+    "key_references": [
+      {
+        "title": "Active noise control: A tutorial review",
+        "doi": "10.1109/PROC.1999.769127",
+        "year": 1999,
+        "role": "foundation",
+        "reason": "Provides a foundational tutorial on active noise control systems."
+      },
+      {
+        "title": "Nonlinear FXLMS algorithm for active noise control systems with saturation nonlinearity",
+        "doi": "10.1109/IEEJ.2012.2222118",
+        "year": 2012,
+        "role": "related_work",
+        "reason": "Discusses nonlinear FXLMS algorithms for ANC, a relevant baseline for handling secondary path nonlinearities."
+      },
+      {
+        "title": "Deep ANC: A deep learning approach to active noise control",
+        "doi": "10.1016/j.neunet.2021.06.014",
+        "year": 2021,
+        "role": "related_work",
+        "reason": "Introduces a deep learning approach to ANC, serving as a comparison point for deep learning methods."
+      },
+      {
+        "title": "A time-domain convolutional recurrent network for packet loss concealment",
+        "doi": "10.1109/ICASSP47223.2021.9438948",
+        "year": 2021,
+        "role": "method",
+        "reason": "Introduces the time-domain convolutional recurrent network (CRN) architecture used in the proposed method."
+      },
+      {
+        "title": "Performance comparison of the FXLMS, non-linear FXLMS and leaky FXLMS algorithms in nonlinear active control applications",
+        "doi": "10.1109/EUSIPCO.2002.1043226",
+        "year": 2002,
+        "role": "baseline",
+        "reason": "Compares traditional and nonlinear FXLMS algorithms, providing context for performance evaluation."
+      }
+    ],
+    "card_url": "https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Chen2022Secondary.md"
+  },
+  {
     "slug": "Oh2024Enhancing",
     "title": "Enhancing active noise control of road noise using deep neural network to update secondary path estimate in real time",
     "year": 2024,
