@@ -58,6 +58,16 @@ export interface KeyFigure {
   image_private: boolean;
 }
 
+// A figure the LLM proposes as a possible cover. The submitter switches between
+// these; picking one fills the type/number/description and jumps to its page.
+export interface KeyFigureCandidate {
+  figure_id: string | null;
+  page: number | null;
+  role: KeyFigureRole | null;
+  caption: string | null;
+  reason: string | null;
+}
+
 export interface TeamMember {
   id: string;
   name: string;
