@@ -110,7 +110,7 @@ key_figure:
     This figure provides a clear, high-level overview of how the cognitive VS
     technique integrates a classifier with the traditional AF method to
     dynamically adjust the control filter based on environmental cognition.
-  image_ref: 1pmWS6nt6v6sb6yjFLo7tGA_41vk8ZHTW
+  image_ref: 1nUktRlg-xqke-ipNQa5-RvhbLqq78ab6
   image_private: true
 drive:
   - >-
@@ -138,6 +138,10 @@ activity:
   - action: key_figure_updated
     by: WBX
     at: '2026-06-15T13:10:54.600Z'
+    detail: '1'
+  - action: key_figure_updated
+    by: WBX
+    at: '2026-06-15T13:11:38.652Z'
     detail: '1'
 ---
 ## Summary
