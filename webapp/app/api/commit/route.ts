@@ -1,6 +1,7 @@
 import matter from "gray-matter";
 import { NextRequest, NextResponse } from "next/server";
 import { DOMAINS, PUBLICATION_TYPES } from "@/lib/types";
+import { normalizedDoi, normalizedTitle } from "@/lib/duplicates";
 import { isGuest } from "@/lib/guest";
 import { githubServerConfig } from "@/lib/github-config";
 import { readTeam } from "@/lib/team";
@@ -43,22 +44,6 @@ async function fileExists(repo: string, path: string, ref: string, token: string
     throw new Error(`GitHub duplicate check -> ${response.status}: ${(await response.text()).slice(0, 300)}`);
   }
   return true;
-}
-
-function normalizedDoi(value: unknown): string {
-  return String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/^https?:\/\/(dx\.)?doi\.org\//, "")
-    .replace(/^doi:\s*/, "");
-}
-
-function normalizedTitle(value: unknown): string {
-  return String(value || "")
-    .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
 }
 
 async function findMetadataDuplicate(
@@ -173,9 +158,10 @@ function validatedOfficialCard(
 
 export async function POST(req: NextRequest) {
   const username = req.headers.get("x-kb-user") || "";
-  const { slug, content, archive } = (await req.json()) as {
+  const { slug, content, archive, allowDuplicate } = (await req.json()) as {
     slug?: string;
     content?: string;
+    allowDuplicate?: boolean;
     archive?: { name?: string; uploadedBy?: string; uploadedAt?: string; reused?: boolean } | null;
   };
   if (!slug || !content || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(slug)) {
@@ -232,9 +218,12 @@ export async function POST(req: NextRequest) {
       String(parsed.data.title || ""),
       String(parsed.data.doi || ""),
     );
-    if (duplicate) {
+    if (duplicate && !allowDuplicate) {
       return NextResponse.json(
-        { error: `This literature appears to already exist as "${duplicate}". Open that record instead.` },
+        {
+          error: `This literature appears to already exist as "${duplicate}". Review the duplicate candidate before publishing.`,
+          duplicate,
+        },
         { status: 409 },
       );
     }

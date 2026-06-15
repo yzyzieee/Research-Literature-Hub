@@ -33,6 +33,22 @@ interface ExtractedLiterature {
   body?: string;
 }
 
+interface DuplicateCandidate {
+  slug: string;
+  title: string;
+  authors: string[];
+  year: number | null;
+  doi: string;
+  citation_key: string;
+  summary: string;
+  card_url: string;
+  drive: string[];
+  reasons: string[];
+  score: number;
+}
+
+type DuplicateDecision = "" | "clear" | "duplicate" | "different";
+
 export default function NewLiteratureWizard() {
   const { t } = useLang();
   const [primaryDomain, setPrimaryDomain] = useState("");
@@ -64,6 +80,13 @@ export default function NewLiteratureWizard() {
   } | null>(null);
   const [currentUser, setCurrentUser] = useState("");
   const [guest, setGuest] = useState(false);
+  const [duplicateBusy, setDuplicateBusy] = useState(false);
+  const [duplicateReview, setDuplicateReview] = useState<{
+    signature: string;
+    candidates: DuplicateCandidate[];
+    decision: DuplicateDecision;
+    selectedSlug?: string;
+  } | null>(null);
   const [msg, setMsg] = useState<{ kind: "ok" | "warn"; text: string; link?: string } | null>(null);
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [published, setPublished] = useState<{ slug: string; url: string; demo: boolean } | null>(null);
@@ -90,6 +113,21 @@ export default function NewLiteratureWizard() {
     .slice(0, 6);
   const driveList = drive.split(/\s+/).map((link) => link.trim()).filter(Boolean);
   const citationKeyValid = /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(slug);
+  const duplicateSignature = JSON.stringify([
+    title.trim().toLowerCase(),
+    doi.trim().toLowerCase(),
+    citationKey.trim().toLowerCase(),
+    authorList[0]?.toLowerCase() || "",
+    Number(year) || null,
+  ]);
+  const duplicateReviewCurrent = duplicateReview?.signature === duplicateSignature;
+  const duplicateResolved = Boolean(
+    duplicateReviewCurrent &&
+      (duplicateReview?.decision === "clear" || duplicateReview?.decision === "different"),
+  );
+  const duplicateConfirmed = Boolean(
+    duplicateReviewCurrent && duplicateReview?.decision === "duplicate",
+  );
   const missingRequirements = [
     !primaryDomain ? t("new.missingPrimaryDomain") : "",
     !domains.length || !domains.includes(primaryDomain) ? t("new.missingDomains") : "",
@@ -110,8 +148,55 @@ export default function NewLiteratureWizard() {
   const needsArchive = Boolean(pdfFile && driveUploadEnabled);
   const submissionErrors = [
     ...missingRequirements,
+    ready && duplicateConfirmed
+      ? t("new.duplicateStop")
+      : ready && !duplicateResolved
+        ? t("new.missingDuplicateReview")
+        : "",
     needsArchive && !archiveCurrent ? t("new.missingArchive") : "",
   ].filter(Boolean);
+
+  const checkDuplicates = async (overrides?: {
+    title?: string;
+    doi?: string;
+    citationKey?: string;
+    authors?: string[];
+    year?: number | null;
+  }) => {
+    const query = {
+      title: overrides?.title ?? title,
+      doi: overrides?.doi ?? doi,
+      citation_key: overrides?.citationKey ?? citationKey,
+      authors: overrides?.authors ?? authorList,
+      year: overrides?.year ?? (year ? Number(year) : null),
+    };
+    const signature = JSON.stringify([
+      String(query.title || "").trim().toLowerCase(),
+      String(query.doi || "").trim().toLowerCase(),
+      String(query.citation_key || "").trim().toLowerCase(),
+      String(query.authors?.[0] || "").trim().toLowerCase(),
+      Number(query.year) || null,
+    ]);
+    setDuplicateBusy(true);
+    try {
+      const response = await fetch("/api/duplicates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(query),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+      const candidates = (data.candidates || []) as DuplicateCandidate[];
+      setDuplicateReview({
+        signature,
+        candidates,
+        decision: candidates.length ? "" : "clear",
+      });
+      return candidates;
+    } finally {
+      setDuplicateBusy(false);
+    }
+  };
 
   const fullMarkdown = () => {
     const today = new Date().toISOString().slice(0, 10);
@@ -213,6 +298,7 @@ export default function NewLiteratureWizard() {
     setPdfFile(file);
     setDrive("");
     setArchived(null);
+    setDuplicateReview(null);
     setUploadProgress(0);
     setMsg({ kind: "ok", text: t("new.pdfSelected") });
   };
@@ -232,13 +318,27 @@ export default function NewLiteratureWizard() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       applyLiterature(data);
+      let duplicateError = "";
+      try {
+        await checkDuplicates({
+          title: data.title,
+          doi: data.doi,
+          citationKey: data.citation_key,
+          authors: data.authors,
+          year: data.year,
+        });
+      } catch (error) {
+        duplicateError = error instanceof Error ? error.message : String(error);
+      }
       setMsg({
-        kind: "ok",
-        text: data.demo
+        kind: duplicateError ? "warn" : "ok",
+        text: `${data.demo
           ? t("new.demoExtracted")
           : driveUploadEnabled
             ? t("new.pdfOkUpload")
-            : t("new.pdfOk"),
+            : t("new.pdfOk")}${
+          duplicateError ? ` ${t("new.duplicateFailed")}: ${duplicateError}` : ""
+        }`,
       });
     } catch (error) {
       setMsg({
@@ -263,9 +363,23 @@ export default function NewLiteratureWizard() {
       const extracted = await response.json();
       if (!response.ok) throw new Error(extracted.error);
       applyLiterature(extracted, true);
+      let duplicateError = "";
+      try {
+        await checkDuplicates({
+          title,
+          doi: extracted.doi || doi,
+          citationKey,
+          authors: authorList,
+          year: year ? Number(year) : null,
+        });
+      } catch (error) {
+        duplicateError = error instanceof Error ? error.message : String(error);
+      }
       setMsg({
-        kind: "ok",
-        text: t(extracted.demo ? "new.demoExtracted" : "new.driveVisionOk"),
+        kind: duplicateError ? "warn" : "ok",
+        text: `${t(extracted.demo ? "new.demoExtracted" : "new.driveVisionOk")}${
+          duplicateError ? ` ${t("new.duplicateFailed")}: ${duplicateError}` : ""
+        }`,
         link: archived.link,
       });
     } catch (error) {
@@ -292,7 +406,24 @@ export default function NewLiteratureWizard() {
       setVenue(data.venue || venue);
       if (data.publication_type) setPublicationType(data.publication_type);
       if (!citationKey) setCitationKey(data.citation_key || "");
-      setMsg({ kind: "ok", text: t("new.doiOk") });
+      let duplicateError = "";
+      try {
+        await checkDuplicates({
+          title: data.title || title,
+          doi: data.doi || doi,
+          citationKey: citationKey || data.citation_key,
+          authors: data.authors || authorList,
+          year: data.year || (year ? Number(year) : null),
+        });
+      } catch (error) {
+        duplicateError = error instanceof Error ? error.message : String(error);
+      }
+      setMsg({
+        kind: duplicateError ? "warn" : "ok",
+        text: `${t("new.doiOk")}${
+          duplicateError ? ` ${t("new.duplicateFailed")}: ${duplicateError}` : ""
+        }`,
+      });
     } catch (error) {
       setMsg({ kind: "warn", text: `${t("new.doiFail")}: ${error}` });
     } finally {
@@ -351,6 +482,8 @@ export default function NewLiteratureWizard() {
                 reused: archived.reused,
               }
             : null,
+          allowDuplicate:
+            duplicateReviewCurrent && duplicateReview?.decision === "different",
         }),
       });
       const data = await response.json();
@@ -413,6 +546,99 @@ export default function NewLiteratureWizard() {
           )}
         </p>
       </div>
+
+      {title.trim() && citationKeyValid && (
+        <div className={`duplicate-review ${duplicateConfirmed ? "confirmed" : ""}`}>
+          <div className="duplicate-review-head">
+            <div>
+              <h2>{t("new.duplicateTitle")}</h2>
+              <p>
+                {!duplicateReviewCurrent
+                  ? t("new.duplicateNeedsCheck")
+                  : duplicateReview?.candidates.length
+                    ? t("new.duplicateFound")
+                    : t("new.duplicateClear")}
+              </p>
+            </div>
+            <button
+              className="btn"
+              onClick={() => checkDuplicates().catch((error) => setMsg({
+                kind: "warn",
+                text: `${t("new.duplicateFailed")}: ${error instanceof Error ? error.message : error}`,
+              }))}
+              disabled={duplicateBusy || busy !== ""}
+            >
+              {duplicateBusy ? t("new.duplicateChecking") : t("new.duplicateCheck")}
+            </button>
+          </div>
+
+          {duplicateReviewCurrent && duplicateReview?.candidates.map((candidate) => (
+            <article className="duplicate-candidate" key={candidate.slug}>
+              <div>
+                <b>{candidate.title}</b>
+                <p className="subtitle">
+                  {candidate.authors.slice(0, 3).join(", ")}
+                  {candidate.year ? ` · ${candidate.year}` : ""}
+                </p>
+                <p>{candidate.summary}</p>
+                <div className="meta-row">
+                  {candidate.reasons.map((reason) => (
+                    <span className="badge" key={reason}>{t(`new.duplicateReason.${reason}`)}</span>
+                  ))}
+                </div>
+              </div>
+              <div className="duplicate-actions">
+                <a className="btn" href={candidate.card_url} target="_blank" rel="noreferrer">
+                  {t("new.duplicateOpenCard")}
+                </a>
+                {candidate.drive.map((link, index) => (
+                  <a className="btn" href={link} target="_blank" rel="noreferrer" key={link}>
+                    {t("new.duplicateOpenPdf")} {candidate.drive.length > 1 ? index + 1 : ""}
+                  </a>
+                ))}
+                {!candidate.drive.length && (
+                  <span className="duplicate-no-pdf">{t("new.duplicateNoPdf")}</span>
+                )}
+                <button
+                  className="btn"
+                  onClick={() => setDuplicateReview((current) => current
+                    ? {
+                        ...current,
+                        decision: "duplicate",
+                        selectedSlug: candidate.slug,
+                      }
+                    : current)}
+                >
+                  {t("new.duplicateSame")}
+                </button>
+              </div>
+            </article>
+          ))}
+
+          {duplicateReviewCurrent && Boolean(duplicateReview?.candidates.length) && (
+            <div className="duplicate-decision">
+              <button
+                className="btn primary"
+                onClick={() => setDuplicateReview((current) => current
+                  ? {
+                      ...current,
+                      decision: "different",
+                      selectedSlug: undefined,
+                    }
+                  : current)}
+              >
+                {t("new.duplicateDifferent")}
+              </button>
+              {duplicateConfirmed && (
+                <span>
+                  {t("new.duplicateConfirmed")}{" "}
+                  <a href={`/cards/${duplicateReview?.selectedSlug}`}>{t("new.duplicateUseExisting")}</a>
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="form-card">
         <label>{t("new.primaryDomain")}</label>
@@ -515,7 +741,11 @@ export default function NewLiteratureWizard() {
             </div>
           )}
           <div className="btn-row">
-            <button className="btn primary" onClick={uploadDrive} disabled={!ready || busy !== "" || archiveCurrent}>
+            <button
+              className="btn primary"
+              onClick={uploadDrive}
+              disabled={!ready || !duplicateResolved || duplicateConfirmed || busy !== "" || archiveCurrent}
+            >
               {busy === "drive"
                 ? `${t("new.driveUploading")} ${uploadProgress}%`
                 : archiveCurrent
@@ -584,7 +814,11 @@ export default function NewLiteratureWizard() {
       )}
 
       <div className="btn-row">
-        <button className="btn primary" onClick={submitLiterature} disabled={busy !== "" || Boolean(published)}>
+        <button
+          className="btn primary"
+          onClick={submitLiterature}
+          disabled={busy !== "" || Boolean(published) || duplicateConfirmed}
+        >
           {published
             ? t("new.publishedButton")
             : busy === "commit"
