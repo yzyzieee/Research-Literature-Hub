@@ -8,46 +8,15 @@ from datetime import date
 
 from kblib import (DOMAINS, PENDING_DIR, ROOT, first_section_paragraphs,
                    iter_cards, utf8_stdout)
+from key_references import build_reference_indexes, resolve_key_references
 
 REPOSITORY = os.getenv(
     "GITHUB_REPOSITORY", "your-org/research-literature-hub")
-KEY_REFERENCE_ROLES = {
-    "foundation", "method", "baseline", "dataset", "survey", "related_work"}
 
 
 def compact_summary(value: str, limit: int = 420) -> str:
     text = re.sub(r"\s+", " ", value or "").strip()
     return text if len(text) <= limit else text[:limit - 1].rstrip() + "…"
-
-
-def normalized_doi(value: object) -> str:
-    text = str(value or "").strip().lower()
-    text = re.sub(r"^https?://(dx\.)?doi\.org/", "", text)
-    return re.sub(r"^doi:\s*", "", text)
-
-
-def normalized_title(value: object) -> str:
-    return re.sub(r"[^a-z0-9]+", " ", str(value or "").lower()).strip()
-
-
-def parse_key_references(value: object) -> list[dict]:
-    if not isinstance(value, list):
-        return []
-    output = []
-    for item in value[:8]:
-        if not isinstance(item, dict) or not str(item.get("title", "")).strip():
-            continue
-        role = str(item.get("role", "")).strip()
-        output.append({
-            "title": str(item.get("title", "")).strip(),
-            "doi": str(item.get("doi", "")).strip(),
-            "year": item.get("year"),
-            "role": role if role in KEY_REFERENCE_ROLES else "",
-            "reason": re.sub(r"\s+", " ", str(item.get("reason", ""))).strip(),
-            "status": "external",
-            "linked_card": None,
-        })
-    return output
 
 
 def main() -> None:
@@ -79,7 +48,7 @@ def main() -> None:
             "authors": meta.get("authors") or [],
             "year": meta.get("year"),
             "citation_key": meta.get("citation_key", ""),
-            "key_references": parse_key_references(meta.get("key_references")),
+            "key_references": meta.get("key_references") or [],
             "related": meta.get("related") or [],
             "drive": meta.get("drive") or [],
             "created": str(meta.get("created", "")),
@@ -90,32 +59,17 @@ def main() -> None:
             "summary": paragraphs[0] if paragraphs else "",
             "legacy_type": legacy_type,
         })
+    official_literature = [
+        item for item in index
+        if item["folder"] != PENDING_DIR and item["entry_type"] == "literature"
+    ]
+    reference_indexes = build_reference_indexes(official_literature)
     for item in index:
-        for reference in item["key_references"]:
-            candidates = [
-                candidate for candidate in index
-                if candidate["slug"] != item["slug"]
-            ]
-            doi = normalized_doi(reference["doi"])
-            match = next(
-                (
-                    candidate for candidate in candidates
-                    if doi and normalized_doi(candidate["doi"]) == doi
-                ),
-                None,
-            )
-            if match is None and not doi:
-                title = normalized_title(reference["title"])
-                matches = [
-                    candidate for candidate in candidates
-                    if len(title) > 12
-                    and normalized_title(candidate["title"]) == title
-                ]
-                if len(matches) == 1:
-                    match = matches[0]
-            if match:
-                reference["status"] = "in_library"
-                reference["linked_card"] = match["slug"]
+        item["key_references"] = resolve_key_references(
+            item["key_references"],
+            reference_indexes,
+            item["slug"],
+        )
     index.sort(key=lambda item: (
         item["entry_type"] != "literature", item["primary_domain"], item["slug"]))
 

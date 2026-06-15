@@ -108,6 +108,11 @@ and its card slug in `linked_card`; unmatched references remain `status: externa
 `linked_card: null`. Key references never create cards automatically and must not contain
 full abstracts, full author lists, BibTeX, or the paper's full bibliography.
 
+After every publication to `main`, repository maintenance rebuilds DOI and title indexes
+from official literature records and synchronizes all existing cards. A reference that was
+previously external is therefore persisted as `in_library` when that paper is added later.
+If a linked card is removed or no longer resolves uniquely, it safely returns to `external`.
+
 ## Naming and duplicate rules
 
 - The Markdown file name equals `citation_key`.

@@ -9,7 +9,14 @@ type LinkableCard = {
   slug: string;
   title: string;
   doi: string;
+  folder?: string;
+  entry_type?: string;
 };
+
+export interface KeyReferenceIndexes {
+  doi: Map<string, string>;
+  title: Map<string, string>;
+}
 
 function optionalYear(value: unknown): number | null {
   if (value === null || value === undefined || value === "") return null;
@@ -43,29 +50,63 @@ export function parseKeyReferences(value: unknown): KeyReference[] {
   }).slice(0, 8);
 }
 
+export function buildKeyReferenceIndexes(cards: LinkableCard[]): KeyReferenceIndexes {
+  const doiCandidates = new Map<string, string[]>();
+  const titleCandidates = new Map<string, string[]>();
+  const officialCards = cards.filter(
+    (card) =>
+      (!card.folder || card.folder === "official") &&
+      (!card.entry_type || card.entry_type === "literature"),
+  );
+  for (const card of officialCards) {
+    const doi = normalizedDoi(card.doi);
+    const title = normalizedTitle(card.title);
+    if (doi) doiCandidates.set(doi, [...(doiCandidates.get(doi) || []), card.slug]);
+    if (title.length > 12) {
+      titleCandidates.set(title, [...(titleCandidates.get(title) || []), card.slug]);
+    }
+  }
+  return {
+    doi: new Map<string, string>(
+      [...doiCandidates].flatMap(([key, slugs]): Array<[string, string]> =>
+        slugs.length === 1 ? [[key, slugs[0]]] : [],
+      ),
+    ),
+    title: new Map<string, string>(
+      [...titleCandidates].flatMap(([key, slugs]): Array<[string, string]> =>
+        slugs.length === 1 ? [[key, slugs[0]]] : [],
+      ),
+    ),
+  };
+}
+
+export function linkKeyReferencesWithIndexes(
+  references: KeyReference[],
+  indexes: KeyReferenceIndexes,
+  currentSlug?: string,
+): KeyReference[] {
+  return references.map((reference) => {
+    const doi = normalizedDoi(reference.doi);
+    const title = normalizedTitle(reference.title);
+    const linked = doi
+      ? indexes.doi.get(doi)
+      : title.length > 12
+        ? indexes.title.get(title)
+        : undefined;
+    return linked && linked !== currentSlug
+      ? { ...reference, status: "in_library", linked_card: linked }
+      : { ...reference, status: "external", linked_card: null };
+  });
+}
+
 export function linkKeyReferences(
   references: KeyReference[],
   cards: LinkableCard[],
   currentSlug?: string,
 ): KeyReference[] {
-  const candidates = cards.filter((card) => card.slug !== currentSlug);
-  return references.map((reference) => {
-    const doi = normalizedDoi(reference.doi);
-    let match: LinkableCard | undefined;
-    if (doi) {
-      match = candidates.find((card) => normalizedDoi(card.doi) === doi);
-    }
-    if (!match && !doi) {
-      const title = normalizedTitle(reference.title);
-      if (title.length > 12) {
-        const titleMatches = candidates.filter(
-          (card) => normalizedTitle(card.title) === title,
-        );
-        if (titleMatches.length === 1) match = titleMatches[0];
-      }
-    }
-    return match
-      ? { ...reference, status: "in_library", linked_card: match.slug }
-      : { ...reference, status: "external", linked_card: null };
-  });
+  return linkKeyReferencesWithIndexes(
+    references,
+    buildKeyReferenceIndexes(cards),
+    currentSlug,
+  );
 }

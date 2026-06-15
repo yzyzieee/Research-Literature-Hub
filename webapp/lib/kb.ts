@@ -13,7 +13,11 @@ import type {
   RatingAggregate,
   RatingEntry,
 } from "./types";
-import { linkKeyReferences, parseKeyReferences } from "./key-references";
+import {
+  buildKeyReferenceIndexes,
+  linkKeyReferencesWithIndexes,
+  parseKeyReferences,
+} from "./key-references";
 
 const KB_ROOT = process.env.KB_PATH || path.resolve(process.cwd(), "..");
 const CARD_DIRS = ["official", "pending"];
@@ -184,8 +188,13 @@ export function getCards(): Card[] {
     }
   }
   cards.sort((a, b) => a.slug.localeCompare(b.slug));
+  const referenceIndexes = buildKeyReferenceIndexes(cards);
   for (const card of cards) {
-    card.key_references = linkKeyReferences(card.key_references, cards, card.slug);
+    card.key_references = linkKeyReferencesWithIndexes(
+      card.key_references,
+      referenceIndexes,
+      card.slug,
+    );
   }
   return cards;
 }

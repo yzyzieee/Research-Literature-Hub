@@ -7,6 +7,7 @@ import sys
 from kblib import (DOMAINS, ENTRY_TYPES, LEGACY_TYPES, OFFICIAL_DIR,
                    PENDING_DIR, PUBLICATION_TYPES, STATUSES, Card, iter_cards,
                    utf8_stdout)
+from key_references import build_reference_indexes, resolve_key_references
 
 REQUIRED_ALWAYS = ["title", "status", "tags", "created"]
 REQUIRED_LITERATURE = [
@@ -185,6 +186,20 @@ def main() -> int:
             errors.append(f"{where}: card in {OFFICIAL_DIR}/ must have status official")
 
     all_slugs = set(slugs)
+    reference_indexes = build_reference_indexes([
+        {
+            "slug": card.slug,
+            "title": card.meta.get("title", card.slug),
+            "doi": card.meta.get("doi", ""),
+        }
+        for card in cards
+        if not card.parse_error
+        and card.folder == OFFICIAL_DIR
+        and (
+            card.meta.get("entry_type") == "literature"
+            or card.meta.get("type") == "paper"
+        )
+    ])
     for card in cards:
         if card.parse_error:
             continue
@@ -213,6 +228,18 @@ def main() -> int:
                     errors.append(f"{prefix} links to unknown card '{linked}'")
                 elif status == "external" and linked:
                     errors.append(f"{prefix} external status must not set linked_card")
+                expected = resolve_key_references(
+                    [reference],
+                    reference_indexes,
+                    card.slug,
+                )
+                if expected:
+                    expected_status = expected[0]["status"]
+                    expected_link = expected[0]["linked_card"]
+                    if status != expected_status or (linked or None) != expected_link:
+                        errors.append(
+                            f"{prefix} is stale; expected status '{expected_status}' "
+                            f"and linked_card '{expected_link}'")
 
     for message in warnings:
         print(f"WARN  {message}")
