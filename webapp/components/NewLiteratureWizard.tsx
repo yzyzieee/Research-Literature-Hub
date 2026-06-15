@@ -7,6 +7,7 @@ import {
   DOMAIN_LABELS,
   PUBLICATION_TYPES,
   PUBLICATION_TYPE_LABELS,
+  type KeyReference,
 } from "@/lib/types";
 import { useLang } from "@/lib/i18n";
 import { extractPdfText } from "@/lib/pdf";
@@ -38,6 +39,7 @@ interface ExtractedLiterature {
   doi?: string;
   abstract?: string;
   citation_key?: string;
+  key_references?: KeyReference[];
   tags?: string[];
   suggested_domain?: string;
   suggested_domain_label?: string;
@@ -74,6 +76,7 @@ export default function NewLiteratureWizard() {
   const [authors, setAuthors] = useState("");
   const [year, setYear] = useState("");
   const [tags, setTags] = useState("");
+  const [keyReferences, setKeyReferences] = useState<KeyReference[]>([]);
   const [drive, setDrive] = useState("");
   const [notes, setNotes] = useState("");
   const [body, setBody] = useState("");
@@ -234,6 +237,7 @@ export default function NewLiteratureWizard() {
       `authors: ${yamlList(authorList)}`,
       `year: ${year || "null"}`,
       `tags: ${yamlList(tagList)}`,
+      `key_references: ${JSON.stringify(keyReferences)}`,
       `drive: ${yamlList(driveList)}`,
       "related: []",
       `created: ${today}`,
@@ -268,6 +272,7 @@ export default function NewLiteratureWizard() {
     setDoi(data.doi || doi);
     setAbstract(data.abstract || "");
     setTags((data.tags || []).join(", "));
+    setKeyReferences(Array.isArray(data.key_references) ? data.key_references.slice(0, 8) : []);
     setBody(data.body || "");
     const suggestedId = String(data.suggested_domain || "").trim();
     const suggestedLabel = String(data.suggested_domain_label || "").trim();
@@ -333,6 +338,7 @@ export default function NewLiteratureWizard() {
     setAuthors("");
     setYear("");
     setTags("");
+    setKeyReferences([]);
     setDrive("");
     setNotes("");
     setBody("");
@@ -844,6 +850,44 @@ export default function NewLiteratureWizard() {
 
         <label>{t("new.tags")}</label>
         <input value={tags} onChange={(event) => setTags(event.target.value)} placeholder="anc, fxlms, secondary-path" />
+
+        <details className="key-reference-editor">
+          <summary>
+            <span>{t("new.keyReferences")}</span>
+            <span className="badge">{keyReferences.length}</span>
+          </summary>
+          <p className="subtitle">{t("new.keyReferencesHint")}</p>
+          {keyReferences.length ? (
+            <div className="key-reference-list">
+              {keyReferences.map((reference, index) => (
+                <div className="key-reference-item" key={`${reference.title}-${index}`}>
+                  <div>
+                    <div className="key-reference-title">
+                      {reference.role && <span className="badge type">{reference.role.replaceAll("_", " ")}</span>}
+                      <strong>{reference.title}</strong>
+                    </div>
+                    <p>{reference.reason}</p>
+                    <small>
+                      {[reference.year, reference.doi ? `DOI: ${reference.doi}` : ""]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </small>
+                  </div>
+                  <button
+                    className="btn"
+                    type="button"
+                    onClick={() => setKeyReferences((current) =>
+                      current.filter((_, itemIndex) => itemIndex !== index))}
+                  >
+                    {t("new.keyReferenceRemove")}
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="subtitle">{t("new.keyReferencesEmpty")}</p>
+          )}
+        </details>
 
         <label>{t("new.drive")}</label>
         <input value={drive} onChange={(event) => setDrive(event.target.value)} />

@@ -32,6 +32,7 @@
     ],
     "year": 2018,
     "citation_key": "Zhang2018Active",
+    "key_references": [],
     "related": [],
     "drive": [
       "https://drive.google.com/file/d/1_1lODaviOAezdyq8q5-TKP8Kr9v98rDg/view?usp=drivesdk"
@@ -78,6 +79,7 @@
     ],
     "year": 1975,
     "citation_key": "widrow1975adaptive",
+    "key_references": [],
     "related": [
       "active-noise-control",
       "fxlms"
@@ -126,6 +128,7 @@
     ],
     "year": 2025,
     "citation_key": "xiao2025spatially",
+    "key_references": [],
     "related": [],
     "drive": [],
     "created": "2026-06-13",
@@ -167,6 +170,7 @@
     ],
     "year": 2026,
     "citation_key": "xiao2026robust",
+    "key_references": [],
     "related": [],
     "drive": [
       "https://drive.google.com/file/d/169kOYOzTtUgqYjPNuKq5fUHW2Si3_OLR/view?usp=drivesdk"
@@ -201,6 +205,7 @@
     "authors": [],
     "year": null,
     "citation_key": "",
+    "key_references": [],
     "related": [
       "widrow1975adaptive",
       "fxlms"
@@ -237,6 +242,7 @@
     "authors": [],
     "year": null,
     "citation_key": "",
+    "key_references": [],
     "related": [
       "active-noise-control",
       "widrow1975adaptive"

@@ -5,6 +5,8 @@ import { normalizedDoi, normalizedTitle } from "@/lib/duplicates";
 import { isGuest } from "@/lib/guest";
 import { githubServerConfig } from "@/lib/github-config";
 import { readTeam } from "@/lib/team";
+import { getCards } from "@/lib/kb";
+import { linkKeyReferences, parseKeyReferences } from "@/lib/key-references";
 
 export const runtime = "nodejs";
 
@@ -133,6 +135,11 @@ function validatedOfficialCard(
   data.rating = data.rating || null;
   data.ratings = Array.isArray(data.ratings) ? data.ratings : [];
   data.comments = Array.isArray(data.comments) ? data.comments : [];
+  data.key_references = linkKeyReferences(
+    parseKeyReferences(data.key_references),
+    getCards(),
+    slug,
+  );
   const publishedAt = new Date().toISOString();
   data.uploaded_by = username;
   data.uploaded_at = publishedAt;

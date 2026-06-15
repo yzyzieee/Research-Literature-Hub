@@ -32,6 +32,9 @@ LITERATURE_SECTIONS = [
     "## Notes",
     "## References",
 ]
+KEY_REFERENCE_ROLES = {
+    "foundation", "method", "baseline", "dataset", "survey", "related_work"}
+KEY_REFERENCE_STATUSES = {"in_library", "external"}
 
 
 def main() -> int:
@@ -142,6 +145,39 @@ def main() -> int:
                 if len(str(comment.get("body", ""))) > 4000:
                     errors.append(f"{prefix} body exceeds 4000 characters")
 
+        key_references = meta.get("key_references") or []
+        if not isinstance(key_references, list):
+            errors.append(f"{where}: 'key_references' must be a list")
+        else:
+            if len(key_references) > 8:
+                errors.append(f"{where}: key_references may contain at most 8 items")
+            for index, reference in enumerate(key_references):
+                prefix = f"{where}: key_references[{index}]"
+                if not isinstance(reference, dict):
+                    errors.append(f"{prefix} must be a mapping")
+                    continue
+                if not str(reference.get("title", "")).strip():
+                    errors.append(f"{prefix} missing 'title'")
+                role = str(reference.get("role", "")).strip()
+                if role and role not in KEY_REFERENCE_ROLES:
+                    errors.append(f"{prefix} invalid role '{role}'")
+                status_value = str(reference.get("status", "external")).strip()
+                if status_value not in KEY_REFERENCE_STATUSES:
+                    errors.append(f"{prefix} invalid status '{status_value}'")
+                reason = re.sub(r"\s+", " ", str(reference.get("reason", ""))).strip()
+                if not reason:
+                    errors.append(f"{prefix} missing 'reason'")
+                elif len(reason) > 400:
+                    errors.append(f"{prefix} reason exceeds 400 characters")
+                year = reference.get("year")
+                if year not in (None, ""):
+                    try:
+                        parsed_year = int(year)
+                        if parsed_year < 1000 or parsed_year > 3000:
+                            raise ValueError
+                    except (TypeError, ValueError):
+                        errors.append(f"{prefix} has invalid year '{year}'")
+
         if card.folder == PENDING_DIR:
             if status == "official":
                 warnings.append(f"{where}: status is official; it will be promoted")
@@ -163,6 +199,20 @@ def main() -> int:
             if target and target not in all_slugs:
                 level = warnings if card.folder == PENDING_DIR else errors
                 level.append(f"{where}: link to unknown card '{target}'")
+        key_references = card.meta.get("key_references") or []
+        if isinstance(key_references, list):
+            for index, reference in enumerate(key_references):
+                if not isinstance(reference, dict):
+                    continue
+                prefix = f"{where}: key_references[{index}]"
+                status = str(reference.get("status", "external")).strip()
+                linked = str(reference.get("linked_card", "") or "").strip()
+                if status == "in_library" and not linked:
+                    errors.append(f"{prefix} status in_library requires linked_card")
+                elif status == "in_library" and linked not in all_slugs:
+                    errors.append(f"{prefix} links to unknown card '{linked}'")
+                elif status == "external" and linked:
+                    errors.append(f"{prefix} external status must not set linked_card")
 
     for message in warnings:
         print(f"WARN  {message}")

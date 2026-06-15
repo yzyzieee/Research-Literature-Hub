@@ -47,6 +47,22 @@ function compactSummary(value: string, limit = 420): string {
   return text.length <= limit ? text : `${text.slice(0, limit - 1).trim()}…`;
 }
 
+function keyReferenceLines(card: Pick<Card, "key_references">): string[] {
+  if (!card.key_references.length) return [];
+  const lines = ["## Key related papers"];
+  for (const reference of card.key_references) {
+    const details = [
+      reference.year ? `(${reference.year})` : "",
+      reference.doi ? `DOI: ${reference.doi}` : "",
+    ].filter(Boolean).join(", ");
+    lines.push(
+      `- [${reference.role || "related_work"}] ${reference.title}${details ? ` ${details}` : ""}`,
+      `  Reason: ${reference.reason}`,
+    );
+  }
+  return lines;
+}
+
 export function compactCatalogPrompt(cards: ExportCardMeta[], idea: string, repo?: string): string {
   const repository = repo || DEFAULT_REPO;
   const lines = [
@@ -70,6 +86,18 @@ export function compactCatalogPrompt(cards: ExportCardMeta[], idea: string, repo
       `Primary domain: ${card.primary_domain} | Domains: ${card.domains.join(", ")}`,
       `Tags: ${card.tags.join(", ")} | Team weight: ${weight}`,
       `Summary: ${compactSummary(card.summary)}`,
+      ...(card.key_references.length
+        ? [
+            "Key related papers:",
+            ...card.key_references.map((reference) => {
+              const details = [
+                reference.year || "",
+                reference.doi ? `DOI ${reference.doi}` : "",
+              ].filter(Boolean).join(", ");
+              return `- [${reference.role || "related_work"}] ${reference.title}${details ? ` (${details})` : ""}: ${reference.reason}`;
+            }),
+          ]
+        : []),
       `Record: https://raw.githubusercontent.com/${repository}/main/${card.folder}/${card.slug}.md`,
       "",
     );
@@ -116,6 +144,8 @@ export function cardToPrompt(card: Card, repo?: string): string {
     );
   }
   lines.push("", card.body.trim());
+  const referenceLines = keyReferenceLines(card);
+  if (referenceLines.length) lines.push("", ...referenceLines);
   if (card.comments.length) {
     lines.push(
       "",

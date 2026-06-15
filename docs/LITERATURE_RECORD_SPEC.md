@@ -25,6 +25,14 @@ citation_key: sample2026adaptive
 authors: [Alex Researcher, Morgan Example]
 year: 2026
 tags: [adaptive-filter, reproducibility]
+key_references:
+  - title: A foundational related paper
+    doi: 10.0000/example.2021.001
+    year: 2021
+    role: foundation
+    reason: Defines the core formulation used by this paper.
+    status: external
+    linked_card: null
 drive: []
 related: []
 created: 2026-06-14
@@ -83,6 +91,22 @@ repository; classification and cross-domain relationships live in the literature
 
 Use one to six specific lowercase kebab-case technical topics, ordered broad to narrow.
 Do not use years, author names, or generic labels such as `paper` or `research`.
+
+### `key_references`
+
+`key_references` is an optional list of three to eight high-value related-paper anchors,
+not a complete bibliography. Leave it empty when the source reference list is unavailable
+or uncertain.
+
+Allowed roles are `foundation`, `method`, `baseline`, `dataset`, `survey`, and
+`related_work`. Each item requires a title and one short reason. DOI and year are optional,
+but DOI is preferred when available.
+
+The app links references to existing cards by exact normalized DOI first, then by a
+conservative exact normalized-title match. A matched reference uses `status: in_library`
+and its card slug in `linked_card`; unmatched references remain `status: external` with
+`linked_card: null`. Key references never create cards automatically and must not contain
+full abstracts, full author lists, BibTeX, or the paper's full bibliography.
 
 ## Naming and duplicate rules
 

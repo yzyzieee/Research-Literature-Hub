@@ -11,11 +11,43 @@ from kblib import (DOMAINS, PENDING_DIR, ROOT, first_section_paragraphs,
 
 REPOSITORY = os.getenv(
     "GITHUB_REPOSITORY", "your-org/research-literature-hub")
+KEY_REFERENCE_ROLES = {
+    "foundation", "method", "baseline", "dataset", "survey", "related_work"}
 
 
 def compact_summary(value: str, limit: int = 420) -> str:
     text = re.sub(r"\s+", " ", value or "").strip()
     return text if len(text) <= limit else text[:limit - 1].rstrip() + "…"
+
+
+def normalized_doi(value: object) -> str:
+    text = str(value or "").strip().lower()
+    text = re.sub(r"^https?://(dx\.)?doi\.org/", "", text)
+    return re.sub(r"^doi:\s*", "", text)
+
+
+def normalized_title(value: object) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", str(value or "").lower()).strip()
+
+
+def parse_key_references(value: object) -> list[dict]:
+    if not isinstance(value, list):
+        return []
+    output = []
+    for item in value[:8]:
+        if not isinstance(item, dict) or not str(item.get("title", "")).strip():
+            continue
+        role = str(item.get("role", "")).strip()
+        output.append({
+            "title": str(item.get("title", "")).strip(),
+            "doi": str(item.get("doi", "")).strip(),
+            "year": item.get("year"),
+            "role": role if role in KEY_REFERENCE_ROLES else "",
+            "reason": re.sub(r"\s+", " ", str(item.get("reason", ""))).strip(),
+            "status": "external",
+            "linked_card": None,
+        })
+    return output
 
 
 def main() -> None:
@@ -47,6 +79,7 @@ def main() -> None:
             "authors": meta.get("authors") or [],
             "year": meta.get("year"),
             "citation_key": meta.get("citation_key", ""),
+            "key_references": parse_key_references(meta.get("key_references")),
             "related": meta.get("related") or [],
             "drive": meta.get("drive") or [],
             "created": str(meta.get("created", "")),
@@ -57,6 +90,32 @@ def main() -> None:
             "summary": paragraphs[0] if paragraphs else "",
             "legacy_type": legacy_type,
         })
+    for item in index:
+        for reference in item["key_references"]:
+            candidates = [
+                candidate for candidate in index
+                if candidate["slug"] != item["slug"]
+            ]
+            doi = normalized_doi(reference["doi"])
+            match = next(
+                (
+                    candidate for candidate in candidates
+                    if doi and normalized_doi(candidate["doi"]) == doi
+                ),
+                None,
+            )
+            if match is None and not doi:
+                title = normalized_title(reference["title"])
+                matches = [
+                    candidate for candidate in candidates
+                    if len(title) > 12
+                    and normalized_title(candidate["title"]) == title
+                ]
+                if len(matches) == 1:
+                    match = matches[0]
+            if match:
+                reference["status"] = "in_library"
+                reference["linked_card"] = match["slug"]
     index.sort(key=lambda item: (
         item["entry_type"] != "literature", item["primary_domain"], item["slug"]))
 
@@ -82,6 +141,16 @@ def main() -> None:
             "tags": item["tags"],
             "team_weight": team_weight,
             "summary": compact_summary(item["summary"]),
+            "key_references": [
+                {
+                    "title": reference["title"],
+                    "doi": reference["doi"],
+                    "year": reference["year"],
+                    "role": reference["role"],
+                    "reason": reference["reason"],
+                }
+                for reference in item["key_references"]
+            ],
             "card_url": (
                 f"https://raw.githubusercontent.com/{REPOSITORY}/main/"
                 f"{item['path']}"),
@@ -118,9 +187,21 @@ def main() -> None:
             f"- Tags: {', '.join(item['tags'])}",
             f"- Team weight: {weight}",
             f"- Summary: {item['summary']}",
-            f"- Record: {item['card_url']}",
-            "",
         ]
+        if item["key_references"]:
+            catalog_lines.append("- Key related papers:")
+            for reference in item["key_references"]:
+                details = []
+                if reference["year"]:
+                    details.append(str(reference["year"]))
+                if reference["doi"]:
+                    details.append(f"DOI: {reference['doi']}")
+                suffix = f" ({', '.join(details)})" if details else ""
+                role = reference["role"] or "related_work"
+                catalog_lines.append(
+                    f"  - [{role}] {reference['title']}{suffix} - "
+                    f"{reference['reason']}")
+        catalog_lines += [f"- Record: {item['card_url']}", ""]
     (out_dir / "llm_catalog.md").write_text(
         "\n".join(catalog_lines), encoding="utf-8")
 

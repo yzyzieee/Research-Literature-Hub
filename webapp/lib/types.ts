@@ -15,6 +15,26 @@ export type PublicationType =
   | "dataset-paper"
   | "other";
 export type TeamRole = "admin" | "member";
+export const KEY_REFERENCE_ROLES = [
+  "foundation",
+  "method",
+  "baseline",
+  "dataset",
+  "survey",
+  "related_work",
+] as const;
+export type KeyReferenceRole = (typeof KEY_REFERENCE_ROLES)[number];
+export type KeyReferenceStatus = "in_library" | "external";
+
+export interface KeyReference {
+  title: string;
+  doi: string;
+  year: number | null;
+  role: KeyReferenceRole | "";
+  reason: string;
+  status: KeyReferenceStatus;
+  linked_card: string | null;
+}
 
 export interface TeamMember {
   id: string;
@@ -77,6 +97,7 @@ export interface CardMeta {
   authors: string[];
   year: number | null;
   citation_key: string;
+  key_references: KeyReference[];
   related: string[];
   drive: string[];
   created: string;
@@ -109,6 +130,7 @@ export type ExportCardMeta = Pick<
   | "venue"
   | "year"
   | "citation_key"
+  | "key_references"
   | "tags"
   | "drive"
   | "summary"

@@ -3,6 +3,8 @@ import { guestLiteratureDraft, isGuest } from "@/lib/guest";
 import { llmChat, llmConfigured, llmProvider, parseJsonLoose } from "@/lib/llm";
 import { driveConfigured, fetchDriveFile } from "@/lib/google";
 import { DOMAINS, PUBLICATION_TYPES } from "@/lib/types";
+import { getCards } from "@/lib/kb";
+import { linkKeyReferences, parseKeyReferences } from "@/lib/key-references";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -30,6 +32,25 @@ const LITERATURE_JSON_SCHEMA = {
     abstract: { type: "string" },
     tags: { type: "array", items: { type: "string" } },
     citation_key: { type: "string" },
+    key_references: {
+      type: "array",
+      maxItems: 8,
+      items: {
+        type: "object",
+        properties: {
+          title: { type: "string" },
+          doi: { type: "string" },
+          year: { anyOf: [{ type: "integer" }, { type: "null" }] },
+          role: {
+            type: "string",
+            enum: ["foundation", "method", "baseline", "dataset", "survey", "related_work"],
+          },
+          reason: { type: "string" },
+        },
+        required: ["title", "doi", "year", "role", "reason"],
+        additionalProperties: false,
+      },
+    },
     suggested_domain: { type: "string" },
     suggested_domain_label: { type: "string" },
     domain_suggestion_reason: { type: "string" },
@@ -48,6 +69,7 @@ const LITERATURE_JSON_SCHEMA = {
     "abstract",
     "tags",
     "citation_key",
+    "key_references",
     "suggested_domain",
     "suggested_domain_label",
     "domain_suggestion_reason",
@@ -74,6 +96,8 @@ function buildSystem(fromOriginal: boolean): string {
     "Tags must be 3-6 specific lowercase kebab-case technical keywords ordered broad to narrow.",
     "Never use years, author names, or generic tags such as audio, paper, research, or signal-processing.",
     "Use a Better-BibTeX-style citation_key: first author surname + year + first significant title word.",
+    "Extract only 3-8 key related papers, not the full bibliography. Prioritize references that define the problem, introduce the main method, provide baselines, datasets, surveys, or directly motivate the paper. If uncertain, leave the list empty. Do not hallucinate DOI, title, or year.",
+    "For each key related paper return only title, DOI if available, year if available, one role, and one short sentence explaining why it matters.",
     "Use exactly this body structure:",
     "## Summary",
     "## Problem",
@@ -186,6 +210,10 @@ function shapeLiterature(record: Record<string, unknown>) {
     abstract: String(record.abstract ?? ""),
     tags,
     citation_key: String(record.citation_key ?? ""),
+    key_references: linkKeyReferences(
+      parseKeyReferences(record.key_references),
+      getCards(),
+    ),
     suggested_domain: normalizedTag(record.suggested_domain),
     suggested_domain_label: String(record.suggested_domain_label ?? "").trim(),
     domain_suggestion_reason: String(record.domain_suggestion_reason ?? "").trim(),

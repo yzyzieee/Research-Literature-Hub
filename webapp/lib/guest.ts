@@ -37,6 +37,7 @@ export function guestLiteratureDraft(seed = "") {
       "This record is generated locally for the public guest demonstration. It is not extracted by an external LLM and is never published to the team library.",
     tags: ["anc", "adaptive-filter", "demo"],
     citation_key: `Guest${year}Demo`,
+    key_references: [],
     body: [
       "## Summary",
       "",

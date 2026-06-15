@@ -13,6 +13,7 @@ import type {
   RatingAggregate,
   RatingEntry,
 } from "./types";
+import { linkKeyReferences, parseKeyReferences } from "./key-references";
 
 const KB_ROOT = process.env.KB_PATH || path.resolve(process.cwd(), "..");
 const CARD_DIRS = ["official", "pending"];
@@ -148,6 +149,7 @@ function parseCard(filePath: string, folder: string): Card | null {
       authors: Array.isArray(data.authors) ? data.authors.map(String) : [],
       year: data.year ? Number(data.year) : null,
       citation_key: String(data.citation_key ?? ""),
+      key_references: parseKeyReferences(data.key_references),
       related: Array.isArray(data.related) ? data.related.map(String) : [],
       drive: Array.isArray(data.drive) ? data.drive.map(String) : [],
       created: String(data.created ?? ""),
@@ -182,6 +184,9 @@ export function getCards(): Card[] {
     }
   }
   cards.sort((a, b) => a.slug.localeCompare(b.slug));
+  for (const card of cards) {
+    card.key_references = linkKeyReferences(card.key_references, cards, card.slug);
+  }
   return cards;
 }
 
@@ -205,6 +210,7 @@ export function toExportMeta(card: Card): ExportCardMeta {
     venue: card.venue,
     year: card.year,
     citation_key: card.citation_key,
+    key_references: card.key_references,
     tags: card.tags,
     drive: card.drive,
     summary: card.summary,

@@ -425,6 +425,44 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
 .comment-compose-meta { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; color: var(--text-2); font-size: 12px; }
 .comment-compose-meta .btn-row { margin-top: 8px; }
 
+.key-references-panel,
+.key-reference-editor {
+  margin-top: 22px;
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.key-reference-editor { margin-bottom: 18px; }
+.key-references-panel > summary,
+.key-reference-editor > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+}
+.key-references-panel > summary small { color: var(--text-2); font-weight: 400; }
+.key-reference-list { display: grid; gap: 9px; margin-top: 14px; }
+.key-reference-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg);
+}
+.key-reference-title { display: flex; align-items: baseline; flex-wrap: wrap; gap: 7px; }
+.key-reference-title .badge { text-transform: capitalize; }
+.key-reference-item p { margin: 6px 0 3px; color: var(--text-2); font-size: 13px; }
+.key-reference-item small { color: var(--muted); }
+.key-reference-item > .btn,
+.key-reference-item > .badge { flex: 0 0 auto; }
+
 .pdf-zone {
   background: var(--accent-soft);
   border: 1px solid #cfe2f7;
@@ -443,6 +481,7 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
   .duplicate-review-head { flex-direction: column; }
   .duplicate-candidate { grid-template-columns: 1fr; }
   .duplicate-actions { justify-content: flex-start; max-width: none; }
+  .key-reference-item { flex-direction: column; }
 }
 
 .login-wrap { display: flex; justify-content: center; padding-top: 60px; }
