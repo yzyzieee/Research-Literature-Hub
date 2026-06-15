@@ -635,6 +635,35 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
   pointer-events: none;
 }
 
+.figure-role-field { display: block; margin-bottom: 12px; }
+.figure-pager { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 12px 0; }
+.figure-pager-status { color: var(--text-2); font-size: 13px; min-width: 130px; text-align: center; }
+.figure-presenter {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr) 116px;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0;
+}
+.figure-thumb {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  padding: 3px;
+  cursor: pointer;
+  overflow: hidden;
+  line-height: 0;
+}
+.figure-thumb:hover:not(:disabled) { border-color: var(--accent); }
+.figure-thumb:disabled { opacity: 0.3; cursor: default; }
+.figure-thumb canvas { display: block; width: 100%; height: auto; }
+.figure-presenter .key-figure-crop { margin: 0; width: 100%; }
+.figure-presenter .key-figure-crop canvas { width: 100%; max-width: 100%; }
+@media (max-width: 720px) {
+  .figure-presenter { grid-template-columns: 1fr; }
+  .figure-thumb { display: none; }
+}
+
 .pdf-zone {
   background: var(--accent-soft);
   border: 1px solid #cfe2f7;
