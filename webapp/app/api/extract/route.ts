@@ -5,7 +5,7 @@ import { driveConfigured, fetchDriveFile } from "@/lib/google";
 import { DOMAINS, PUBLICATION_TYPES } from "@/lib/types";
 import { getCards } from "@/lib/kb";
 import { linkKeyReferences, parseKeyReferences } from "@/lib/key-references";
-import { aiKeyFigure } from "@/lib/key-figure";
+import { aiKeyFigure, parseKeyFigureCandidates } from "@/lib/key-figure";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -87,6 +87,37 @@ const LITERATURE_JSON_SCHEMA = {
       ],
       additionalProperties: false,
     },
+    key_figure_candidates: {
+      type: "array",
+      maxItems: 6,
+      items: {
+        type: "object",
+        properties: {
+          figure_id: { anyOf: [{ type: "string" }, { type: "null" }] },
+          page: { anyOf: [{ type: "integer" }, { type: "null" }] },
+          role: {
+            anyOf: [
+              {
+                type: "string",
+                enum: [
+                  "method_overview",
+                  "model_architecture",
+                  "system_setup",
+                  "main_result",
+                  "ablation_result",
+                  "dataset_overview",
+                ],
+              },
+              { type: "null" },
+            ],
+          },
+          caption: { anyOf: [{ type: "string" }, { type: "null" }] },
+          reason: { anyOf: [{ type: "string" }, { type: "null" }] },
+        },
+        required: ["figure_id", "page", "role", "caption", "reason"],
+        additionalProperties: false,
+      },
+    },
     suggested_domain: { type: "string" },
     suggested_domain_label: { type: "string" },
     domain_suggestion_reason: { type: "string" },
@@ -107,6 +138,7 @@ const LITERATURE_JSON_SCHEMA = {
     "citation_key",
     "key_references",
     "key_figure",
+    "key_figure_candidates",
     "suggested_domain",
     "suggested_domain_label",
     "domain_suggestion_reason",
@@ -137,7 +169,8 @@ function buildSystem(fromOriginal: boolean): string {
     "For each key related paper return only title, DOI if available, year if available, one role, and one short sentence explaining why it matters.",
     "Optionally recommend one representative Key Figure for human reading. Prefer a method overview, model architecture, system setup, main result, ablation result, or dataset overview that explains the paper at a glance.",
     "For key_figure, return status suggested only when a clearly identified figure and a reliable 1-based PDF page number are available from the original PDF or explicit PDF PAGE markers. Include figure_id, page, role, caption when available, and one short reason. Otherwise return status none with null metadata.",
-    "Do not extract, crop, upload, or encode an image. Never invent a figure number, caption, or page. The application adds private image storage fields only after human confirmation.",
+    "Also return key_figure_candidates: up to 5 figures a human might pick as the cover, ordered best first, each with figure_id (e.g. Fig. 3), the 1-based PDF page, role, a short caption taken from the paper, and one short reason. Make the first candidate match the key_figure suggestion when one exists. Only list figures you can actually identify in the PDF; never invent a figure number, caption, or page. Return an empty array if none are reliable.",
+    "Do not extract, crop, upload, or encode an image. The application adds private image storage fields only after human confirmation.",
     "Use exactly this body structure:",
     "## Summary",
     "## Problem",
@@ -257,6 +290,7 @@ function shapeLiterature(record: Record<string, unknown>) {
       getCards(),
     ),
     key_figure: aiKeyFigure(record.key_figure),
+    key_figure_candidates: parseKeyFigureCandidates(record.key_figure_candidates),
     suggested_domain: normalizedTag(record.suggested_domain),
     suggested_domain_label: String(record.suggested_domain_label ?? "").trim(),
     domain_suggestion_reason: String(record.domain_suggestion_reason ?? "").trim(),

@@ -8,6 +8,7 @@ import {
   PUBLICATION_TYPES,
   PUBLICATION_TYPE_LABELS,
   type KeyFigure,
+  type KeyFigureCandidate,
   type KeyReference,
 } from "@/lib/types";
 import { useLang } from "@/lib/i18n";
@@ -44,6 +45,7 @@ interface ExtractedLiterature {
   citation_key?: string;
   key_references?: KeyReference[];
   key_figure?: KeyFigure;
+  key_figure_candidates?: KeyFigureCandidate[];
   tags?: string[];
   suggested_domain?: string;
   suggested_domain_label?: string;
@@ -82,6 +84,7 @@ export default function NewLiteratureWizard() {
   const [tags, setTags] = useState("");
   const [keyReferences, setKeyReferences] = useState<KeyReference[]>([]);
   const [keyFigure, setKeyFigure] = useState<KeyFigure>({ ...EMPTY_KEY_FIGURE });
+  const [keyFigureCandidates, setKeyFigureCandidates] = useState<KeyFigureCandidate[]>([]);
   const [drive, setDrive] = useState("");
   const [notes, setNotes] = useState("");
   const [body, setBody] = useState("");
@@ -281,6 +284,9 @@ export default function NewLiteratureWizard() {
     setKeyReferences(Array.isArray(data.key_references) ? data.key_references.slice(0, 8) : []);
     setKeyFigure((current) =>
       current.status === "cached" ? current : data.key_figure || { ...EMPTY_KEY_FIGURE });
+    setKeyFigureCandidates(
+      Array.isArray(data.key_figure_candidates) ? (data.key_figure_candidates as KeyFigureCandidate[]) : [],
+    );
     setBody(data.body || "");
     const suggestedId = String(data.suggested_domain || "").trim();
     const suggestedLabel = String(data.suggested_domain_label || "").trim();
@@ -352,6 +358,7 @@ export default function NewLiteratureWizard() {
     setTags("");
     setKeyReferences([]);
     setKeyFigure({ ...EMPTY_KEY_FIGURE });
+    setKeyFigureCandidates([]);
     setDrive("");
     setNotes("");
     setBody("");
@@ -1023,6 +1030,7 @@ export default function NewLiteratureWizard() {
         <KeyFigurePanel
           slug={slug}
           initialFigure={keyFigure}
+          candidates={keyFigureCandidates}
           pdfFile={pdfFile}
           pdfLink={archived?.link || ""}
           canCache={Boolean(archived) || guest}

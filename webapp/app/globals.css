@@ -594,8 +594,17 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
 }
 .key-figure-fields {
   display: grid;
-  grid-template-columns: minmax(150px, 1fr) 110px minmax(190px, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 16px;
+  margin-bottom: 8px;
+}
+.key-figure-fields .figure-role-field { margin-bottom: 0; }
+.key-figure-fields .figure-caption-field,
+.key-figure-fields .figure-edit-note { grid-column: 1 / -1; }
+.key-figure-fields .figure-caption-field textarea { resize: vertical; }
+.key-figure-fields .figure-edit-note { margin: 2px 0 0; font-size: 12px; }
+@media (max-width: 560px) {
+  .key-figure-fields { grid-template-columns: 1fr; }
 }
 .key-figure-crop {
   position: relative;

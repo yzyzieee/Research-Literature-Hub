@@ -7,6 +7,7 @@ import { canvasCropBlob, loadPdfDoc, pdfPageCount, renderDocPage, type PdfDoc } 
 import {
   KEY_FIGURE_ROLES,
   type KeyFigure,
+  type KeyFigureCandidate,
   type KeyFigureRole,
 } from "@/lib/types";
 import { useLang } from "@/lib/i18n";
@@ -21,6 +22,7 @@ interface CropRect {
 interface Props {
   slug: string;
   initialFigure: KeyFigure;
+  candidates?: KeyFigureCandidate[];
   pdfFile?: File | null;
   pdfLink?: string;
   canCache?: boolean;
@@ -35,6 +37,7 @@ function cleanFigureId(value: string): string {
 export default function KeyFigurePanel({
   slug,
   initialFigure,
+  candidates = [],
   pdfFile = null,
   pdfLink = "",
   canCache = true,
@@ -150,6 +153,27 @@ export default function KeyFigurePanel({
     if (safe === page && rendered) return;
     setPage(safe);
     renderAll(doc, safe).catch(() => {});
+  };
+
+  // The submitter switches figures here: pick one and its number, type,
+  // description and page all follow, so image and text always correspond.
+  const candidateKey = (c: KeyFigureCandidate) => `${c.figure_id ?? ""}|${c.page ?? ""}`;
+  const selectedCandidate = candidates.findIndex(
+    (c) => candidateKey(c) === `${figure.figure_id ?? ""}|${figure.page ?? ""}`,
+  );
+
+  const selectCandidate = (index: number) => {
+    const choice = candidates[index];
+    if (!choice) return;
+    updateLocal({
+      ...figure,
+      figure_id: choice.figure_id,
+      role: choice.role ?? figure.role,
+      caption: choice.caption,
+      reason: choice.reason,
+      page: choice.page ?? figure.page,
+    });
+    if (choice.page) goToPage(choice.page);
   };
 
   const patchCard = async (next: KeyFigure) => {
@@ -396,22 +420,71 @@ export default function KeyFigurePanel({
             </div>
           )}
 
-          {/* The only thing a person picks: what kind of figure this is. */}
-          <label className="figure-role-field">
-            {t("figure.role")}
-            <select
-              value={figure.role || ""}
-              onChange={(event) => updateLocal({
-                ...figure,
-                role: (event.target.value || null) as KeyFigureRole | null,
-              })}
-            >
-              <option value="">{t("figure.rolePick")}</option>
-              {KEY_FIGURE_ROLES.map((role) => (
-                <option value={role} key={role}>{t(`figure.roleLabel.${role}`)}</option>
-              ))}
-            </select>
-          </label>
+          <div className="key-figure-fields">
+            {/* Switch between AI-found figures: picking one fills the rest. */}
+            {candidates.length > 0 && (
+              <label className="figure-role-field">
+                {t("figure.candidate")}
+                <select
+                  value={selectedCandidate >= 0 ? String(selectedCandidate) : ""}
+                  onChange={(event) => {
+                    if (event.target.value !== "") selectCandidate(Number(event.target.value));
+                  }}
+                >
+                  <option value="">{t("figure.candidatePick")}</option>
+                  {candidates.map((candidate, index) => (
+                    <option value={index} key={candidateKey(candidate)}>
+                      {[
+                        candidate.figure_id,
+                        candidate.page ? `${t("figure.page")} ${candidate.page}` : "",
+                        candidate.role ? t(`figure.roleLabel.${candidate.role}`) : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+
+            <label className="figure-role-field">
+              {t("figure.role")}
+              <select
+                value={figure.role || ""}
+                onChange={(event) => updateLocal({
+                  ...figure,
+                  role: (event.target.value || null) as KeyFigureRole | null,
+                })}
+              >
+                <option value="">{t("figure.rolePick")}</option>
+                {KEY_FIGURE_ROLES.map((role) => (
+                  <option value={role} key={role}>{t(`figure.roleLabel.${role}`)}</option>
+                ))}
+              </select>
+            </label>
+
+            <label className="figure-role-field">
+              {t("figure.figureId")}
+              <input
+                type="text"
+                value={figure.figure_id || ""}
+                placeholder={t("figure.figureIdPh")}
+                onChange={(event) => updateLocal({ ...figure, figure_id: event.target.value || null })}
+              />
+            </label>
+
+            <label className="figure-role-field figure-caption-field">
+              {t("figure.caption")}
+              <textarea
+                rows={2}
+                value={figure.caption || ""}
+                placeholder={t("figure.captionPh")}
+                onChange={(event) => updateLocal({ ...figure, caption: event.target.value || null })}
+              />
+            </label>
+
+            <p className="subtitle figure-edit-note">{t("figure.editNote")}</p>
+          </div>
 
           <input
             ref={customRef}
