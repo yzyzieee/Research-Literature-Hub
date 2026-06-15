@@ -67,15 +67,6 @@ export async function renderDocPage(
   return { pages: doc.numPages, width: canvas.width, height: canvas.height };
 }
 
-export async function renderPdfPage(
-  source: PdfSource,
-  pageNumber: number,
-  canvas: HTMLCanvasElement,
-): Promise<{ pages: number; width: number; height: number }> {
-  const doc = await openPdf(source);
-  return renderDocPage(doc, pageNumber, canvas);
-}
-
 export async function canvasCropBlob(
   canvas: HTMLCanvasElement,
   crop?: { x: number; y: number; width: number; height: number } | null,
