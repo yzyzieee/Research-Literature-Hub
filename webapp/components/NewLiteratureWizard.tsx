@@ -306,15 +306,19 @@ export default function NewLiteratureWizard() {
     );
   };
 
-  const uploadDrive = async () => {
-    if (!pdfFile || !driveUploadEnabled || !ready) return;
+  const uploadDrive = async (opts?: { slugOverride?: string; doiOverride?: string }) => {
+    if (!pdfFile || !driveUploadEnabled) return;
+    const effSlug = (opts?.slugOverride ?? slug).trim();
+    const effDoi = opts?.doiOverride ?? doi;
+    if (!effSlug) return;
+    const signature = `${effSlug}:${effDoi.trim().toLowerCase()}`;
     setBusy("drive");
     setUploadProgress(0);
     setMsg(null);
     try {
-      const result = await uploadToDrive(pdfFile, slug, doi, setUploadProgress);
+      const result = await uploadToDrive(pdfFile, effSlug, effDoi, setUploadProgress);
       setDrive(result.link);
-      setArchived({ ...result, signature: archiveSignature });
+      setArchived({ ...result, signature });
       setMsg({
         kind: "ok",
         text: guest
@@ -465,27 +469,45 @@ export default function NewLiteratureWizard() {
       if (!response.ok) throw new Error(data.error);
       applyLiterature(data);
       let duplicateError = "";
+      let candidates: DuplicateCandidate[] = [];
       try {
-        await checkDuplicates({
+        candidates = (await checkDuplicates({
           title: data.title,
           doi: data.doi,
           citationKey: data.citation_key,
           authors: data.authors,
           year: data.year,
-        });
+        })) || [];
       } catch (error) {
         duplicateError = error instanceof Error ? error.message : String(error);
       }
-      setMsg({
-        kind: duplicateError ? "warn" : "ok",
-        text: `${data.demo
-          ? t("new.demoExtracted")
-          : driveUploadEnabled
-            ? t("new.pdfOkUpload")
-            : t("new.pdfOk")}${
-          duplicateError ? ` ${t("new.duplicateFailed")}: ${duplicateError}` : ""
-        }`,
-      });
+      const baseText = data.demo
+        ? t("new.demoExtracted")
+        : driveUploadEnabled
+          ? t("new.pdfOkUpload")
+          : t("new.pdfOk");
+      // Auto-archive to Drive when the extraction is complete and there is no
+      // duplicate to review — the member shouldn't have to click a second time.
+      const extractedPrimary =
+        data.primary_domain && DOMAINS.includes(data.primary_domain) ? data.primary_domain : "";
+      const extractedTags = ((data.tags || []) as string[]).map((tag) => tag.trim()).filter(Boolean);
+      const dataReady =
+        Boolean(extractedPrimary) &&
+        Boolean(String(data.title || "").trim()) &&
+        Boolean(data.publication_type) &&
+        Boolean((data.authors || []).length) &&
+        Boolean(data.year) &&
+        extractedTags.length > 0 &&
+        /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(String(data.citation_key || "").trim());
+      if (!duplicateError && candidates.length === 0 && dataReady && driveUploadEnabled && pdfFile && !archived) {
+        setMsg({ kind: "ok", text: baseText });
+        await uploadDrive({ slugOverride: data.citation_key, doiOverride: data.doi });
+      } else {
+        setMsg({
+          kind: duplicateError ? "warn" : "ok",
+          text: `${baseText}${duplicateError ? ` ${t("new.duplicateFailed")}: ${duplicateError}` : ""}`,
+        });
+      }
     } catch (error) {
       setMsg({
         kind: "warn",
@@ -682,6 +704,29 @@ export default function NewLiteratureWizard() {
             </>
           )}
         </p>
+        {driveUploadEnabled && pdfFile && (
+          <div className="pdf-archive">
+            {busy === "drive" && (
+              <div className="upload-progress" aria-label={`${uploadProgress}%`}>
+                <span style={{ width: `${uploadProgress}%` }} />
+              </div>
+            )}
+            <div className="btn-row">
+              <button
+                className="btn primary"
+                onClick={() => uploadDrive()}
+                disabled={!ready || !duplicateResolved || duplicateConfirmed || busy !== "" || archiveCurrent}
+              >
+                {busy === "drive"
+                  ? `${t("new.driveUploading")} ${uploadProgress}%`
+                  : archiveCurrent
+                    ? t("new.driveArchived")
+                    : t("new.driveConfirmUpload")}
+              </button>
+            </div>
+            {!archiveCurrent && !ready && <p className="subtitle">{t("new.archiveNeedsFields")}</p>}
+          </div>
+        )}
       </div>
 
       {title.trim() && citationKeyValid && (
@@ -922,84 +967,55 @@ export default function NewLiteratureWizard() {
         <textarea rows={24} value={body} onChange={(event) => setBody(event.target.value)} />
       </div>
 
-      {driveUploadEnabled && pdfFile && (
+      {driveUploadEnabled && pdfFile && archived && (
         <div className="form-card">
           <h2 style={{ marginTop: 0 }}>{t("new.archiveTitle")}</h2>
-          <p className="subtitle">{t("new.archiveHint")}</p>
           <p className="subtitle">
-            {t("new.archiveTarget")}: <code>NNNN_{slug || "citation-key"}.pdf</code>
+            {t("new.archiveTarget")}: <code>{archived.name}</code>
           </p>
-          {busy === "drive" && (
-            <div className="upload-progress" aria-label={`${uploadProgress}%`}>
-              <span style={{ width: `${uploadProgress}%` }} />
-            </div>
-          )}
           <div className="btn-row">
             <button
-              className="btn primary"
-              onClick={uploadDrive}
-              disabled={!ready || !duplicateResolved || duplicateConfirmed || busy !== "" || archiveCurrent}
+              className="btn"
+              onClick={analyzeOriginalPdf}
+              disabled={busy !== "" || !archiveCurrent}
             >
-              {busy === "drive"
-                ? `${t("new.driveUploading")} ${uploadProgress}%`
-                : archiveCurrent
-                  ? t("new.driveArchived")
-                  : t("new.driveConfirmUpload")}
+              {busy === "original" ? t("new.originalAnalyzing") : t("new.originalAnalyze")}
             </button>
-            {archived && (
+            <a className="btn" href={archived.link} target="_blank" rel="noreferrer">
+              {t("new.driveOpenFile")}
+            </a>
+            {!archiveDeleteArmed ? (
+              <button
+                className="btn danger"
+                onClick={() => setArchiveDeleteArmed(true)}
+                disabled={busy !== ""}
+              >
+                {archived.reused ? t("new.driveDetach") : t("new.driveDeleteReset")}
+              </button>
+            ) : (
               <>
                 <button
-                  className="btn"
-                  onClick={analyzeOriginalPdf}
-                  disabled={busy !== "" || !archiveCurrent}
+                  className="btn danger"
+                  onClick={removeArchivedPdf}
+                  disabled={busy !== ""}
                 >
-                  {busy === "original" ? t("new.originalAnalyzing") : t("new.originalAnalyze")}
+                  {busy === "delete"
+                    ? t("new.driveDeleting")
+                    : archived.reused
+                      ? t("new.driveConfirmDetach")
+                      : t("new.driveConfirmDelete")}
                 </button>
-                <a className="btn" href={archived.link} target="_blank" rel="noreferrer">
-                  {t("new.driveOpenFile")}
-                </a>
-                {!archiveDeleteArmed ? (
-                  <button
-                    className="btn danger"
-                    onClick={() => setArchiveDeleteArmed(true)}
-                    disabled={busy !== ""}
-                  >
-                    {archived.reused ? t("new.driveDetach") : t("new.driveDeleteReset")}
-                  </button>
-                ) : (
-                  <>
-                    <button
-                      className="btn danger"
-                      onClick={removeArchivedPdf}
-                      disabled={busy !== ""}
-                    >
-                      {busy === "delete"
-                        ? t("new.driveDeleting")
-                        : archived.reused
-                          ? t("new.driveConfirmDetach")
-                          : t("new.driveConfirmDelete")}
-                    </button>
-                    <button
-                      className="btn"
-                      onClick={() => setArchiveDeleteArmed(false)}
-                      disabled={busy !== ""}
-                    >
-                      {t("new.cancel")}
-                    </button>
-                  </>
-                )}
+                <button
+                  className="btn"
+                  onClick={() => setArchiveDeleteArmed(false)}
+                  disabled={busy !== ""}
+                >
+                  {t("new.cancel")}
+                </button>
               </>
             )}
           </div>
-          {!ready && (
-            <div className="notice warn">
-              <b>{t("new.archiveRequired")}</b>
-              <ul style={{ margin: "8px 0 0", paddingLeft: 20 }}>
-                {missingRequirements.map((item) => <li key={item}>{item}</li>)}
-              </ul>
-            </div>
-          )}
-          {archived && !archiveCurrent && <div className="notice warn">{t("new.archiveChanged")}</div>}
+          {!archiveCurrent && <div className="notice warn">{t("new.archiveChanged")}</div>}
         </div>
       )}
 

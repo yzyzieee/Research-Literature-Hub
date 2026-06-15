@@ -9,8 +9,53 @@ export default function CardEditor({ slug }: { slug: string }) {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [reextracting, setReextracting] = useState(false);
   const [saved, setSaved] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+
+  const driveFileIdFromContent = (text: string): string => {
+    const match =
+      text.match(/drive\.google\.com\/file\/d\/([A-Za-z0-9_-]+)/) ||
+      text.match(/[?&]id=([A-Za-z0-9_-]+)/) ||
+      text.match(/\/d\/([A-Za-z0-9_-]+)/);
+    return match?.[1] || "";
+  };
+
+  const reextract = async () => {
+    const fileId = driveFileIdFromContent(content);
+    if (!fileId) {
+      setMessage({ ok: false, text: t("edit.reextractNoPdf") });
+      return;
+    }
+    setReextracting(true);
+    setMessage(null);
+    try {
+      const extractResponse = await fetch("/api/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ driveFileId: fileId }),
+      });
+      const record = await extractResponse.json();
+      if (!extractResponse.ok) throw new Error(record.error);
+      const mergeResponse = await fetch(`/api/cards/${encodeURIComponent(slug)}/reextract`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ record }),
+      });
+      const data = await mergeResponse.json();
+      if (!mergeResponse.ok) throw new Error(data.error);
+      setContent(data.content);
+      setSaved(false);
+      setMessage({ ok: true, text: t("edit.reextracted") });
+    } catch (error) {
+      setMessage({
+        ok: false,
+        text: `${t("edit.reextractFailed")}: ${error instanceof Error ? error.message : error}`,
+      });
+    } finally {
+      setReextracting(false);
+    }
+  };
 
   useEffect(() => {
     fetch(`/api/cards/${encodeURIComponent(slug)}`)
@@ -57,6 +102,15 @@ export default function CardEditor({ slug }: { slug: string }) {
       <div className="editor-guidance">
         <b>{t("edit.sharedTitle")}</b>
         <p>{t("edit.sharedHint")}</p>
+      </div>
+      <div className="reextract-row">
+        <div>
+          <b>{t("edit.reextractTitle")}</b>
+          <p className="subtitle">{t("edit.reextractHint")}</p>
+        </div>
+        <button className="btn" onClick={reextract} disabled={busy || reextracting}>
+          {reextracting ? t("edit.reextracting") : t("edit.reextract")}
+        </button>
       </div>
       <label htmlFor="card-markdown">{t("edit.markdown")}</label>
       <textarea
