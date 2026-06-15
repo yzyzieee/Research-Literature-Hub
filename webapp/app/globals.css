@@ -672,6 +672,20 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
   margin-bottom: 18px;
 }
 .pdf-zone-main { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.pdf-archive { margin-top: 12px; padding-top: 12px; border-top: 1px solid #cfe2f7; }
+.reextract-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 12px 0 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--accent-soft);
+}
+.reextract-row b { font-size: 15px; }
 .pdf-zone b { font-size: 16px; }
 .upload-progress { height: 8px; overflow: hidden; border-radius: 999px; background: var(--border); margin: 14px 0; }
 .upload-progress span { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width 180ms ease; }
