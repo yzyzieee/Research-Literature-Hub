@@ -31,7 +31,6 @@ LITERATURE_SECTIONS = [
     "## Limitations",
     "## Relevance to our group",
     "## Notes",
-    "## References",
 ]
 KEY_REFERENCE_ROLES = {
     "foundation", "method", "baseline", "dataset", "survey", "related_work"}
@@ -112,6 +111,14 @@ def main() -> int:
             positions = [card.body.find(section) for section in LITERATURE_SECTIONS]
             if all(position >= 0 for position in positions) and positions != sorted(positions):
                 errors.append(f"{where}: literature sections are not in the required order")
+            if re.search(
+                r"^## (References|Bibliography|Related work|Works cited)\s*$",
+                card.body,
+                flags=re.IGNORECASE | re.MULTILINE,
+            ):
+                errors.append(
+                    f"{where}: bibliography sections are not allowed; "
+                    "use key_references metadata")
 
         tags = meta.get("tags")
         if tags is not None and not isinstance(tags, list):

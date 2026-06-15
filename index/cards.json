@@ -14,7 +14,7 @@
     ],
     "venue": "IEEE/ACM Transactions on Audio, Speech, and Language Processing",
     "doi": "10.1109/TASLP.2018.2795756",
-    "abstract": "Noise control and cancellation over a spatial region is a fundamental problem in acoustic signal processing. In this paper, we utilize wave-domain adaptive algorithms to iteratively calculate the secondary source driving signals and to cancel the primary noise field over the control region. We propose wave-domain active noise control algorithms based on two minimization problems: first, minimizing the wave-domain residual signal coefficients, and second, minimizing the acoustic potential energy over the region, and derive the update equations with respect to two variables, the loudspeaker weights and wave-domain secondary source coefficients. Simulation results demonstrate the effectiveness of the proposed algorithms, more specifically the convergence speed and the noise cancellation performance in terms of the noise reduction level and acoustic potential energy reduction level over the entire spatial region.",
+    "abstract": "Noise control and cancellation over a spatial region is a fundamental problem in acoustic signal processing. This paper uses wave-domain adaptive algorithms to calculate secondary-source driving signals and cancel a primary noise field over a control region.",
     "status": "official",
     "tags": [
       "active-noise-control",
@@ -32,7 +32,62 @@
     ],
     "year": 2018,
     "citation_key": "Zhang2018Active",
-    "key_references": [],
+    "key_references": [
+      {
+        "title": "Recent advances in active noise control inside automobile cabins: Toward quieter cars",
+        "doi": "",
+        "year": 2016,
+        "role": "survey",
+        "reason": "Reviews spatial ANC challenges and practical vehicle-cabin applications that motivate regional control.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Recent advances on active noise control: Open issues and innovative applications",
+        "doi": "",
+        "year": 2012,
+        "role": "survey",
+        "reason": "Provides the broader ANC background and open problems behind spatial noise control.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Multichannel active noise control for spatially sparse noise fields",
+        "doi": "",
+        "year": 2016,
+        "role": "method",
+        "reason": "Introduces closely related spatial multichannel control ideas developed by the same research group.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Noise cancellation over spatial regions using adaptive wave domain processing",
+        "doi": "",
+        "year": 2015,
+        "role": "foundation",
+        "reason": "Presents the earlier adaptive wave-domain formulation extended in this paper.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Efficient massive multichannel active noise control using wave-domain adaptive filtering",
+        "doi": "",
+        "year": 2008,
+        "role": "foundation",
+        "reason": "Establishes a wave-domain adaptive filtering baseline for massive multichannel ANC.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Theory and design of sound field reproduction in reverberant rooms",
+        "doi": "",
+        "year": 2005,
+        "role": "method",
+        "reason": "Supplies sound-field representation theory relevant to the reverberant-room formulation.",
+        "status": "external",
+        "linked_card": null
+      }
+    ],
     "related": [],
     "drive": [
       "https://drive.google.com/file/d/1_1lODaviOAezdyq8q5-TKP8Kr9v98rDg/view?usp=drivesdk"
@@ -42,7 +97,7 @@
     "comments": [],
     "uploaded_by": "YZY",
     "uploaded_at": "2026-06-14T12:28:12.917Z",
-    "summary": "This paper introduces and evaluates four novel adaptive wave-domain active noise control (ANC) algorithms designed for noise cancellation over a spatial region. The proposed methods leverage cylindrical harmonic expansions to represent sound fields and adaptively adjust secondary source signals. Two primary cost functions are explored: minimizing the wave-domain residual signal coefficients and minimizing the acoustic potential energy within the control region. The algorithms are further differentiated by whether they update loudspeaker driving signals directly or update the wave-domain secondary sound field coefficients. Simulation results in both free-field and reverberant environments demonstrate that these wave-domain approaches achieve superior noise reduction and faster convergence compared to conventional multi-point methods, particularly when the number of secondary sources is limited.",
+    "summary": "This paper develops four adaptive wave-domain active noise control algorithms for reducing a noise field over an extended spatial region. It compares modal-coefficient and acoustic-energy objectives, each implemented through either direct loudspeaker-weight updates or secondary-field modal updates. Simulations show faster convergence and better regional attenuation than conventional multi-point control, especially when the available loudspeakers cannot reproduce every active spatial mode.",
     "legacy_type": ""
   },
   {
@@ -96,7 +151,7 @@
     "comments": [],
     "uploaded_by": "",
     "uploaded_at": "",
-    "summary": "The foundational paper on adaptive noise cancelling: a reference input correlated with the noise (but not the signal) is adaptively filtered and subtracted from the primary input, with the LMS algorithm driving the filter towards the Wiener solution without prior knowledge of signal statistics.",
+    "summary": "This foundational paper presents adaptive noise cancelling as a general estimation problem: a reference input correlated with unwanted interference is adaptively filtered and subtracted from the primary input. The LMS algorithm drives the filter toward the Wiener solution without requiring prior knowledge of signal statistics.",
     "legacy_type": ""
   },
   {
@@ -128,7 +183,62 @@
     ],
     "year": 2025,
     "citation_key": "xiao2025spatially",
-    "key_references": [],
+    "key_references": [
+      {
+        "title": "Spatially selective active noise control systems",
+        "doi": "",
+        "year": 2023,
+        "role": "foundation",
+        "reason": "Introduces the spatially selective ANC framework extended to open-fitting hearables.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Effect of target signals and delays on spatially selective active noise control for open-fitting hearables",
+        "doi": "",
+        "year": 2024,
+        "role": "method",
+        "reason": "Establishes the causal target-signal and delay formulation used as the direct comparison.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "The hearpiece database of individual transfer functions of an in-the-ear earpiece for hearing device research",
+        "doi": "",
+        "year": 2021,
+        "role": "dataset",
+        "reason": "Provides measured hearpiece transfer functions used to construct the simulated acoustic paths.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "CSTR VCTK corpus: English multi-speaker corpus for CSTR voice cloning toolkit",
+        "doi": "",
+        "year": 2017,
+        "role": "dataset",
+        "reason": "Supplies speech material for the desired and interfering source simulations.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Assessment for automatic speech recognition: II. NOISEX-92: A database and an experiment to study the effect of additive noise on speech recognition systems",
+        "doi": "",
+        "year": 1993,
+        "role": "dataset",
+        "reason": "Supplies standard noise material for evaluating speech preservation and noise reduction.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Beamforming: a versatile approach to spatial filtering",
+        "doi": "",
+        "year": 1988,
+        "role": "foundation",
+        "reason": "Provides foundational spatial filtering concepts relevant to direction-selective control.",
+        "status": "external",
+        "linked_card": null
+      }
+    ],
     "related": [],
     "drive": [],
     "created": "2026-06-13",
@@ -136,7 +246,7 @@
     "comments": [],
     "uploaded_by": "",
     "uploaded_at": "",
-    "summary": "This paper proposes an enhanced approach to Spatially Selective Active Noise Control (SSANC) for open-fitting hearables. The core innovation is the incorporation of acausal relative impulse responses (ReIRs) into the optimization process, aiming to improve performance over existing causal methods. The system is evaluated through simulations using a KEMAR dummy head with open-fitting hearables, considering both speech and noise sources at various locations. Performance is measured by speech distortion, noise reduction, and signal-to-noise ratio (SNR) improvement. The results consistently demonstrate that the acausal optimization strategy yields superior performance across all metrics compared to the causal approach, particularly in accurately characterizing the desired source's acoustic path.",
+    "summary": "This paper extends spatially selective active noise control for open-fitting hearables by allowing acausal relative impulse responses in the speech-preservation constraint. The extra anti-causal freedom improves the approximation of the desired source path, reducing speech distortion and increasing SNR while retaining useful noise attenuation. Simulations also show less sensitivity to the selected processing delay than the causal formulation.",
     "legacy_type": ""
   },
   {
@@ -170,7 +280,53 @@
     ],
     "year": 2026,
     "citation_key": "xiao2026robust",
-    "key_references": [],
+    "key_references": [
+      {
+        "title": "Spatially Selective Active Noise Control for Open-Fitting Hearables with Acausal Optimization",
+        "doi": "10.61782/fa.2025.0817",
+        "year": 2025,
+        "role": "baseline",
+        "reason": "Provides the acausal SSANC controller that the robust formulation extends under path variation.",
+        "status": "in_library",
+        "linked_card": "xiao2025spatially"
+      },
+      {
+        "title": "Soft-constrained spatially selective active noise control for open-fitting hearables",
+        "doi": "",
+        "year": 2025,
+        "role": "method",
+        "reason": "Introduces the soft-constrained objective used as the basis of the robust average-cost design.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Spatially selective active noise control systems",
+        "doi": "",
+        "year": 2023,
+        "role": "foundation",
+        "reason": "Establishes the direction-selective ANC problem and core system formulation.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Data-driven uncertainty modeling for robust feedback active noise control in headphones",
+        "doi": "",
+        "year": 2024,
+        "role": "related_work",
+        "reason": "Provides a related data-driven treatment of acoustic-path uncertainty for headphone ANC.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Robust single- and multi-loudspeaker least-squares-based equalization for hearing devices",
+        "doi": "",
+        "year": 2022,
+        "role": "method",
+        "reason": "Demonstrates robust optimization across measured hearing-device transfer-function variation.",
+        "status": "external",
+        "linked_card": null
+      }
+    ],
     "related": [],
     "drive": [
       "https://drive.google.com/file/d/169kOYOzTtUgqYjPNuKq5fUHW2Si3_OLR/view?usp=drivesdk"
@@ -180,7 +336,7 @@
     "comments": [],
     "uploaded_by": "",
     "uploaded_at": "",
-    "summary": "This paper addresses the challenge of secondary path variations in spatially selective active noise control (SSANC) for hearables. SSANC aims to attenuate noise from specific directions while preserving desired speech. A key practical issue is that the acoustic path from the hearable's loudspeaker to the inner error microphone (the secondary path) can vary significantly between users and due to device fit. This variation can degrade SSANC performance and compromise system stability. The authors propose a robust soft-constrained optimization framework that computes a single control filter by minimizing the average cost over a set of secondary path estimates derived from human measurements. This approach aims to provide consistent performance even when the exact secondary path is unknown.",
+    "summary": "This paper addresses secondary-path variation in spatially selective active noise control for hearables. It computes one soft-constrained controller by averaging the optimization objective over a set of measured secondary-path estimates. Simulations and real-time experiments show that the robust controller gives up a small amount of matched-path performance in exchange for substantially more consistent behavior across users and device fits.",
     "legacy_type": ""
   },
   {

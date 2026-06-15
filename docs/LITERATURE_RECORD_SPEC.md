@@ -135,8 +135,15 @@ Every new literature record uses this English structure:
 ## Limitations
 ## Relevance to our group
 ## Notes
-## References
 ```
+
+Do not add a `References`, `Bibliography`, `Related work`, or `Works cited` section to
+the body. The compact `key_references` metadata is the only related-paper list retained
+by the literature record.
+
+Write important equations with `$...$` for inline math and `$$...$$` for display math.
+Do not place equations in backticks or code fences. Define notation in nearby prose so
+the Method section remains readable when exported as text as well as rendered in the app.
 
 ## Team evaluation
 

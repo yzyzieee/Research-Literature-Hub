@@ -29,6 +29,4 @@ How this paper relates to our current research directions.
 ## Notes
 
 Team-specific observations, implementation thoughts, or TODOs.
-
-## References
 `;

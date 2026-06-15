@@ -3,6 +3,7 @@ import { LangProvider, T } from "@/lib/i18n";
 import GuestModeBanner from "@/components/GuestModeBanner";
 import SiteHeader from "@/components/SiteHeader";
 import packageJson from "@/package.json";
+import "katex/dist/katex.min.css";
 import "./globals.css";
 
 export const metadata: Metadata = {

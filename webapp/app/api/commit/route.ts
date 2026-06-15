@@ -120,9 +120,11 @@ function validatedOfficialCard(
     "## Limitations",
     "## Relevance to our group",
     "## Notes",
-    "## References",
   ]) {
     if (!parsed.content.includes(section)) errors.push(`${section.slice(3)} section`);
+  }
+  if (/^## (References|Bibliography|Related work|Works cited)\s*$/im.test(parsed.content)) {
+    errors.push("no bibliography section; use key_references metadata");
   }
   if (String(data.citation_key || "") !== slug) errors.push("citation key matching the file name");
   if (!Array.isArray(data.authors) || !data.authors.length) errors.push("authors");

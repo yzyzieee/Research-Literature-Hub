@@ -70,10 +70,6 @@ export function guestLiteratureDraft(seed = "") {
       "## Notes",
       "",
       "Guest actions remain temporary and do not change GitHub, Drive, ratings, or comments.",
-      "",
-      "## References",
-      "",
-      "- Guest sandbox record; no external reference.",
     ].join("\n"),
   };
 }

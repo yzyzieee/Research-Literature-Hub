@@ -40,6 +40,9 @@ export async function POST(req: NextRequest) {
     "Separate source-grounded findings from team-facing interpretation.",
     "Be technically conservative. Mark uncertain numbers or claims with (TODO: verify).",
     "This is a compact paper record, not a full literature survey.",
+    "Do not add a References, Bibliography, Related work, or Works cited section. Related-paper anchors belong only in key_references metadata.",
+    "Write equations with $...$ or $$...$$ delimiters, never as inline code or fenced code.",
+    "Explain every important symbol and equation in nearby prose.",
   ].join("\n");
 
   const user = [

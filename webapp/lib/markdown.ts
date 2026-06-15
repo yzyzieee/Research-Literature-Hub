@@ -1,6 +1,9 @@
 import { remark } from "remark";
 import remarkGfm from "remark-gfm";
-import remarkHtml from "remark-html";
+import remarkMath from "remark-math";
+import remarkRehype from "remark-rehype";
+import rehypeKatex from "rehype-katex";
+import rehypeStringify from "rehype-stringify";
 import type { CardMeta } from "./types";
 
 export async function renderCardBody(body: string, allCards: CardMeta[]): Promise<string> {
@@ -10,6 +13,12 @@ export async function renderCardBody(body: string, allCards: CardMeta[]): Promis
     if (!target) return `\`${slug}\``;
     return `[${target.title}](/cards/${target.slug})`;
   });
-  const result = await remark().use(remarkGfm).use(remarkHtml).process(withLinks);
+  const result = await remark()
+    .use(remarkGfm)
+    .use(remarkMath)
+    .use(remarkRehype)
+    .use(rehypeKatex)
+    .use(rehypeStringify)
+    .process(withLinks);
   return String(result);
 }
