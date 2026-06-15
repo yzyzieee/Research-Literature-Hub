@@ -56,7 +56,7 @@
         "reason": "This is a standard textbook on adaptive filters, providing theoretical background for the adaptive algorithms used."
       }
     ],
-    "card_url": "https://raw.githubusercontent.com/your-org/research-literature-hub/main/official/Xiao2023Spatially.md"
+    "card_url": "https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Xiao2023Spatially.md"
   },
   {
     "slug": "Xie2024Cognitive",
@@ -114,7 +114,7 @@
         "reason": "This paper details the selective fixed-filter active noise control (SFANC) system, which is a foundational concept that the cognitive VS technique builds upon and enhances."
       }
     ],
-    "card_url": "https://raw.githubusercontent.com/your-org/research-literature-hub/main/official/Xie2024Cognitive.md"
+    "card_url": "https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Xie2024Cognitive.md"
   },
   {
     "slug": "Yang2026Co-initialization",
@@ -174,7 +174,7 @@
         "reason": "This paper provides the measured acoustic paths used for training and evaluation in the proposed method."
       }
     ],
-    "card_url": "https://raw.githubusercontent.com/your-org/research-literature-hub/main/official/Yang2026Co-initialization.md"
+    "card_url": "https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Yang2026Co-initialization.md"
   },
   {
     "slug": "jiang2022integration",
@@ -234,6 +234,6 @@
         "reason": "The Filtered-X LMS (FXLMS) algorithm is a widely used traditional method for ANC and serves as a baseline for comparison."
       }
     ],
-    "card_url": "https://raw.githubusercontent.com/your-org/research-literature-hub/main/official/jiang2022integration.md"
+    "card_url": "https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/jiang2022integration.md"
   }
 ]
