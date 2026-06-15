@@ -2,7 +2,7 @@ import matter from "gray-matter";
 import { NextRequest, NextResponse } from "next/server";
 import type { RatingAggregate, RatingEntry } from "@/lib/types";
 import { GUEST_MEMBER, isGuest } from "@/lib/guest";
-import { configuredGithubRepository, githubRef } from "@/lib/github-config";
+import { githubServerConfig } from "@/lib/github-config";
 import { getCard } from "@/lib/kb";
 import { readTeam } from "@/lib/team";
 
@@ -123,13 +123,11 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const token = process.env.GITHUB_TOKEN;
-  const repo = configuredGithubRepository();
+  const { token, repo, ref } = githubServerConfig();
   if (!token || !repo) {
     return NextResponse.json({ error: "GitHub write access is not configured." }, { status: 501 });
   }
 
-  const ref = githubRef();
   const path = `official/${slug}.md`;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {

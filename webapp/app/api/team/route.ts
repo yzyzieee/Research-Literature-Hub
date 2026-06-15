@@ -52,12 +52,12 @@ export async function PATCH(req: NextRequest) {
 
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      const { config, sha, repo } = await readTeam();
+      const { config, sha } = await readTeam();
       const member = config.members.find((item) => item.id === username && item.active);
       if (!member) return NextResponse.json({ error: "Account not found." }, { status: 404 });
       member.name = name;
       member.domains = domains;
-      await writeTeam(config, sha, repo);
+      await writeTeam(config, sha);
       return NextResponse.json({ member });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
 
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      const { config, sha, repo } = await readTeam();
+      const { config, sha } = await readTeam();
       const actor = config.members.find((item) => item.id === username && item.active);
       if (!actor || actor.role !== "admin") {
         return NextResponse.json({ error: "Only a team administrator can add accounts." }, { status: 403 });
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
         created: new Date().toISOString().slice(0, 10),
       };
       config.members.push(member);
-      await writeTeam(config, sha, repo);
+      await writeTeam(config, sha);
       return NextResponse.json({ member, members: config.members });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

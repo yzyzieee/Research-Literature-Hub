@@ -2,7 +2,7 @@ import matter from "gray-matter";
 import { NextRequest, NextResponse } from "next/server";
 import type { CommentEntry } from "@/lib/types";
 import { GUEST_MEMBER, isGuest } from "@/lib/guest";
-import { configuredGithubRepository, githubRef } from "@/lib/github-config";
+import { githubServerConfig } from "@/lib/github-config";
 import { getCard } from "@/lib/kb";
 import { readTeam } from "@/lib/team";
 
@@ -16,14 +16,6 @@ interface GitHubFile {
   encoding: string;
   sha: string;
   html_url?: string;
-}
-
-function githubConfig() {
-  return {
-    token: process.env.GITHUB_TOKEN || "",
-    repo: configuredGithubRepository(),
-    ref: githubRef(),
-  };
 }
 
 function validSlug(value: string): boolean {
@@ -77,7 +69,7 @@ async function currentMember(username: string) {
 export async function GET(req: NextRequest) {
   const username = req.headers.get("x-kb-user") || "";
   const slug = String(req.nextUrl.searchParams.get("slug") || "").trim();
-  const { token, repo, ref } = githubConfig();
+  const { token, repo, ref } = githubServerConfig();
   if (!username || !validSlug(slug)) {
     return NextResponse.json({ error: "A valid team account and card are required." }, { status: 400 });
   }
@@ -106,7 +98,7 @@ export async function POST(req: NextRequest) {
   const slug = String(body.slug || "").trim();
   const commentId = String(body.id || "").trim();
   const text = String(body.body || "").trim();
-  const { token, repo, ref } = githubConfig();
+  const { token, repo, ref } = githubServerConfig();
 
   if (!username || !validSlug(slug) || text.length < 2 || text.length > MAX_COMMENT_LENGTH) {
     return NextResponse.json(

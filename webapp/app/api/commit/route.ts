@@ -2,7 +2,7 @@ import matter from "gray-matter";
 import { NextRequest, NextResponse } from "next/server";
 import { DOMAINS, PUBLICATION_TYPES } from "@/lib/types";
 import { isGuest } from "@/lib/guest";
-import { configuredGithubRepository, githubRef } from "@/lib/github-config";
+import { githubServerConfig } from "@/lib/github-config";
 import { readTeam } from "@/lib/team";
 
 export const runtime = "nodejs";
@@ -198,8 +198,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const token = process.env.GITHUB_TOKEN;
-  const repo = configuredGithubRepository();
+  const { token, repo, ref: base } = githubServerConfig();
   const missing = [
     !token ? "GITHUB_TOKEN" : "",
     !repo ? "GITHUB_REPO (or NEXT_PUBLIC_GITHUB_REPO)" : "",
@@ -212,7 +211,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const base = githubRef();
   try {
     const { config } = await readTeam();
     if (!config.members.some((member) => member.id === username && member.active)) {

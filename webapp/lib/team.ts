@@ -1,9 +1,5 @@
 import type { TeamConfig, TeamMember } from "./types";
-import {
-  githubRef,
-  githubRepositoryCandidates,
-  resolveGithubRepository,
-} from "./github-config";
+import { githubServerConfig } from "./github-config";
 
 const GH = "https://api.github.com";
 export const TEAM_FILE = "team/members.json";
@@ -46,13 +42,11 @@ function normalized(config: TeamConfig): TeamConfig {
   };
 }
 
-export async function readTeam(): Promise<{ config: TeamConfig; sha?: string; repo?: string }> {
-  const token = process.env.GITHUB_TOKEN || "";
-  const ref = githubRef();
-  if (!token || !githubRepositoryCandidates().length) {
+export async function readTeam(): Promise<{ config: TeamConfig; sha?: string }> {
+  const { token, repo, ref } = githubServerConfig();
+  if (!token || !repo) {
     return { config: normalized(DEFAULT_TEAM) };
   }
-  const repo = await resolveGithubRepository(token);
   const params = new URLSearchParams({ ref });
   const response = await fetch(`${GH}/repos/${repo}/contents/${TEAM_FILE}?${params}`, {
     headers: {
@@ -62,7 +56,11 @@ export async function readTeam(): Promise<{ config: TeamConfig; sha?: string; re
     },
     cache: "no-store",
   });
-  if (response.status === 404) return { config: normalized(DEFAULT_TEAM), repo };
+  if (response.status === 404) {
+    throw new Error(
+      `Team registry not found in "${repo}". Check GITHUB_REPO and confirm ${TEAM_FILE} exists on branch "${ref}".`,
+    );
+  }
   if (!response.ok) {
     throw new Error(
       `Team registry read failed (${response.status}) in "${repo}": ${(await response.text()).slice(0, 200)}`,
@@ -70,14 +68,12 @@ export async function readTeam(): Promise<{ config: TeamConfig; sha?: string; re
   }
   const file = (await response.json()) as GitHubTeamFile;
   const raw = Buffer.from(file.content.replace(/\n/g, ""), file.encoding as BufferEncoding).toString("utf-8");
-  return { config: normalized(JSON.parse(raw) as TeamConfig), sha: file.sha, repo };
+  return { config: normalized(JSON.parse(raw) as TeamConfig), sha: file.sha };
 }
 
-export async function writeTeam(config: TeamConfig, sha?: string, resolvedRepo?: string): Promise<void> {
-  const token = process.env.GITHUB_TOKEN || "";
-  if (!token) throw new Error("GITHUB_TOKEN is not configured.");
-  const repo = resolvedRepo || await resolveGithubRepository(token);
-  const ref = githubRef();
+export async function writeTeam(config: TeamConfig, sha?: string): Promise<void> {
+  const { token, repo, ref } = githubServerConfig();
+  if (!token || !repo) throw new Error("GITHUB_TOKEN / GITHUB_REPO is not configured.");
   const response = await fetch(`${GH}/repos/${repo}/contents/${TEAM_FILE}`, {
     method: "PUT",
     headers: {
@@ -96,7 +92,7 @@ export async function writeTeam(config: TeamConfig, sha?: string, resolvedRepo?:
   if (!response.ok) {
     const detail = (await response.text()).slice(0, 200);
     const guidance = response.status === 404
-      ? " Verify that GITHUB_TOKEN can access this repository and has Contents: Read and write permission."
+      ? " Check GITHUB_REPO spelling and verify that GITHUB_TOKEN has Contents: Read and write permission."
       : "";
     throw new Error(
       `Team registry write failed (${response.status}) in "${repo}": ${detail}.${guidance}`,
