@@ -34,16 +34,28 @@ export async function extractPdfText(file: File, maxChars = 60000): Promise<stri
   return out.slice(0, maxChars).trim();
 }
 
-export async function renderPdfPage(
-  source: PdfSource,
+// A loaded document, opened once so page navigation doesn't re-download the PDF.
+export type PdfDoc = Awaited<ReturnType<typeof openPdf>>;
+
+export async function loadPdfDoc(source: PdfSource): Promise<PdfDoc> {
+  return openPdf(source);
+}
+
+export function pdfPageCount(doc: PdfDoc): number {
+  return doc.numPages;
+}
+
+/** Render one page of an already-loaded document into a canvas. */
+export async function renderDocPage(
+  doc: PdfDoc,
   pageNumber: number,
   canvas: HTMLCanvasElement,
+  maxWidth = 1400,
 ): Promise<{ pages: number; width: number; height: number }> {
-  const doc = await openPdf(source);
   const safePage = Math.min(Math.max(Math.trunc(pageNumber), 1), doc.numPages);
   const page = await doc.getPage(safePage);
   const base = page.getViewport({ scale: 1 });
-  const scale = Math.min(2.2, Math.max(1.35, 1400 / Math.max(base.width, 1)));
+  const scale = Math.min(2.2, Math.max(0.2, maxWidth / Math.max(base.width, 1)));
   const viewport = page.getViewport({ scale });
   canvas.width = Math.ceil(viewport.width);
   canvas.height = Math.ceil(viewport.height);
@@ -53,6 +65,15 @@ export async function renderPdfPage(
   context.fillRect(0, 0, canvas.width, canvas.height);
   await page.render({ canvasContext: context, viewport }).promise;
   return { pages: doc.numPages, width: canvas.width, height: canvas.height };
+}
+
+export async function renderPdfPage(
+  source: PdfSource,
+  pageNumber: number,
+  canvas: HTMLCanvasElement,
+): Promise<{ pages: number; width: number; height: number }> {
+  const doc = await openPdf(source);
+  return renderDocPage(doc, pageNumber, canvas);
 }
 
 export async function canvasCropBlob(

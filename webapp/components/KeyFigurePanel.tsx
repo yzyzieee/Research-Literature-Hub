@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { driveFileId, uploadKeyFigureToDrive } from "@/lib/drive";
 import { EMPTY_KEY_FIGURE } from "@/lib/key-figure";
-import { canvasCropBlob, renderPdfPage } from "@/lib/pdf";
+import { canvasCropBlob, loadPdfDoc, pdfPageCount, renderDocPage, type PdfDoc } from "@/lib/pdf";
 import {
   KEY_FIGURE_ROLES,
   type KeyFigure,
@@ -52,11 +52,25 @@ export default function KeyFigurePanel({
   const [customPreview, setCustomPreview] = useState("");
   const [imageBroken, setImageBroken] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [loadingDoc, setLoadingDoc] = useState(false);
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const prevThumbRef = useRef<HTMLCanvasElement>(null);
+  const nextThumbRef = useRef<HTMLCanvasElement>(null);
   const startRef = useRef<{ x: number; y: number } | null>(null);
   const customRef = useRef<HTMLInputElement>(null);
+  const docRef = useRef<PdfDoc | null>(null);
+  const renderSeq = useRef(0);
+
+  // A stable identity for the PDF source so we reload the doc only when it changes.
+  const sourceKey = pdfFile ? `file:${pdfFile.name}:${pdfFile.size}` : pdfLink ? `link:${pdfLink}` : "";
+
+  const source = () => {
+    if (pdfFile) return pdfFile;
+    const id = driveFileId(pdfLink);
+    return id ? `/api/drive/file?id=${encodeURIComponent(id)}` : "";
+  };
 
   useEffect(() => {
     setFigure(initialFigure);
@@ -68,9 +82,74 @@ export default function KeyFigurePanel({
     if (customPreview.startsWith("blob:")) URL.revokeObjectURL(customPreview);
   }, [customPreview]);
 
+  const renderAll = async (doc: PdfDoc, target: number) => {
+    const seq = ++renderSeq.current;
+    const main = canvasRef.current;
+    if (!main) return;
+    await renderDocPage(doc, target, main, 1400);
+    if (seq !== renderSeq.current) return;
+    setCrop(null);
+    setRendered(true);
+    const count = pdfPageCount(doc);
+    if (prevThumbRef.current) {
+      if (target > 1) await renderDocPage(doc, target - 1, prevThumbRef.current, 240);
+      else prevThumbRef.current.getContext("2d")?.clearRect(0, 0, prevThumbRef.current.width, prevThumbRef.current.height);
+    }
+    if (nextThumbRef.current) {
+      if (target < count) await renderDocPage(doc, target + 1, nextThumbRef.current, 240);
+      else nextThumbRef.current.getContext("2d")?.clearRect(0, 0, nextThumbRef.current.width, nextThumbRef.current.height);
+    }
+  };
+
+  // Load the document once when entering PDF mode, then render the current page.
+  useEffect(() => {
+    if (!editing || customFile || !sourceKey) return;
+    const value = source();
+    if (!value) return;
+    let cancelled = false;
+    setLoadingDoc(true);
+    setMessage(null);
+    loadPdfDoc(value)
+      .then(async (doc) => {
+        if (cancelled) return;
+        docRef.current = doc;
+        const count = pdfPageCount(doc);
+        setPageCount(count);
+        const safe = Math.min(Math.max(page, 1), count);
+        setPage(safe);
+        await renderAll(doc, safe);
+        if (!cancelled) setMessage({ ok: true, text: t("figure.dragHint") });
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setMessage({
+            ok: false,
+            text: `${t("figure.renderFailed")}: ${error instanceof Error ? error.message : error}`,
+          });
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingDoc(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editing, sourceKey, customFile]);
+
   const updateLocal = (next: KeyFigure) => {
     setFigure(next);
     onChange?.(next);
+  };
+
+  const goToPage = (target: number) => {
+    const doc = docRef.current;
+    if (!doc) return;
+    const count = pdfPageCount(doc);
+    const safe = Math.min(Math.max(target, 1), count);
+    if (safe === page && rendered) return;
+    setPage(safe);
+    renderAll(doc, safe).catch(() => {});
   };
 
   const patchCard = async (next: KeyFigure) => {
@@ -87,42 +166,6 @@ export default function KeyFigurePanel({
     if (!response.ok) throw new Error(data.error || t("figure.saveFailed"));
     updateLocal(data.key_figure || next);
     return data as { demo?: boolean };
-  };
-
-  const source = () => {
-    if (pdfFile) return pdfFile;
-    const id = driveFileId(pdfLink);
-    return id ? `/api/drive/file?id=${encodeURIComponent(id)}` : "";
-  };
-
-  const loadPage = async () => {
-    const value = source();
-    if (!value) {
-      setMessage({ ok: false, text: t("figure.noPdf") });
-      return;
-    }
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    setBusy(true);
-    setMessage(null);
-    try {
-      const result = await renderPdfPage(value, page, canvas);
-      const safePage = Math.min(Math.max(page, 1), result.pages);
-      setPage(safePage);
-      setPageCount(result.pages);
-      setRendered(true);
-      setCustomFile(null);
-      setCustomPreview("");
-      setCrop(null);
-      setMessage({ ok: true, text: t("figure.dragHint") });
-    } catch (error) {
-      setMessage({
-        ok: false,
-        text: `${t("figure.renderFailed")}: ${error instanceof Error ? error.message : error}`,
-      });
-    } finally {
-      setBusy(false);
-    }
   };
 
   const pointerPosition = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -269,6 +312,13 @@ export default function KeyFigurePanel({
     }
   };
 
+  const useCanvasMode = () => {
+    if (customPreview.startsWith("blob:")) URL.revokeObjectURL(customPreview);
+    setCustomFile(null);
+    setCustomPreview("");
+    setCrop(null);
+  };
+
   const imageSrc =
     customPreview ||
     (figure.status === "cached" && figure.image_ref
@@ -345,56 +395,22 @@ export default function KeyFigurePanel({
               {figure.reason && <span> {figure.reason}</span>}
             </div>
           )}
-          <div className="key-figure-fields">
-            <label>
-              {t("figure.figureId")}
-              <input
-                value={figure.figure_id || ""}
-                onChange={(event) => updateLocal({ ...figure, figure_id: event.target.value || null })}
-                placeholder="Figure 2"
-              />
-            </label>
-            <label>
-              {t("figure.page")}
-              <input
-                type="number"
-                min={1}
-                max={pageCount || undefined}
-                value={page}
-                onChange={(event) => setPage(Math.max(1, Number(event.target.value) || 1))}
-              />
-            </label>
-            <label>
-              {t("figure.role")}
-              <select
-                value={figure.role || ""}
-                onChange={(event) => updateLocal({
-                  ...figure,
-                  role: (event.target.value || null) as KeyFigureRole | null,
-                })}
-              >
-                <option value="">{t("figure.rolePick")}</option>
-                {KEY_FIGURE_ROLES.map((role) => (
-                  <option value={role} key={role}>{role.replaceAll("_", " ")}</option>
-                ))}
-              </select>
-            </label>
-          </div>
-          <label>
-            {t("figure.caption")}
-            <textarea
-              rows={2}
-              value={figure.caption || ""}
-              onChange={(event) => updateLocal({ ...figure, caption: event.target.value || null })}
-            />
-          </label>
-          <label>
-            {t("figure.reason")}
-            <textarea
-              rows={2}
-              value={figure.reason || ""}
-              onChange={(event) => updateLocal({ ...figure, reason: event.target.value || null })}
-            />
+
+          {/* The only thing a person picks: what kind of figure this is. */}
+          <label className="figure-role-field">
+            {t("figure.role")}
+            <select
+              value={figure.role || ""}
+              onChange={(event) => updateLocal({
+                ...figure,
+                role: (event.target.value || null) as KeyFigureRole | null,
+              })}
+            >
+              <option value="">{t("figure.rolePick")}</option>
+              {KEY_FIGURE_ROLES.map((role) => (
+                <option value={role} key={role}>{t(`figure.roleLabel.${role}`)}</option>
+              ))}
+            </select>
           </label>
 
           <input
@@ -404,69 +420,90 @@ export default function KeyFigurePanel({
             hidden
             onChange={(event) => onCustomImage(event.target.files?.[0])}
           />
-          <div className="btn-row">
-            <button className="btn" onClick={loadPage} disabled={busy || !source()}>
-              {busy && !progress ? t("figure.rendering") : t("figure.loadPage")}
-            </button>
-            <button className="btn" onClick={() => customRef.current?.click()} disabled={busy}>
-              {t("figure.uploadImage")}
-            </button>
-            {(rendered || customFile) && (
-              <button
-                className="btn"
-                onClick={() => {
-                  setCrop(null);
-                  setCustomFile(null);
-                  setCustomPreview("");
-                }}
-                disabled={busy}
-              >
-                {t("figure.resetSelection")}
-              </button>
-            )}
-            {persist && figure.status === "cached" && (
-              <button
-                className="btn"
-                onClick={() => {
-                  setFigure(initialFigure);
-                  setPage(initialFigure.page || 1);
-                  setRendered(false);
-                  setCrop(null);
-                  setCustomFile(null);
-                  setCustomPreview("");
-                  setEditing(false);
-                  setMessage(null);
-                }}
-                disabled={busy}
-              >
-                {t("figure.cancel")}
-              </button>
-            )}
-          </div>
 
-          <div
-            className={`key-figure-crop ${customPreview ? "custom" : ""} ${
-              !rendered && !customPreview ? "is-hidden" : ""
-            }`}
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={onPointerUp}
-            onPointerCancel={onPointerUp}
-          >
-            {customPreview && <img src={customPreview} alt={t("figure.customPreview")} />}
-            <canvas ref={canvasRef} className={customPreview ? "hidden" : ""} />
-            {crop && !customPreview && (
-              <span
-                className="crop-selection"
-                style={{
-                  left: crop.x,
-                  top: crop.y,
-                  width: crop.width,
-                  height: crop.height,
-                }}
-              />
-            )}
-          </div>
+          {!customPreview && (
+            <div className="figure-pager">
+              <button
+                className="btn"
+                onClick={() => goToPage(page - 1)}
+                disabled={loadingDoc || busy || page <= 1}
+                aria-label={t("figure.prevPage")}
+              >
+                ‹ {t("figure.prevPage")}
+              </button>
+              <span className="figure-pager-status">
+                {loadingDoc
+                  ? t("figure.rendering")
+                  : pageCount
+                    ? `${t("figure.page")} ${page} / ${pageCount}`
+                    : t("figure.noPdf")}
+              </span>
+              <button
+                className="btn"
+                onClick={() => goToPage(page + 1)}
+                disabled={loadingDoc || busy || (pageCount > 0 && page >= pageCount)}
+                aria-label={t("figure.nextPage")}
+              >
+                {t("figure.nextPage")} ›
+              </button>
+              <button className="btn" onClick={() => customRef.current?.click()} disabled={busy}>
+                {t("figure.uploadImage")}
+              </button>
+            </div>
+          )}
+          {customPreview && (
+            <div className="btn-row">
+              <button className="btn" onClick={useCanvasMode} disabled={busy}>
+                {t("figure.backToPdf")}
+              </button>
+            </div>
+          )}
+
+          {/* Presenter-mode view: prev thumb · current page · next thumb. */}
+          {!customPreview && (
+            <div className="figure-presenter">
+              <button
+                type="button"
+                className="figure-thumb"
+                onClick={() => goToPage(page - 1)}
+                disabled={loadingDoc || page <= 1}
+                aria-label={t("figure.prevPage")}
+              >
+                <canvas ref={prevThumbRef} />
+              </button>
+              <div
+                className={`key-figure-crop ${!rendered ? "is-hidden" : ""}`}
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerUp}
+                onPointerCancel={onPointerUp}
+              >
+                <canvas ref={canvasRef} />
+                {crop && (
+                  <span
+                    className="crop-selection"
+                    style={{ left: crop.x, top: crop.y, width: crop.width, height: crop.height }}
+                  />
+                )}
+              </div>
+              <button
+                type="button"
+                className="figure-thumb"
+                onClick={() => goToPage(page + 1)}
+                disabled={loadingDoc || (pageCount > 0 && page >= pageCount)}
+                aria-label={t("figure.nextPage")}
+              >
+                <canvas ref={nextThumbRef} />
+              </button>
+            </div>
+          )}
+
+          {customPreview && (
+            <div className="key-figure-crop custom">
+              <img src={customPreview} alt={t("figure.customPreview")} />
+            </div>
+          )}
+
           {(rendered || customFile) && (
             <>
               {!canCache && <div className="notice warn">{t("figure.archiveFirst")}</div>}
@@ -475,11 +512,28 @@ export default function KeyFigurePanel({
                   <span style={{ width: `${progress}%` }} />
                 </div>
               )}
-              <button className="btn primary" onClick={confirmFigure} disabled={busy || !canCache}>
-                {busy && progress > 0
-                  ? `${t("figure.caching")} ${progress}%`
-                  : t("figure.confirm")}
-              </button>
+              <div className="btn-row">
+                <button className="btn primary" onClick={confirmFigure} disabled={busy || !canCache}>
+                  {busy && progress > 0 ? `${t("figure.caching")} ${progress}%` : t("figure.confirm")}
+                </button>
+                {persist && figure.status === "cached" && (
+                  <button
+                    className="btn"
+                    onClick={() => {
+                      setFigure(initialFigure);
+                      setPage(initialFigure.page || 1);
+                      setRendered(false);
+                      setCrop(null);
+                      useCanvasMode();
+                      setEditing(false);
+                      setMessage(null);
+                    }}
+                    disabled={busy}
+                  >
+                    {t("figure.cancel")}
+                  </button>
+                )}
+              </div>
             </>
           )}
         </div>

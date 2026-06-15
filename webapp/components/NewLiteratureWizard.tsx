@@ -643,15 +643,6 @@ export default function NewLiteratureWizard() {
     }
   };
 
-  const download = () => {
-    const blob = new Blob([fullMarkdown()], { type: "text/markdown;charset=utf-8" });
-    const anchor = document.createElement("a");
-    anchor.href = URL.createObjectURL(blob);
-    anchor.download = `${slug || "literature"}.md`;
-    anchor.click();
-    URL.revokeObjectURL(anchor.href);
-  };
-
   return (
     <>
       {guest && <div className="notice guest">{t("new.demoHint")}</div>}
@@ -905,15 +896,6 @@ export default function NewLiteratureWizard() {
           )}
         </details>
 
-        <KeyFigurePanel
-          slug={slug}
-          initialFigure={keyFigure}
-          pdfFile={pdfFile}
-          pdfLink={archived?.link || ""}
-          canCache={Boolean(archived) || guest}
-          onChange={setKeyFigure}
-        />
-
         <label>{t("new.drive")}</label>
         <input value={drive} onChange={(event) => setDrive(event.target.value)} />
 
@@ -1021,6 +1003,17 @@ export default function NewLiteratureWizard() {
         </div>
       )}
 
+      <div className="form-card">
+        <KeyFigurePanel
+          slug={slug}
+          initialFigure={keyFigure}
+          pdfFile={pdfFile}
+          pdfLink={archived?.link || ""}
+          canCache={Boolean(archived) || guest}
+          onChange={setKeyFigure}
+        />
+      </div>
+
       {msg && !published && (
         <div className={`notice ${msg.kind}`}>
           {msg.text} {msg.link && !guest && <a href={msg.link} target="_blank" rel="noreferrer">{msg.link}</a>}
@@ -1066,10 +1059,6 @@ export default function NewLiteratureWizard() {
             : busy === "commit"
               ? t("new.submitting")
               : t("new.submitPr")}
-        </button>
-        <button className="btn" onClick={download} disabled={!ready}>{t("new.download")}</button>
-        <button className="btn" onClick={() => navigator.clipboard.writeText(fullMarkdown())} disabled={!ready}>
-          {t("new.copyMd")}
         </button>
       </div>
       {currentUser && <p className="subtitle">{t("new.publishingAs")}: <b>{currentUser}</b></p>}
