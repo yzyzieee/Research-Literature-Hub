@@ -1,13 +1,14 @@
 import Link from "next/link";
-import { getCards, toMeta } from "@/lib/kb";
+import { toMeta } from "@/lib/kb";
+import { getCardsRemote } from "@/lib/kb-remote";
 import { isLiterature } from "@/lib/types";
 import { T } from "@/lib/i18n";
 import CardListItem from "@/components/CardListItem";
 
-export const dynamic = "force-static";
+export const revalidate = 300;
 
-export default function HomePage() {
-  const cards = getCards().filter(isLiterature);
+export default async function HomePage() {
+  const cards = (await getCardsRemote()).filter(isLiterature);
   const official = cards.filter((c) => c.folder !== "pending");
   const rated = official.filter((c) => c.rating);
   const recent = [...cards]

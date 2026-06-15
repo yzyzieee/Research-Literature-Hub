@@ -1,5 +1,7 @@
 import matter from "gray-matter";
+import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
+import { CARDS_TAG } from "@/lib/kb-remote";
 import { currentTeamMember } from "@/lib/current-member";
 import { decodeGitHubFile, readGitHubFile, writeGitHubFile } from "@/lib/github-content";
 import { isGuest } from "@/lib/guest";
@@ -65,10 +67,11 @@ export async function PATCH(
           sha: file.sha,
           message: `literature: update key figure for ${slug} by ${member.id}`,
         });
+        revalidateTag(CARDS_TAG);
         return NextResponse.json({
           saved: true,
           key_figure: keyFigure,
-          deploy_pending: true,
+          deploy_pending: false,
         });
       } catch (error) {
         if (!(error instanceof Error) || !error.message.includes("(409)") || attempt === 2) {

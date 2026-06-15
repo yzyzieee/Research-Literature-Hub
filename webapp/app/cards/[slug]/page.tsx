@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCard, getCards, toMeta } from "@/lib/kb";
+import { getCards, toMeta } from "@/lib/kb";
+import { getCardRemote, getCardsRemote } from "@/lib/kb-remote";
 import { renderCardBody } from "@/lib/markdown";
 import { cardToPrompt } from "@/lib/export";
 import { domainLabel, publicationTypeLabel } from "@/lib/types";
@@ -12,7 +13,7 @@ import KeyReferencesPanel from "@/components/KeyReferencesPanel";
 import CardActions from "@/components/CardActions";
 import KeyFigurePanel from "@/components/KeyFigurePanel";
 
-export const dynamic = "force-static";
+export const revalidate = 300;
 
 export function generateStaticParams() {
   return getCards().map((c) => ({ slug: c.slug }));
@@ -20,10 +21,10 @@ export function generateStaticParams() {
 
 export default async function CardPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const card = getCard(slug);
+  const card = await getCardRemote(slug);
   if (!card) notFound();
 
-  const all = getCards().map(toMeta);
+  const all = (await getCardsRemote()).map(toMeta);
   const html = await renderCardBody(card.body, all);
   const related = card.related
     .map((r) => all.find((c) => c.slug === r))

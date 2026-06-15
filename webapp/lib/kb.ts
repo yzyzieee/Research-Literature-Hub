@@ -114,9 +114,8 @@ function parseComments(value: unknown): CommentEntry[] {
   });
 }
 
-function parseCard(filePath: string, folder: string): Card | null {
+export function parseCardContent(slug: string, folder: string, raw: string): Card | null {
   try {
-    const raw = fs.readFileSync(filePath, "utf-8");
     const { data, content } = matter(raw);
     const legacyType = String(data.type ?? "");
     const legacySourceType = String(data.source_type ?? "");
@@ -137,9 +136,9 @@ function parseCard(filePath: string, folder: string): Card | null {
       other: "other",
     };
     return {
-      slug: path.basename(filePath, ".md"),
+      slug,
       folder,
-      title: String(data.title ?? path.basename(filePath, ".md")),
+      title: String(data.title ?? slug),
       entry_type: entryType,
       publication_type: String(
         data.publication_type ?? publicationTypeMap[legacySourceType] ?? "",
@@ -178,6 +177,31 @@ function parseCard(filePath: string, folder: string): Card | null {
   }
 }
 
+function parseCard(filePath: string, folder: string): Card | null {
+  try {
+    return parseCardContent(path.basename(filePath, ".md"), folder, fs.readFileSync(filePath, "utf-8"));
+  } catch {
+    return null;
+  }
+}
+
+// Sort and resolve [[wiki-link]] key references across the whole set. Shared by
+// the build-time (fs) reader and the runtime (GitHub) reader so both behave the same.
+export function linkCardReferences(cards: Card[]): Card[] {
+  cards.sort((a, b) => a.slug.localeCompare(b.slug));
+  const referenceIndexes = buildKeyReferenceIndexes(cards);
+  for (const card of cards) {
+    card.key_references = linkKeyReferencesWithIndexes(
+      card.key_references,
+      referenceIndexes,
+      card.slug,
+    );
+  }
+  return cards;
+}
+
+export const KB_CARD_DIRS = CARD_DIRS;
+
 export function getCards(): Card[] {
   const cards: Card[] = [];
   for (const dir of CARD_DIRS) {
@@ -189,16 +213,7 @@ export function getCards(): Card[] {
       if (card) cards.push(card);
     }
   }
-  cards.sort((a, b) => a.slug.localeCompare(b.slug));
-  const referenceIndexes = buildKeyReferenceIndexes(cards);
-  for (const card of cards) {
-    card.key_references = linkKeyReferencesWithIndexes(
-      card.key_references,
-      referenceIndexes,
-      card.slug,
-    );
-  }
-  return cards;
+  return linkCardReferences(cards);
 }
 
 export function getCard(slug: string): Card | null {
