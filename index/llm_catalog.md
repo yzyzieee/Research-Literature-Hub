@@ -4,9 +4,27 @@ Use this file as the entry point for searching our internal literature library.
 Search this catalog first, then open only the most relevant literature record files.
 Do not assume private Google Drive PDFs are accessible.
 
-Papers: 4
+Papers: 5
 
 ## Papers
+
+### Oh2024Enhancing
+- Title: Enhancing active noise control of road noise using deep neural network to update secondary path estimate in real time
+- Year: 2024
+- Venue: Mechanical Systems and Signal Processing
+- Publication type: journal-paper
+- Primary domain: active-noise-control
+- Domains: active-noise-control, machine-learning-audio
+- Tags: active-noise-control, secondary-path-estimation, deep-neural-network, real-time-update, principal-component-analysis
+- Team weight: unrated
+- Summary: This paper introduces a novel deep learning-based approach to enhance active noise control (ANC) performance in vehicles by enabling real-time updates of the secondary path estimate. The dynamic nature of vehicle environments causes significant variations in the secondary path, degrading ANC effectiveness. The authors identified key spatial conditions (vertical, horizontal, roll, yaw) influencing these variations an…
+- Key related papers:
+  - [foundation] Advances in active noise control: A survey, with emphasis on recent nonlinear techniques (2013, DOI: 10.1016/j.sigpro.2012.08.013) - Provides a broad overview of active noise control techniques, setting the foundation for the problem addressed in the paper.
+  - [foundation] Active noise control systems: algorithms and DSP implementations (2015, DOI: 10.1016/j.ymssp.2015.01.008) - Discusses fundamental algorithms like FxLMS, which are central to ANC systems and the context of this work.
+  - [related_work] A review of virtual sensing algorithms for active noise control (2008, DOI: 10.3390/a1020069) - Introduces virtual sensing, a related concept to real-time path estimation for ANC in dynamic environments.
+  - [related_work] Deep learning-based active noise control: A deep learning approach to active noise control (2021, DOI: 10.1016/j.neunet.2021.03.037) - Represents prior work applying deep learning to ANC, though not specifically for real-time secondary path estimation in vehicles.
+  - [related_work] Deep learning-assisted active noise control in a time-varying environment (2023, DOI: 10.1007/s12206-023-0206-2) - Explores deep learning for ANC in time-varying environments, similar to the dynamic conditions addressed in this paper.
+- Record: https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Oh2024Enhancing.md
 
 ### Xiao2023Spatially
 - Title: Spatially selective active noise control systems

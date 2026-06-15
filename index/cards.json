@@ -1,5 +1,96 @@
 [
   {
+    "slug": "Oh2024Enhancing",
+    "path": "official/Oh2024Enhancing.md",
+    "folder": "official",
+    "title": "Enhancing active noise control of road noise using deep neural network to update secondary path estimate in real time",
+    "entry_type": "literature",
+    "publication_type": "journal-paper",
+    "primary_domain": "active-noise-control",
+    "domains": [
+      "active-noise-control",
+      "machine-learning-audio"
+    ],
+    "venue": "Mechanical Systems and Signal Processing",
+    "doi": "10.1016/j.ymssp.2023.110940",
+    "abstract": "The performance of active noise control (ANC) is significantly influenced by the accuracy of the secondary path estimate. In the case of a vehicle, dynamic environments, which constantly change the secondary path, can degrade the ANC performance. To address this issue, we proposed a deep learning-based method to continuously update the secondary path estimate in real time. The sensitivity of secondary paths to various conditions was analyzed, with vertical, horizontal, roll, and yaw conditions identified as primary factors; subsequently, a dataset corresponding to these conditions was created. Estimation models were formulated using Delaunay triangulation- based interpolation and three deep neural network (DNN)-based methods which incorporated diverse representations of the secondary path domain. All the methods precisely estimated the secondary path under different conditions. Notably, DNN-based methods required significantly less data storage than the interpolation method, with the principal component analysis (PCA)- based approach performing the best, achieving a 98.5 % reduction. Using this method, updating the secondary path estimate in real time led to reductions of 10.2 and 17.2 dB in road noise and 500 – 1,000 Hz random noise, respectively. The improvement was notable for both types of noises, indicating that the suggested method can expand the frequency range of ANC.",
+    "status": "official",
+    "tags": [
+      "active-noise-control",
+      "secondary-path-estimation",
+      "deep-neural-network",
+      "real-time-update",
+      "principal-component-analysis"
+    ],
+    "authors": [
+      "Jun Young Oh",
+      "Hyun Woo Jung",
+      "Myung Han Lee",
+      "Kyoung Hoon Lee",
+      "Yeon June Kang"
+    ],
+    "year": 2024,
+    "citation_key": "Oh2024Enhancing",
+    "key_references": [
+      {
+        "title": "Advances in active noise control: A survey, with emphasis on recent nonlinear techniques",
+        "doi": "10.1016/j.sigpro.2012.08.013",
+        "year": 2013,
+        "role": "foundation",
+        "reason": "Provides a broad overview of active noise control techniques, setting the foundation for the problem addressed in the paper.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Active noise control systems: algorithms and DSP implementations",
+        "doi": "10.1016/j.ymssp.2015.01.008",
+        "year": 2015,
+        "role": "foundation",
+        "reason": "Discusses fundamental algorithms like FxLMS, which are central to ANC systems and the context of this work.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "A review of virtual sensing algorithms for active noise control",
+        "doi": "10.3390/a1020069",
+        "year": 2008,
+        "role": "related_work",
+        "reason": "Introduces virtual sensing, a related concept to real-time path estimation for ANC in dynamic environments.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Deep learning-based active noise control: A deep learning approach to active noise control",
+        "doi": "10.1016/j.neunet.2021.03.037",
+        "year": 2021,
+        "role": "related_work",
+        "reason": "Represents prior work applying deep learning to ANC, though not specifically for real-time secondary path estimation in vehicles.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Deep learning-assisted active noise control in a time-varying environment",
+        "doi": "10.1007/s12206-023-0206-2",
+        "year": 2023,
+        "role": "related_work",
+        "reason": "Explores deep learning for ANC in time-varying environments, similar to the dynamic conditions addressed in this paper.",
+        "status": "external",
+        "linked_card": null
+      }
+    ],
+    "related": [],
+    "drive": [
+      "https://drive.google.com/file/d/15MKFyDyhyMSXCMxbesu20RzVUc89_mpZ/view?usp=drivesdk"
+    ],
+    "created": "2026-06-15",
+    "rating": null,
+    "comments": [],
+    "uploaded_by": "YZY",
+    "uploaded_at": "2026-06-15T19:14:12.683Z",
+    "summary": "This paper introduces a novel deep learning-based approach to enhance active noise control (ANC) performance in vehicles by enabling real-time updates of the secondary path estimate. The dynamic nature of vehicle environments causes significant variations in the secondary path, degrading ANC effectiveness. The authors identified key spatial conditions (vertical, horizontal, roll, yaw) influencing these variations and created a dataset to train estimation models. They compared Delaunay triangulation-based interpolation with three deep neural network (DNN) methods, including one based on Principal Component Analysis (PCA). The PCA-based DNN approach demonstrated superior performance, achieving a 98.5% reduction in data storage compared to interpolation while maintaining high estimation accuracy. Experimental validation showed that real-time secondary path updates using this method reduced road noise by 10.2 dB and random noise (500-1000 Hz) by 17.2 dB, indicating its potential to expand the effective frequency range of ANC systems.",
+    "legacy_type": ""
+  },
+  {
     "slug": "Xiao2023Spatially",
     "path": "official/Xiao2023Spatially.md",
     "folder": "official",
