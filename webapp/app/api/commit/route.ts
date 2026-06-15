@@ -1,5 +1,7 @@
 import matter from "gray-matter";
+import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
+import { CARDS_TAG } from "@/lib/kb-remote";
 import { normalizedDoi, normalizedTitle } from "@/lib/duplicates";
 import { isGuest } from "@/lib/guest";
 import { githubServerConfig } from "@/lib/github-config";
@@ -197,6 +199,7 @@ export async function POST(req: NextRequest) {
         branch: base,
       }),
     });
+    revalidateTag(CARDS_TAG);
     return NextResponse.json({
       card_url: result.content?.html_url || `https://github.com/${repo}/blob/${base}/official/${slug}.md`,
       commit_sha: result.commit?.sha,

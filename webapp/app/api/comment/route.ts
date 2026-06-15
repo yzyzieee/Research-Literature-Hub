@@ -1,5 +1,7 @@
 import matter from "gray-matter";
+import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
+import { CARDS_TAG } from "@/lib/kb-remote";
 import type { CommentEntry } from "@/lib/types";
 import { GUEST_MEMBER, isGuest } from "@/lib/guest";
 import { githubServerConfig } from "@/lib/github-config";
@@ -193,6 +195,7 @@ export async function POST(req: NextRequest) {
         throw new Error(`GitHub write failed (${response.status}): ${(await response.text()).slice(0, 200)}`);
       }
       const result = await response.json();
+      revalidateTag(CARDS_TAG);
       return NextResponse.json({
         comments,
         saved,

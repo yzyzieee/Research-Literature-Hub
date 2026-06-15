@@ -1,5 +1,7 @@
 import matter from "gray-matter";
+import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
+import { CARDS_TAG } from "@/lib/kb-remote";
 import { validateLiteratureContent, stringifyLiteratureContent } from "@/lib/card-content";
 import { currentTeamMember } from "@/lib/current-member";
 import { isGuest } from "@/lib/guest";
@@ -146,10 +148,11 @@ export async function PATCH(
           sha: file.sha,
           message: `literature: edit ${context.slug} by ${context.member.id}`,
         });
+        revalidateTag(CARDS_TAG);
         return NextResponse.json({
           saved: true,
           card_url: result.content?.html_url,
-          deploy_pending: true,
+          deploy_pending: false,
         });
       } catch (error) {
         if (!(error instanceof Error) || !error.message.includes("(409)") || attempt === 2) {
@@ -206,11 +209,12 @@ export async function DELETE(
         console.warn(`Key Figure cleanup failed for ${context.slug}:`, error);
       }
     }
+    revalidateTag(CARDS_TAG);
     return NextResponse.json({
       deleted: true,
       pdf_preserved: true,
       key_figure_deleted: keyFigureDeleted,
-      deploy_pending: true,
+      deploy_pending: false,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

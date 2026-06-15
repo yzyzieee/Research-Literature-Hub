@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 import CardEditor from "@/components/CardEditor";
 import { T } from "@/lib/i18n";
-import { getCard, getCards } from "@/lib/kb";
+import { getCards } from "@/lib/kb";
+import { getCardRemote } from "@/lib/kb-remote";
 
-export const dynamic = "force-static";
+export const revalidate = 300;
 
 export function generateStaticParams() {
   return getCards()
@@ -17,7 +18,7 @@ export default async function EditCardPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const card = getCard(slug);
+  const card = await getCardRemote(slug);
   if (!card || card.folder !== "official" || card.entry_type !== "literature") notFound();
 
   return (
