@@ -35,6 +35,10 @@ LITERATURE_SECTIONS = [
 KEY_REFERENCE_ROLES = {
     "foundation", "method", "baseline", "dataset", "survey", "related_work"}
 KEY_REFERENCE_STATUSES = {"in_library", "external"}
+KEY_FIGURE_STATUSES = {"none", "suggested", "cached", "missing"}
+KEY_FIGURE_ROLES = {
+    "method_overview", "model_architecture", "system_setup", "main_result",
+    "ablation_result", "dataset_overview"}
 
 
 def main() -> int:
@@ -185,6 +189,33 @@ def main() -> int:
                             raise ValueError
                     except (TypeError, ValueError):
                         errors.append(f"{prefix} has invalid year '{year}'")
+
+        key_figure = meta.get("key_figure")
+        if key_figure is not None:
+            prefix = f"{where}: key_figure"
+            if not isinstance(key_figure, dict):
+                errors.append(f"{prefix} must be a mapping")
+            else:
+                figure_status = str(key_figure.get("status", "none")).strip()
+                if figure_status not in KEY_FIGURE_STATUSES:
+                    errors.append(f"{prefix} invalid status '{figure_status}'")
+                figure_role = str(key_figure.get("role", "") or "").strip()
+                if figure_role and figure_role not in KEY_FIGURE_ROLES:
+                    errors.append(f"{prefix} invalid role '{figure_role}'")
+                figure_page = key_figure.get("page")
+                if figure_page not in (None, ""):
+                    try:
+                        if int(figure_page) < 1:
+                            raise ValueError
+                    except (TypeError, ValueError):
+                        errors.append(f"{prefix} has invalid page '{figure_page}'")
+                image_ref = str(key_figure.get("image_ref", "") or "").strip()
+                if figure_status == "cached" and not re.match(r"^[A-Za-z0-9_-]{8,}$", image_ref):
+                    errors.append(f"{prefix} cached status requires a private Drive file ID")
+                if figure_status == "suggested" and image_ref:
+                    errors.append(f"{prefix} suggested status must not contain image_ref")
+                if figure_status == "cached" and key_figure.get("image_private") is not True:
+                    errors.append(f"{prefix} cached images must set image_private: true")
 
         if card.folder == PENDING_DIR:
             if status == "official":

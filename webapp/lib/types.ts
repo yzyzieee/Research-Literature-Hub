@@ -25,6 +25,17 @@ export const KEY_REFERENCE_ROLES = [
 ] as const;
 export type KeyReferenceRole = (typeof KEY_REFERENCE_ROLES)[number];
 export type KeyReferenceStatus = "in_library" | "external";
+export const KEY_FIGURE_STATUSES = ["none", "suggested", "cached", "missing"] as const;
+export type KeyFigureStatus = (typeof KEY_FIGURE_STATUSES)[number];
+export const KEY_FIGURE_ROLES = [
+  "method_overview",
+  "model_architecture",
+  "system_setup",
+  "main_result",
+  "ablation_result",
+  "dataset_overview",
+] as const;
+export type KeyFigureRole = (typeof KEY_FIGURE_ROLES)[number];
 
 export interface KeyReference {
   title: string;
@@ -34,6 +45,17 @@ export interface KeyReference {
   reason: string;
   status: KeyReferenceStatus;
   linked_card: string | null;
+}
+
+export interface KeyFigure {
+  status: KeyFigureStatus;
+  figure_id: string | null;
+  page: number | null;
+  role: KeyFigureRole | null;
+  caption: string | null;
+  reason: string | null;
+  image_ref: string | null;
+  image_private: boolean;
 }
 
 export interface TeamMember {
@@ -98,6 +120,7 @@ export interface CardMeta {
   year: number | null;
   citation_key: string;
   key_references: KeyReference[];
+  key_figure: KeyFigure;
   related: string[];
   drive: string[];
   created: string;

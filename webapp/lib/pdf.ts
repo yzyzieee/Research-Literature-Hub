@@ -1,22 +1,86 @@
-// Client-side PDF text extraction. Runs entirely in the browser so large PDFs
-// never hit the serverless body limit — only the extracted text is sent on.
+// Client-side PDF processing. Large PDFs stay in the browser; only extracted
+// text or a user-confirmed image crop is sent to the app.
+
+type PdfSource = File | Blob | ArrayBuffer | string;
+
+async function pdfJs() {
+  const pdfjs = await import("pdfjs-dist");
+  pdfjs.GlobalWorkerOptions.workerSrc =
+    `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+  return pdfjs;
+}
+
+async function openPdf(source: PdfSource) {
+  const pdfjs = await pdfJs();
+  if (typeof source === "string") {
+    return pdfjs.getDocument({ url: source, withCredentials: true }).promise;
+  }
+  const data = source instanceof ArrayBuffer ? source : await source.arrayBuffer();
+  return pdfjs.getDocument({ data }).promise;
+}
 
 export async function extractPdfText(file: File, maxChars = 60000): Promise<string> {
-  // Dynamic import keeps pdfjs out of the server bundle / SSR pass.
-  const pdfjs = await import("pdfjs-dist");
-  pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
-
-  const data = await file.arrayBuffer();
-  const doc = await pdfjs.getDocument({ data }).promise;
+  const doc = await openPdf(file);
   let out = "";
   for (let i = 1; i <= doc.numPages; i++) {
     const page = await doc.getPage(i);
     const content = await page.getTextContent();
     const line = content.items
-      .map((it) => ("str" in it ? (it as { str: string }).str : ""))
+      .map((item) => ("str" in item ? (item as { str: string }).str : ""))
       .join(" ");
-    out += line + "\n";
+    out += `\n--- PDF PAGE ${i} ---\n${line}\n`;
     if (out.length >= maxChars) break;
   }
   return out.slice(0, maxChars).trim();
+}
+
+export async function renderPdfPage(
+  source: PdfSource,
+  pageNumber: number,
+  canvas: HTMLCanvasElement,
+): Promise<{ pages: number; width: number; height: number }> {
+  const doc = await openPdf(source);
+  const safePage = Math.min(Math.max(Math.trunc(pageNumber), 1), doc.numPages);
+  const page = await doc.getPage(safePage);
+  const base = page.getViewport({ scale: 1 });
+  const scale = Math.min(2.2, Math.max(1.35, 1400 / Math.max(base.width, 1)));
+  const viewport = page.getViewport({ scale });
+  canvas.width = Math.ceil(viewport.width);
+  canvas.height = Math.ceil(viewport.height);
+  const context = canvas.getContext("2d", { alpha: false });
+  if (!context) throw new Error("Canvas rendering is unavailable in this browser.");
+  context.fillStyle = "#fff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  await page.render({ canvasContext: context, viewport }).promise;
+  return { pages: doc.numPages, width: canvas.width, height: canvas.height };
+}
+
+export async function canvasCropBlob(
+  canvas: HTMLCanvasElement,
+  crop?: { x: number; y: number; width: number; height: number } | null,
+): Promise<Blob> {
+  const rect = crop && crop.width >= 8 && crop.height >= 8
+    ? crop
+    : { x: 0, y: 0, width: canvas.clientWidth, height: canvas.clientHeight };
+  const scaleX = canvas.width / Math.max(canvas.clientWidth, 1);
+  const scaleY = canvas.height / Math.max(canvas.clientHeight, 1);
+  const sx = Math.max(0, Math.round(rect.x * scaleX));
+  const sy = Math.max(0, Math.round(rect.y * scaleY));
+  const sw = Math.min(canvas.width - sx, Math.max(1, Math.round(rect.width * scaleX)));
+  const sh = Math.min(canvas.height - sy, Math.max(1, Math.round(rect.height * scaleY)));
+  const output = document.createElement("canvas");
+  output.width = sw;
+  output.height = sh;
+  const context = output.getContext("2d", { alpha: false });
+  if (!context) throw new Error("Canvas export is unavailable in this browser.");
+  context.fillStyle = "#fff";
+  context.fillRect(0, 0, sw, sh);
+  context.drawImage(canvas, sx, sy, sw, sh, 0, 0, sw, sh);
+  return new Promise((resolve, reject) => {
+    output.toBlob(
+      (blob) => blob ? resolve(blob) : reject(new Error("Could not create the figure preview.")),
+      "image/png",
+      0.92,
+    );
+  });
 }

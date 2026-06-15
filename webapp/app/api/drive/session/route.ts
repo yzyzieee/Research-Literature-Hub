@@ -74,24 +74,40 @@ function nextId(files: DriveFile[]): string {
 
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as {
+    kind?: "paper" | "key-figure";
     base?: string;
+    figureId?: string;
     mimeType?: string;
     size?: number;
     doi?: string;
   };
+  const kind = body.kind === "key-figure" ? "key-figure" : "paper";
   const base = (body.base || "file")
     .trim()
     .replace(/[^A-Za-z0-9._-]+/g, "-")
     .replace(/^-+|-+$/g, "") || "file";
   const doi = normalizedDoi(body.doi);
+  const figureId = String(body.figureId || "figure")
+    .trim()
+    .replace(/[^A-Za-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80) || "figure";
+  const imageMimeTypes = new Set(["image/png", "image/jpeg", "image/webp"]);
+  if (kind === "key-figure" && !imageMimeTypes.has(body.mimeType || "")) {
+    return NextResponse.json({ error: "Key figures must be PNG, JPEG, or WebP images." }, { status: 400 });
+  }
+  if (kind === "key-figure" && (!body.size || body.size > 15 * 1024 * 1024)) {
+    return NextResponse.json({ error: "Key figure images must be no larger than 15 MB." }, { status: 400 });
+  }
   const username = req.headers.get("x-kb-user") || "unknown";
   const uploadedAt = new Date().toISOString();
   if (isGuest(username)) {
+    const extension = body.mimeType === "image/jpeg" ? "jpg" : body.mimeType === "image/webp" ? "webp" : "png";
     return NextResponse.json({
       demo: {
         id: `guest-${Date.now().toString(36)}`,
-        name: `DEMO_${base}.pdf`,
-        link: "/new#guest-demo-pdf",
+        name: kind === "key-figure" ? `DEMO_KEYFIG_${base}.${extension}` : `DEMO_${base}.pdf`,
+        link: kind === "key-figure" ? "/new#guest-demo-key-figure" : "/new#guest-demo-pdf",
         uploadedBy: GUEST_MEMBER.id,
         uploadedAt,
       },
@@ -116,6 +132,46 @@ export async function POST(req: NextRequest) {
 
   try {
     const rootId = process.env.DRIVE_FOLDER_ID;
+    if (kind === "key-figure") {
+      const extension =
+        body.mimeType === "image/jpeg" ? "jpg" : body.mimeType === "image/webp" ? "webp" : "png";
+      const name = `KEYFIG_${base}_${figureId}_${Date.now().toString(36)}.${extension}`;
+      const init = await fetch(
+        "https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&supportsAllDrives=true&fields=id,webViewLink",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json; charset=UTF-8",
+            "X-Upload-Content-Type": body.mimeType || "image/png",
+            ...(body.size ? { "X-Upload-Content-Length": String(body.size) } : {}),
+          },
+          body: JSON.stringify({
+            name,
+            ...(rootId ? { parents: [rootId] } : {}),
+            appProperties: {
+              assetKind: "keyFigure",
+              literatureKey: base,
+              figureId,
+              uploadedBy: username,
+              uploadedAt,
+            },
+          }),
+        },
+      );
+      if (!init.ok) {
+        return NextResponse.json(
+          { error: `Drive init ${init.status}: ${(await init.text()).slice(0, 300)}` },
+          { status: 502 },
+        );
+      }
+      const uploadUrl = init.headers.get("location");
+      if (!uploadUrl) {
+        return NextResponse.json({ error: "Drive returned no resumable session URL." }, { status: 502 });
+      }
+      return NextResponse.json({ uploadUrl, name, uploadedBy: username, uploadedAt });
+    }
+
     const visibleFiles = await listLibraryFiles(token);
     const files = visibleFiles.filter(
       (file) => Boolean(file.appProperties?.literatureKey) ||

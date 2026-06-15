@@ -2,6 +2,7 @@ import matter from "gray-matter";
 import { DOMAINS, PUBLICATION_TYPES } from "./types";
 import { getCards } from "./kb";
 import { linkKeyReferences, parseKeyReferences } from "./key-references";
+import { parseKeyFigure } from "./key-figure";
 
 export function validateLiteratureContent(slug: string, content: string) {
   const parsed = matter(content);
@@ -56,6 +57,7 @@ export function validateLiteratureContent(slug: string, content: string) {
     getCards(),
     slug,
   );
+  data.key_figure = parseKeyFigure(data.key_figure);
   return parsed;
 }
 

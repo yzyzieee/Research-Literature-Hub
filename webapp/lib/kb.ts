@@ -18,6 +18,7 @@ import {
   linkKeyReferencesWithIndexes,
   parseKeyReferences,
 } from "./key-references";
+import { parseKeyFigure } from "./key-figure";
 
 const KB_ROOT = process.env.KB_PATH || path.resolve(process.cwd(), "..");
 const CARD_DIRS = ["official", "pending"];
@@ -154,6 +155,7 @@ function parseCard(filePath: string, folder: string): Card | null {
       year: data.year ? Number(data.year) : null,
       citation_key: String(data.citation_key ?? ""),
       key_references: parseKeyReferences(data.key_references),
+      key_figure: parseKeyFigure(data.key_figure),
       related: Array.isArray(data.related) ? data.related.map(String) : [],
       drive: Array.isArray(data.drive) ? data.drive.map(String) : [],
       created: String(data.created ?? ""),

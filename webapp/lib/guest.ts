@@ -1,5 +1,6 @@
 import { DOMAINS } from "./types";
 import type { TeamMember } from "./types";
+import { EMPTY_KEY_FIGURE } from "./key-figure";
 
 export const GUEST_ID = "GUEST";
 
@@ -38,6 +39,15 @@ export function guestLiteratureDraft(seed = "") {
     tags: ["anc", "adaptive-filter", "demo"],
     citation_key: `Guest${year}Demo`,
     key_references: [],
+    key_figure: {
+      ...EMPTY_KEY_FIGURE,
+      status: "suggested",
+      figure_id: "Figure 1",
+      page: 1,
+      role: "method_overview",
+      caption: "Guest-mode visual candidate for demonstrating the confirmation workflow.",
+      reason: "Shows how a representative method figure can be reviewed before private caching.",
+    },
     body: [
       "## Summary",
       "",

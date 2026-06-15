@@ -13,20 +13,18 @@ export interface DriveResult {
   uploadedAt: string;
 }
 
-export async function uploadToDrive(
-  file: File,
-  base: string,
-  doi = "",
+async function uploadFileToDrive(
+  file: File | Blob,
+  payload: Record<string, unknown>,
   onProgress?: (percent: number) => void,
 ): Promise<DriveResult> {
   const sess = await fetch("/api/drive/session", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      base,
-      mimeType: file.type || "application/pdf",
+      ...payload,
+      mimeType: file.type || "application/octet-stream",
       size: file.size,
-      doi,
     }),
   });
   const session = (await sess.json()) as {
@@ -98,9 +96,42 @@ export async function uploadToDrive(
   if (!final) throw new Error("Drive did not confirm the completed upload.");
   return {
     ...final,
-    name: session.name || file.name,
+    name: session.name || ("name" in file ? file.name : "file"),
     reused: false,
     uploadedBy: session.uploadedBy || "",
     uploadedAt: session.uploadedAt || "",
   };
+}
+
+export async function uploadToDrive(
+  file: File,
+  base: string,
+  doi = "",
+  onProgress?: (percent: number) => void,
+): Promise<DriveResult> {
+  return uploadFileToDrive(file, { kind: "paper", base, doi }, onProgress);
+}
+
+export async function uploadKeyFigureToDrive(
+  file: File | Blob,
+  literatureKey: string,
+  figureId: string,
+  onProgress?: (percent: number) => void,
+): Promise<DriveResult> {
+  return uploadFileToDrive(
+    file,
+    {
+      kind: "key-figure",
+      base: literatureKey,
+      figureId,
+    },
+    onProgress,
+  );
+}
+
+export function driveFileId(link: string): string {
+  const match =
+    link.match(/\/d\/([A-Za-z0-9_-]+)/) ||
+    link.match(/[?&]id=([A-Za-z0-9_-]+)/);
+  return match?.[1] || "";
 }

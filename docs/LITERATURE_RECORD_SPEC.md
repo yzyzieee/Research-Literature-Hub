@@ -33,6 +33,15 @@ key_references:
     reason: Defines the core formulation used by this paper.
     status: external
     linked_card: null
+key_figure:
+  status: none
+  figure_id: null
+  page: null
+  role: null
+  caption: null
+  reason: null
+  image_ref: null
+  image_private: true
 drive: []
 related: []
 created: 2026-06-14
@@ -112,6 +121,23 @@ After every publication to `main`, repository maintenance rebuilds DOI and title
 from official literature records and synchronizes all existing cards. A reference that was
 previously external is therefore persisted as `in_library` when that paper is added later.
 If a linked card is removed or no longer resolves uniquely, it safely returns to `external`.
+
+### `key_figure`
+
+`key_figure` is an optional visual highlight for human reading, not an LLM context field.
+The AI may recommend one clearly identified figure and PDF page, but it never commits an
+image. A member confirms the page and crop, or uploads a prepared image, before the app
+caches it once in private Drive storage.
+
+Allowed statuses are `none`, `suggested`, `cached`, and `missing`. Allowed roles are
+`method_overview`, `model_architecture`, `system_setup`, `main_result`,
+`ablation_result`, and `dataset_overview`.
+
+GitHub stores only the lightweight metadata and the private Drive file ID in `image_ref`.
+The public repository never stores the paper figure itself. The detail page reads the
+cached image through an authenticated same-origin endpoint and does not re-extract the
+PDF during startup or rendering. Key Figures are excluded from **Use with My LLM**
+exports by default.
 
 ## Naming and duplicate rules
 

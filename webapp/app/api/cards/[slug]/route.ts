@@ -71,6 +71,7 @@ export async function GET(
         year: card.year,
         tags: card.tags,
         key_references: card.key_references,
+        key_figure: card.key_figure,
         drive: card.drive,
         related: card.related,
         created: card.created,

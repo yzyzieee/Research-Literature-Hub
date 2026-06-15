@@ -7,11 +7,14 @@ import {
   DOMAIN_LABELS,
   PUBLICATION_TYPES,
   PUBLICATION_TYPE_LABELS,
+  type KeyFigure,
   type KeyReference,
 } from "@/lib/types";
 import { useLang } from "@/lib/i18n";
 import { extractPdfText } from "@/lib/pdf";
 import { uploadToDrive } from "@/lib/drive";
+import { EMPTY_KEY_FIGURE } from "@/lib/key-figure";
+import KeyFigurePanel from "@/components/KeyFigurePanel";
 
 function yamlList(items: string[]): string {
   return items.length ? `[${items.map((item) => JSON.stringify(item)).join(", ")}]` : "[]";
@@ -40,6 +43,7 @@ interface ExtractedLiterature {
   abstract?: string;
   citation_key?: string;
   key_references?: KeyReference[];
+  key_figure?: KeyFigure;
   tags?: string[];
   suggested_domain?: string;
   suggested_domain_label?: string;
@@ -77,6 +81,7 @@ export default function NewLiteratureWizard() {
   const [year, setYear] = useState("");
   const [tags, setTags] = useState("");
   const [keyReferences, setKeyReferences] = useState<KeyReference[]>([]);
+  const [keyFigure, setKeyFigure] = useState<KeyFigure>({ ...EMPTY_KEY_FIGURE });
   const [drive, setDrive] = useState("");
   const [notes, setNotes] = useState("");
   const [body, setBody] = useState("");
@@ -238,6 +243,7 @@ export default function NewLiteratureWizard() {
       `year: ${year || "null"}`,
       `tags: ${yamlList(tagList)}`,
       `key_references: ${JSON.stringify(keyReferences)}`,
+      `key_figure: ${JSON.stringify(keyFigure)}`,
       `drive: ${yamlList(driveList)}`,
       "related: []",
       `created: ${today}`,
@@ -273,6 +279,8 @@ export default function NewLiteratureWizard() {
     setAbstract(data.abstract || "");
     setTags((data.tags || []).join(", "));
     setKeyReferences(Array.isArray(data.key_references) ? data.key_references.slice(0, 8) : []);
+    setKeyFigure((current) =>
+      current.status === "cached" ? current : data.key_figure || { ...EMPTY_KEY_FIGURE });
     setBody(data.body || "");
     const suggestedId = String(data.suggested_domain || "").trim();
     const suggestedLabel = String(data.suggested_domain_label || "").trim();
@@ -339,6 +347,7 @@ export default function NewLiteratureWizard() {
     setYear("");
     setTags("");
     setKeyReferences([]);
+    setKeyFigure({ ...EMPTY_KEY_FIGURE });
     setDrive("");
     setNotes("");
     setBody("");
@@ -367,6 +376,13 @@ export default function NewLiteratureWizard() {
         });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error);
+      }
+      if (keyFigure.image_ref && !guest) {
+        await fetch("/api/drive/file", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: keyFigure.image_ref }),
+        }).catch(() => {});
       }
       const reused = archived.reused;
       resetDraft();
@@ -888,6 +904,15 @@ export default function NewLiteratureWizard() {
             <p className="subtitle">{t("new.keyReferencesEmpty")}</p>
           )}
         </details>
+
+        <KeyFigurePanel
+          slug={slug}
+          initialFigure={keyFigure}
+          pdfFile={pdfFile}
+          pdfLink={archived?.link || ""}
+          canCache={Boolean(archived) || guest}
+          onChange={setKeyFigure}
+        />
 
         <label>{t("new.drive")}</label>
         <input value={drive} onChange={(event) => setDrive(event.target.value)} />

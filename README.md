@@ -51,8 +51,8 @@ The system deliberately separates original files from public knowledge records:
 
 | Layer | Recommended service | Stores | Access |
 |---|---|---|---|
-| **Team file storage** | Shared Google Drive folder | Original paper PDFs with normalized filenames | Private or team-controlled |
-| **Public record storage** | Public GitHub repository | Metadata, summaries, tags, ratings, comments, indexes, prompts, and PDF references | Public, versioned, and LLM-readable |
+| **Team file storage** | Shared Google Drive folder | Original paper PDFs and confirmed Key Figure image caches | Private or team-controlled |
+| **Public record storage** | Public GitHub repository | Metadata, summaries, tags, ratings, comments, lightweight figure references, indexes, prompts, and PDF references | Public, versioned, and LLM-readable |
 
 Google Drive is the source-document repository. GitHub is the searchable knowledge and
 audit layer. Vercel hosts the interface that connects them.
@@ -85,6 +85,7 @@ Drive metadata, provenance, and the PDF reference stored in each literature reco
 | **Organization** | Primary domain, cross-domains, publication type, venue, year, and technical tags |
 | **Deduplication** | DOI, citation key, normalized title, and Drive metadata checks |
 | **Structured records** | Summary, problem, method, key results, strengths, limitations, relevance, and notes |
+| **Visual highlights** | Optional AI-suggested Key Figure, browser crop/confirmation, private image cache, and compact card preview |
 | **Team knowledge** | Named accounts, research interests, shared card editing, recommendation/innovation/rigor reviews, comments, and activity history |
 | **Record governance** | Creator/admin direct deletion, reasoned member deletion requests, and administrator approval |
 | **Original files** | Google Drive adapter, global filenames, archive provenance, and download links |

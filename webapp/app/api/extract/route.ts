@@ -5,6 +5,7 @@ import { driveConfigured, fetchDriveFile } from "@/lib/google";
 import { DOMAINS, PUBLICATION_TYPES } from "@/lib/types";
 import { getCards } from "@/lib/kb";
 import { linkKeyReferences, parseKeyReferences } from "@/lib/key-references";
+import { aiKeyFigure } from "@/lib/key-figure";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -51,6 +52,41 @@ const LITERATURE_JSON_SCHEMA = {
         additionalProperties: false,
       },
     },
+    key_figure: {
+      type: "object",
+      properties: {
+        status: { type: "string", enum: ["none", "suggested"] },
+        figure_id: { anyOf: [{ type: "string" }, { type: "null" }] },
+        page: { anyOf: [{ type: "integer" }, { type: "null" }] },
+        role: {
+          anyOf: [
+            {
+              type: "string",
+              enum: [
+                "method_overview",
+                "model_architecture",
+                "system_setup",
+                "main_result",
+                "ablation_result",
+                "dataset_overview",
+              ],
+            },
+            { type: "null" },
+          ],
+        },
+        caption: { anyOf: [{ type: "string" }, { type: "null" }] },
+        reason: { anyOf: [{ type: "string" }, { type: "null" }] },
+      },
+      required: [
+        "status",
+        "figure_id",
+        "page",
+        "role",
+        "caption",
+        "reason",
+      ],
+      additionalProperties: false,
+    },
     suggested_domain: { type: "string" },
     suggested_domain_label: { type: "string" },
     domain_suggestion_reason: { type: "string" },
@@ -70,6 +106,7 @@ const LITERATURE_JSON_SCHEMA = {
     "tags",
     "citation_key",
     "key_references",
+    "key_figure",
     "suggested_domain",
     "suggested_domain_label",
     "domain_suggestion_reason",
@@ -98,6 +135,9 @@ function buildSystem(fromOriginal: boolean): string {
     "Use a Better-BibTeX-style citation_key: first author surname + year + first significant title word.",
     "Extract only 3-8 key related papers, not the full bibliography. Prioritize references that define the problem, introduce the main method, provide baselines, datasets, surveys, or directly motivate the paper. If uncertain, leave the list empty. Do not hallucinate DOI, title, or year.",
     "For each key related paper return only title, DOI if available, year if available, one role, and one short sentence explaining why it matters.",
+    "Optionally recommend one representative Key Figure for human reading. Prefer a method overview, model architecture, system setup, main result, ablation result, or dataset overview that explains the paper at a glance.",
+    "For key_figure, return status suggested only when a clearly identified figure and a reliable 1-based PDF page number are available from the original PDF or explicit PDF PAGE markers. Include figure_id, page, role, caption when available, and one short reason. Otherwise return status none with null metadata.",
+    "Do not extract, crop, upload, or encode an image. Never invent a figure number, caption, or page. The application adds private image storage fields only after human confirmation.",
     "Use exactly this body structure:",
     "## Summary",
     "## Problem",
@@ -216,6 +256,7 @@ function shapeLiterature(record: Record<string, unknown>) {
       parseKeyReferences(record.key_references),
       getCards(),
     ),
+    key_figure: aiKeyFigure(record.key_figure),
     suggested_domain: normalizedTag(record.suggested_domain),
     suggested_domain_label: String(record.suggested_domain_label ?? "").trim(),
     domain_suggestion_reason: String(record.domain_suggestion_reason ?? "").trim(),

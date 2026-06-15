@@ -10,6 +10,7 @@ import CommentsPanel from "@/components/CommentsPanel";
 import DownloadButton from "@/components/DownloadButton";
 import KeyReferencesPanel from "@/components/KeyReferencesPanel";
 import CardActions from "@/components/CardActions";
+import KeyFigurePanel from "@/components/KeyFigurePanel";
 
 export const dynamic = "force-static";
 
@@ -78,6 +79,12 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
             <span>{card.rating.count} <T k="review.votes" /></span>
           </div>
         )}
+        <KeyFigurePanel
+          slug={card.slug}
+          initialFigure={card.key_figure}
+          pdfLink={card.drive[0] || ""}
+          persist
+        />
         {card.drive.length > 0 && (
           <div className="kv">
             <b><T k="detail.fulltext" /></b> ·{" "}
