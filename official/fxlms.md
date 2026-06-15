@@ -5,7 +5,7 @@ domain: active-noise-control
 status: official
 tags: [anc, adaptive-filter, fxlms]
 drive: []
-related: [active-noise-control, widrow1975adaptive]
+related: [active-noise-control]
 created: 2026-06-12
 reviewed_by: []
 ---
@@ -43,5 +43,5 @@ Draft for review — please check the ±90° phase bound citation before promoti
 
 ## References
 
-- Related cards: [[active-noise-control]], [[widrow1975adaptive]]
+- Related cards: [[active-noise-control]]
 - S. M. Kuo and D. R. Morgan, "Active noise control: a tutorial review," *Proc. IEEE*, vol. 87, no. 6, 1999.
