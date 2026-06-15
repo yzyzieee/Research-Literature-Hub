@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import sys
+import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -20,20 +21,14 @@ ENTRY_TYPES = {"literature"}
 LEGACY_TYPES = {"concept", "algorithm", "resource", "synthesis"}
 STATUSES = {"pending", "reviewed", "official"}
 
-# Research domain (the primary organising axis). Edit this list to fit the group.
-DOMAINS = [
-    "active-noise-control",
-    "acoustic-echo-cancellation",
-    "speech-enhancement",
-    "source-separation",
-    "beamforming-arrays",
-    "spatial-audio",
-    "audio-coding",
-    "room-acoustics",
-    "machine-learning-audio",
-    "fundamentals-dsp",
-    "other",
-]
+# Research domains are administrator-approved in the shared registry.
+DOMAIN_REGISTRY = ROOT / "webapp" / "data" / "domains.json"
+with DOMAIN_REGISTRY.open(encoding="utf-8") as domain_file:
+    DOMAINS = [
+        str(item["id"])
+        for item in json.load(domain_file).get("approved", [])
+        if item.get("id")
+    ]
 
 # Publication kind is literature-record metadata only; Drive remains a flat PDF repository.
 PUBLICATION_TYPES = {

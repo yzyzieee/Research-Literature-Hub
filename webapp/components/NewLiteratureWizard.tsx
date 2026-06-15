@@ -16,7 +16,16 @@ function yamlList(items: string[]): string {
   return items.length ? `[${items.map((item) => JSON.stringify(item)).join(", ")}]` : "[]";
 }
 
-type BusyAction = "" | "doi" | "draft" | "commit" | "extract" | "drive" | "original";
+type BusyAction =
+  | ""
+  | "doi"
+  | "draft"
+  | "commit"
+  | "extract"
+  | "drive"
+  | "original"
+  | "delete"
+  | "domain";
 
 interface ExtractedLiterature {
   primary_domain?: string;
@@ -30,6 +39,9 @@ interface ExtractedLiterature {
   abstract?: string;
   citation_key?: string;
   tags?: string[];
+  suggested_domain?: string;
+  suggested_domain_label?: string;
+  domain_suggestion_reason?: string;
   body?: string;
 }
 
@@ -87,6 +99,13 @@ export default function NewLiteratureWizard() {
     decision: DuplicateDecision;
     selectedSlug?: string;
   } | null>(null);
+  const [domainSuggestion, setDomainSuggestion] = useState<{
+    id: string;
+    label: string;
+    reason: string;
+  } | null>(null);
+  const [domainProposalSent, setDomainProposalSent] = useState(false);
+  const [archiveDeleteArmed, setArchiveDeleteArmed] = useState(false);
   const [msg, setMsg] = useState<{ kind: "ok" | "warn"; text: string; link?: string } | null>(null);
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [published, setPublished] = useState<{ slug: string; url: string; demo: boolean } | null>(null);
@@ -250,6 +269,16 @@ export default function NewLiteratureWizard() {
     setAbstract(data.abstract || "");
     setTags((data.tags || []).join(", "));
     setBody(data.body || "");
+    const suggestedId = String(data.suggested_domain || "").trim();
+    const suggestedLabel = String(data.suggested_domain_label || "").trim();
+    const suggestedReason = String(data.domain_suggestion_reason || "").trim();
+    setDomainSuggestion(
+      suggestedId && suggestedLabel && suggestedReason
+        ? { id: suggestedId, label: suggestedLabel, reason: suggestedReason }
+        : null,
+    );
+    setDomainProposalSent(false);
+    setArchiveDeleteArmed(false);
   };
 
   const choosePrimaryDomain = (value: string) => {
@@ -292,15 +321,110 @@ export default function NewLiteratureWizard() {
     }
   };
 
+  const resetDraft = () => {
+    setPrimaryDomain("");
+    setDomains([]);
+    setPublicationType("journal-paper");
+    setTitle("");
+    setDoi("");
+    setVenue("");
+    setAbstract("");
+    setCitationKey("");
+    setAuthors("");
+    setYear("");
+    setTags("");
+    setDrive("");
+    setNotes("");
+    setBody("");
+    setPdfName("");
+    setPdfFile(null);
+    setArchived(null);
+    setDuplicateReview(null);
+    setDomainSuggestion(null);
+    setDomainProposalSent(false);
+    setArchiveDeleteArmed(false);
+    setUploadProgress(0);
+    setSubmitAttempted(false);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const removeArchivedPdf = async () => {
+    if (!archived) return;
+    setBusy("delete");
+    setMsg(null);
+    try {
+      if (!archived.reused) {
+        const response = await fetch("/api/drive/file", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: archived.id }),
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error);
+      }
+      const reused = archived.reused;
+      resetDraft();
+      setMsg({
+        kind: "ok",
+        text: t(reused ? "new.driveDetached" : "new.driveDeleted"),
+      });
+    } catch (error) {
+      setMsg({
+        kind: "warn",
+        text: `${t("new.driveDeleteFail")}: ${error instanceof Error ? error.message : error}`,
+      });
+    } finally {
+      setBusy("");
+    }
+  };
+
   const onPdf = (file: File | undefined) => {
     if (!file) return;
+    if (archived) {
+      if (fileRef.current) fileRef.current.value = "";
+      setMsg({ kind: "warn", text: t("new.removeArchiveFirst") });
+      return;
+    }
     setPdfName(file.name);
     setPdfFile(file);
     setDrive("");
     setArchived(null);
+    setArchiveDeleteArmed(false);
     setDuplicateReview(null);
     setUploadProgress(0);
     setMsg({ kind: "ok", text: t("new.pdfSelected") });
+  };
+
+  const submitDomainProposal = async () => {
+    if (!domainSuggestion) return;
+    setBusy("domain");
+    setMsg(null);
+    try {
+      const response = await fetch("/api/domains", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: domainSuggestion.id,
+          label: domainSuggestion.label,
+          description: domainSuggestion.reason,
+          reason: domainSuggestion.reason,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+      setDomainProposalSent(true);
+      setMsg({
+        kind: "ok",
+        text: t(data.demo ? "new.domainProposalDemo" : "new.domainProposalSent"),
+      });
+    } catch (error) {
+      setMsg({
+        kind: "warn",
+        text: `${t("new.domainProposalFail")}: ${error instanceof Error ? error.message : error}`,
+      });
+    } finally {
+      setBusy("");
+    }
   };
 
   const extractSelectedPdf = async () => {
@@ -665,6 +789,25 @@ export default function NewLiteratureWizard() {
             </label>
           ))}
         </div>
+        {domainSuggestion && primaryDomain === "other" && (
+          <div className="domain-suggestion">
+            <b>{t("new.domainSuggestionTitle")}: {domainSuggestion.label}</b>
+            <code>{domainSuggestion.id}</code>
+            <p>{domainSuggestion.reason}</p>
+            <p className="subtitle">{t("new.domainSuggestionHint")}</p>
+            <button
+              className="btn"
+              onClick={submitDomainProposal}
+              disabled={domainProposalSent || busy !== ""}
+            >
+              {domainProposalSent
+                ? t("new.domainProposalPending")
+                : busy === "domain"
+                  ? t("new.domainProposalSending")
+                  : t("new.domainProposalSubmit")}
+            </button>
+          </div>
+        )}
 
         <label>{t("new.publicationType")}</label>
         <select value={publicationType} onChange={(event) => setPublicationType(event.target.value)}>
@@ -764,6 +907,36 @@ export default function NewLiteratureWizard() {
                 <a className="btn" href={archived.link} target="_blank" rel="noreferrer">
                   {t("new.driveOpenFile")}
                 </a>
+                {!archiveDeleteArmed ? (
+                  <button
+                    className="btn danger"
+                    onClick={() => setArchiveDeleteArmed(true)}
+                    disabled={busy !== ""}
+                  >
+                    {archived.reused ? t("new.driveDetach") : t("new.driveDeleteReset")}
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      className="btn danger"
+                      onClick={removeArchivedPdf}
+                      disabled={busy !== ""}
+                    >
+                      {busy === "delete"
+                        ? t("new.driveDeleting")
+                        : archived.reused
+                          ? t("new.driveConfirmDetach")
+                          : t("new.driveConfirmDelete")}
+                    </button>
+                    <button
+                      className="btn"
+                      onClick={() => setArchiveDeleteArmed(false)}
+                      disabled={busy !== ""}
+                    >
+                      {t("new.cancel")}
+                    </button>
+                  </>
+                )}
               </>
             )}
           </div>

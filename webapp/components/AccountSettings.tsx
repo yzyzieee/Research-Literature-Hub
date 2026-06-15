@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { domainLabel, DOMAIN_LABELS, DOMAINS } from "@/lib/types";
 import type { TeamMember } from "@/lib/types";
+import type { DomainProposal } from "@/lib/domain-registry";
 import { useLang } from "@/lib/i18n";
 
 function DomainPicker({
@@ -35,8 +36,12 @@ export default function AccountSettings() {
   const [domains, setDomains] = useState<string[]>([]);
   const [newId, setNewId] = useState("");
   const [newName, setNewName] = useState("");
+  const [proposalId, setProposalId] = useState("");
+  const [proposalLabel, setProposalLabel] = useState("");
+  const [proposalReason, setProposalReason] = useState("");
+  const [proposals, setProposals] = useState<DomainProposal[]>([]);
   const [guest, setGuest] = useState(false);
-  const [busy, setBusy] = useState<"" | "save" | "add">("");
+  const [busy, setBusy] = useState<"" | "save" | "add" | "propose" | "review">("");
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
   useEffect(() => {
@@ -49,6 +54,13 @@ export default function AccountSettings() {
         setDomains(data.member.domains || []);
         setMembers(data.members || []);
         setGuest(Boolean(data.demo));
+      })
+      .catch((error) => setMessage({ ok: false, text: String(error) }));
+    fetch("/api/domains")
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error);
+        setProposals(data.proposals || []);
       })
       .catch((error) => setMessage({ ok: false, text: String(error) }));
   }, []);
@@ -94,6 +106,70 @@ export default function AccountSettings() {
       setMessage({ ok: true, text: t("settings.memberAdded") });
     } catch (error) {
       setMessage({ ok: false, text: `${t("settings.failed")}: ${error instanceof Error ? error.message : error}` });
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const proposeDomain = async () => {
+    setBusy("propose");
+    setMessage(null);
+    try {
+      const response = await fetch("/api/domains", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: proposalId,
+          label: proposalLabel,
+          description: proposalReason,
+          reason: proposalReason,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+      setProposals((current) => [...current, data.proposal]);
+      setProposalId("");
+      setProposalLabel("");
+      setProposalReason("");
+      setMessage({
+        ok: true,
+        text: t(data.demo ? "settings.domainProposalDemo" : "settings.domainProposalSent"),
+      });
+    } catch (error) {
+      setMessage({
+        ok: false,
+        text: `${t("settings.failed")}: ${error instanceof Error ? error.message : error}`,
+      });
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const reviewDomain = async (id: string, action: "approve" | "reject") => {
+    setBusy("review");
+    setMessage(null);
+    try {
+      const response = await fetch("/api/domains", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, action }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+      setProposals((current) =>
+        current.map((proposal) => proposal.id === id ? data.proposal : proposal),
+      );
+      setMessage({
+        ok: true,
+        text: t(action === "approve"
+          ? "settings.domainApproved"
+          : "settings.domainRejected"),
+      });
+    } catch (error) {
+      setMessage({
+        ok: false,
+        text: `${t("settings.failed")}: ${error instanceof Error ? error.message : error}`,
+      });
     } finally {
       setBusy("");
     }
@@ -150,6 +226,83 @@ export default function AccountSettings() {
           ))}
         </div>
       </div>
+
+      <div className="form-card">
+        <h2 style={{ marginTop: 0 }}>{t("settings.proposeDomain")}</h2>
+        <p className="subtitle">{t("settings.proposeDomainHint")}</p>
+        <label>{t("settings.domainId")}</label>
+        <input
+          value={proposalId}
+          onChange={(event) => setProposalId(event.target.value.toLowerCase())}
+          placeholder="music-information-retrieval"
+        />
+        <label>{t("settings.domainLabel")}</label>
+        <input
+          value={proposalLabel}
+          onChange={(event) => setProposalLabel(event.target.value)}
+          placeholder="Music information retrieval"
+        />
+        <label>{t("settings.domainReason")}</label>
+        <textarea
+          rows={4}
+          value={proposalReason}
+          onChange={(event) => setProposalReason(event.target.value)}
+          placeholder={t("settings.domainReasonPlaceholder")}
+        />
+        <div className="btn-row">
+          <button
+            className="btn"
+            onClick={proposeDomain}
+            disabled={
+              proposalId.length < 3 ||
+              proposalLabel.length < 3 ||
+              proposalReason.length < 10 ||
+              busy !== ""
+            }
+          >
+            {busy === "propose" ? t("settings.domainSubmitting") : t("settings.domainSubmit")}
+          </button>
+        </div>
+      </div>
+
+      {member?.role === "admin" && (
+        <div className="form-card">
+          <h2 style={{ marginTop: 0 }}>{t("settings.domainReview")}</h2>
+          <p className="subtitle">{t("settings.domainReviewHint")}</p>
+          <div className="domain-proposal-list">
+            {proposals.filter((proposal) => proposal.status === "pending").map((proposal) => (
+              <article className="domain-proposal" key={proposal.id}>
+                <div>
+                  <b>{proposal.label}</b> <code>{proposal.id}</code>
+                  <p>{proposal.reason}</p>
+                  <span className="subtitle">
+                    {proposal.proposed_by} · {proposal.proposed_at.slice(0, 10)}
+                  </span>
+                </div>
+                <div className="btn-row">
+                  <button
+                    className="btn primary"
+                    onClick={() => reviewDomain(proposal.id, "approve")}
+                    disabled={busy !== ""}
+                  >
+                    {t("settings.domainApprove")}
+                  </button>
+                  <button
+                    className="btn danger"
+                    onClick={() => reviewDomain(proposal.id, "reject")}
+                    disabled={busy !== ""}
+                  >
+                    {t("settings.domainReject")}
+                  </button>
+                </div>
+              </article>
+            ))}
+            {!proposals.some((proposal) => proposal.status === "pending") && (
+              <p className="subtitle">{t("settings.domainReviewEmpty")}</p>
+            )}
+          </div>
+        </div>
+      )}
 
       {member?.role === "admin" && (
         <div className="form-card">

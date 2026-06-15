@@ -261,6 +261,8 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
 .btn:hover { border-color: var(--accent); color: var(--accent); }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 .btn.primary:hover { opacity: 0.9; color: #fff; }
+.btn.danger { border-color: #efb2b2; background: #fff5f5; color: #b42318; }
+.btn.danger:hover { border-color: #d92d20; color: #912018; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
 
@@ -375,6 +377,28 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
 .domain-picker { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin: 12px 0; }
 .domain-picker label { display: flex; align-items: center; gap: 8px; margin: 0; padding: 9px 11px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; }
 .domain-picker input { width: auto; margin: 0; }
+.domain-suggestion {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border: 1px solid #c9b8f5;
+  border-radius: 9px;
+  background: #f7f3ff;
+}
+.domain-suggestion b { margin-right: 8px; }
+.domain-suggestion p { margin: 8px 0; }
+.domain-proposal-list { display: grid; gap: 12px; margin-top: 14px; }
+.domain-proposal {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg);
+}
+.domain-proposal p { margin: 7px 0; color: var(--text-2); }
+.domain-proposal .btn-row { flex: 0 0 auto; margin-top: 0; }
 .member-list { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 18px; }
 .team-directory { display: grid; gap: 10px; margin-top: 14px; }
 .team-member { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); }
@@ -383,6 +407,7 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
 @media (max-width: 680px) {
   .team-member { align-items: flex-start; flex-direction: column; }
   .team-member .meta-row { justify-content: flex-start; }
+  .domain-proposal { flex-direction: column; }
 }
 .comments-panel { margin-top: 24px; padding: 20px 24px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); scroll-margin-top: 80px; }
 .comments-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }

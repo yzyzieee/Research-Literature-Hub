@@ -1,3 +1,5 @@
+import { DEFAULT_DOMAIN_REGISTRY } from "./domain-registry";
+
 export type EntryType = "literature" | "legacy-note";
 export type CardStatus = "pending" | "reviewed" | "official";
 export type PublicationType =
@@ -153,34 +155,12 @@ export function publicationTypeLabel(value: string): string {
   return PUBLICATION_TYPE_LABELS[value as PublicationType] || value || "Unspecified";
 }
 
-// Research domains — keep in sync with scripts/kblib.py DOMAINS.
-export const DOMAINS: string[] = [
-  "active-noise-control",
-  "acoustic-echo-cancellation",
-  "speech-enhancement",
-  "source-separation",
-  "beamforming-arrays",
-  "spatial-audio",
-  "audio-coding",
-  "room-acoustics",
-  "machine-learning-audio",
-  "fundamentals-dsp",
-  "other",
-];
+// Controlled taxonomy. Changes enter through the administrator-reviewed registry.
+export const DOMAINS: string[] = DEFAULT_DOMAIN_REGISTRY.approved.map((domain) => domain.id);
 
-export const DOMAIN_LABELS: Record<string, string> = {
-  "active-noise-control": "Active noise control",
-  "acoustic-echo-cancellation": "Acoustic echo cancellation",
-  "speech-enhancement": "Speech enhancement",
-  "source-separation": "Source separation",
-  "beamforming-arrays": "Beamforming & arrays",
-  "spatial-audio": "Spatial audio",
-  "audio-coding": "Audio coding",
-  "room-acoustics": "Room acoustics",
-  "machine-learning-audio": "Machine learning for audio",
-  "fundamentals-dsp": "Fundamentals & DSP",
-  other: "Other",
-};
+export const DOMAIN_LABELS: Record<string, string> = Object.fromEntries(
+  DEFAULT_DOMAIN_REGISTRY.approved.map((domain) => [domain.id, domain.label]),
+);
 
 export function domainLabel(d: string): string {
   return DOMAIN_LABELS[d] || d || "Unsorted";

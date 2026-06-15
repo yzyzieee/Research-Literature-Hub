@@ -30,6 +30,9 @@ const LITERATURE_JSON_SCHEMA = {
     abstract: { type: "string" },
     tags: { type: "array", items: { type: "string" } },
     citation_key: { type: "string" },
+    suggested_domain: { type: "string" },
+    suggested_domain_label: { type: "string" },
+    domain_suggestion_reason: { type: "string" },
     body: { type: "string" },
   },
   required: [
@@ -45,6 +48,9 @@ const LITERATURE_JSON_SCHEMA = {
     "abstract",
     "tags",
     "citation_key",
+    "suggested_domain",
+    "suggested_domain_label",
+    "domain_suggestion_reason",
     "body",
   ],
   additionalProperties: false,
@@ -58,6 +64,9 @@ function buildSystem(fromOriginal: boolean): string {
     "Produce one structured English literature record. entry_type must always be literature.",
     `Allowed research domains: ${DOMAINS.join(", ")}.`,
     "Choose one primary_domain for filing and statistics. Also return domains as all genuinely relevant research domains, including primary_domain. Avoid weak or speculative cross-domain labels.",
+    "The approved domains are intentionally broad. Algorithms, model families, applications, and closely related subfields belong in tags, not in new domains.",
+    "Only if the paper's central research area cannot reasonably fit any approved domain, set primary_domain to other and propose one broad missing research area in suggested_domain (lowercase kebab-case), suggested_domain_label, and domain_suggestion_reason.",
+    "Otherwise return empty strings for all three domain suggestion fields. Never create a near-duplicate or narrower version of an approved domain.",
     `Allowed publication_type values: ${PUBLICATION_TYPES.join(", ")}.`,
     "Classify journal articles, conference papers, preprints, review papers, books, chapters, patents, theses, technical reports, and dataset papers carefully.",
     "Extract venue, DOI, year, authors, and the paper's abstract when present. Use an empty string rather than inventing missing metadata.",
@@ -177,8 +186,22 @@ function shapeLiterature(record: Record<string, unknown>) {
     abstract: String(record.abstract ?? ""),
     tags,
     citation_key: String(record.citation_key ?? ""),
+    suggested_domain: normalizedTag(record.suggested_domain),
+    suggested_domain_label: String(record.suggested_domain_label ?? "").trim(),
+    domain_suggestion_reason: String(record.domain_suggestion_reason ?? "").trim(),
     body: String(record.body ?? ""),
   };
+  if (
+    !shaped.suggested_domain ||
+    !shaped.suggested_domain_label ||
+    !shaped.domain_suggestion_reason ||
+    DOMAINS.includes(shaped.suggested_domain) ||
+    shaped.primary_domain !== "other"
+  ) {
+    shaped.suggested_domain = "";
+    shaped.suggested_domain_label = "";
+    shaped.domain_suggestion_reason = "";
+  }
   if (!shaped.title.trim() || !shaped.body.trim()) {
     throw new Error("The model returned an incomplete literature record (missing title or body).");
   }

@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "approved": [
+    {
+      "id": "active-noise-control",
+      "label": "Active noise control",
+      "description": "Active control of acoustic noise and sound fields.",
+      "created": "2026-06-15",
+      "created_by": "system"
+    },
+    {
+      "id": "acoustic-echo-cancellation",
+      "label": "Acoustic echo cancellation",
+      "description": "Echo-path modelling, cancellation, and residual echo suppression.",
+      "created": "2026-06-15",
+      "created_by": "system"
+    },
+    {
+      "id": "speech-enhancement",
+      "label": "Speech enhancement",
+      "description": "Denoising, dereverberation, and intelligibility enhancement for speech.",
+      "created": "2026-06-15",
+      "created_by": "system"
+    },
+    {
+      "id": "source-separation",
+      "label": "Source separation",
+      "description": "Separation and extraction of individual acoustic sources.",
+      "created": "2026-06-15",
+      "created_by": "system"
+    },
+    {
+      "id": "beamforming-arrays",
+      "label": "Beamforming & arrays",
+      "description": "Microphone and loudspeaker arrays, beamforming, and array processing.",
+      "created": "2026-06-15",
+      "created_by": "system"
+    },
+    {
+      "id": "spatial-audio",
+      "label": "Spatial audio",
+      "description": "Spatial sound capture, rendering, reproduction, and perception.",
+      "created": "2026-06-15",
+      "created_by": "system"
+    },
+    {
+      "id": "audio-coding",
+      "label": "Audio coding",
+      "description": "Audio compression, representation, transmission, and quality assessment.",
+      "created": "2026-06-15",
+      "created_by": "system"
+    },
+    {
+      "id": "room-acoustics",
+      "label": "Room acoustics",
+      "description": "Room impulse responses, reverberation, sound-field modelling, and treatment.",
+      "created": "2026-06-15",
+      "created_by": "system"
+    },
+    {
+      "id": "machine-learning-audio",
+      "label": "Machine learning for audio",
+      "description": "Machine-learning methods whose central contribution concerns audio or acoustics.",
+      "created": "2026-06-15",
+      "created_by": "system"
+    },
+    {
+      "id": "fundamentals-dsp",
+      "label": "Fundamentals & DSP",
+      "description": "Foundational signal processing, estimation, filtering, and control methods.",
+      "created": "2026-06-15",
+      "created_by": "system"
+    },
+    {
+      "id": "other",
+      "label": "Other",
+      "description": "Literature that does not yet fit an approved research domain.",
+      "created": "2026-06-15",
+      "created_by": "system"
+    }
+  ],
+  "proposals": []
+}
