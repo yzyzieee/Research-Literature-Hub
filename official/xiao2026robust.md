@@ -33,8 +33,8 @@ key_references:
   year: 2025
   role: baseline
   reason: Provides the acausal SSANC controller that the robust formulation extends under path variation.
-  status: in_library
-  linked_card: xiao2025spatially
+  status: external
+  linked_card: null
 - title: Soft-constrained spatially selective active noise control for open-fitting hearables
   doi: ''
   year: 2025

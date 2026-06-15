@@ -4,7 +4,7 @@ Use this file as the entry point for searching our internal literature library.
 Search this catalog first, then open only the most relevant literature record files.
 Do not assume private Google Drive PDFs are accessible.
 
-Papers: 4
+Papers: 3
 
 ## Papers
 
@@ -38,25 +38,6 @@ Papers: 4
 - Team weight: 60
 - Summary: This foundational paper presents adaptive noise cancelling as a general estimation problem: a reference input correlated with unwanted interference is adaptively filtered and subtracted from the primary input. The LMS algorithm drives the filter toward the Wiener solution without requiring prior knowledge of signal statistics.
 - Record: https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/widrow1975adaptive.md
-
-### xiao2025spatially
-- Title: Spatially Selective Active Noise Control for Open-Fitting Hearables with Acausal Optimization
-- Year: 2025
-- Venue: Forum Acusticum Euronoise 2025
-- Publication type: conference-paper
-- Primary domain: active-noise-control
-- Domains: active-noise-control, spatial-audio, beamforming-arrays
-- Tags: anc, spatially-selective-anc, hearables, acausal-optimization
-- Team weight: unrated
-- Summary: This paper extends spatially selective active noise control for open-fitting hearables by allowing acausal relative impulse responses in the speech-preservation constraint. The extra anti-causal freedom improves the approximation of the desired source path, reducing speech distortion and increasing SNR while retaining useful noise attenuation. Simulations also show less sensitivity to the selected processing delay t…
-- Key related papers:
-  - [foundation] Spatially selective active noise control systems (2023) - Introduces the spatially selective ANC framework extended to open-fitting hearables.
-  - [method] Effect of target signals and delays on spatially selective active noise control for open-fitting hearables (2024) - Establishes the causal target-signal and delay formulation used as the direct comparison.
-  - [dataset] The hearpiece database of individual transfer functions of an in-the-ear earpiece for hearing device research (2021) - Provides measured hearpiece transfer functions used to construct the simulated acoustic paths.
-  - [dataset] CSTR VCTK corpus: English multi-speaker corpus for CSTR voice cloning toolkit (2017) - Supplies speech material for the desired and interfering source simulations.
-  - [dataset] Assessment for automatic speech recognition: II. NOISEX-92: A database and an experiment to study the effect of additive noise on speech recognition systems (1993) - Supplies standard noise material for evaluating speech preservation and noise reduction.
-  - [foundation] Beamforming: a versatile approach to spatial filtering (1988) - Provides foundational spatial filtering concepts relevant to direction-selective control.
-- Record: https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/xiao2025spatially.md
 
 ### xiao2026robust
 - Title: Robust Soft-Constrained Spatially Selective Active Noise Control for Hearables Under Secondary Path Variations

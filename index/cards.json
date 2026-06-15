@@ -155,101 +155,6 @@
     "legacy_type": ""
   },
   {
-    "slug": "xiao2025spatially",
-    "path": "official/xiao2025spatially.md",
-    "folder": "official",
-    "title": "Spatially Selective Active Noise Control for Open-Fitting Hearables with Acausal Optimization",
-    "entry_type": "literature",
-    "publication_type": "conference-paper",
-    "primary_domain": "active-noise-control",
-    "domains": [
-      "active-noise-control",
-      "spatial-audio",
-      "beamforming-arrays"
-    ],
-    "venue": "Forum Acusticum Euronoise 2025",
-    "doi": "10.61782/fa.2025.0817",
-    "abstract": "An acausal relative-impulse-response formulation is introduced for spatially selective active noise control in open-fitting hearables. Simulations evaluate speech distortion, noise reduction, and SNR improvement across delays and degrees of acausality.",
-    "status": "official",
-    "tags": [
-      "anc",
-      "spatially-selective-anc",
-      "hearables",
-      "acausal-optimization"
-    ],
-    "authors": [
-      "Tong Xiao",
-      "Simon Doclo"
-    ],
-    "year": 2025,
-    "citation_key": "xiao2025spatially",
-    "key_references": [
-      {
-        "title": "Spatially selective active noise control systems",
-        "doi": "",
-        "year": 2023,
-        "role": "foundation",
-        "reason": "Introduces the spatially selective ANC framework extended to open-fitting hearables.",
-        "status": "external",
-        "linked_card": null
-      },
-      {
-        "title": "Effect of target signals and delays on spatially selective active noise control for open-fitting hearables",
-        "doi": "",
-        "year": 2024,
-        "role": "method",
-        "reason": "Establishes the causal target-signal and delay formulation used as the direct comparison.",
-        "status": "external",
-        "linked_card": null
-      },
-      {
-        "title": "The hearpiece database of individual transfer functions of an in-the-ear earpiece for hearing device research",
-        "doi": "",
-        "year": 2021,
-        "role": "dataset",
-        "reason": "Provides measured hearpiece transfer functions used to construct the simulated acoustic paths.",
-        "status": "external",
-        "linked_card": null
-      },
-      {
-        "title": "CSTR VCTK corpus: English multi-speaker corpus for CSTR voice cloning toolkit",
-        "doi": "",
-        "year": 2017,
-        "role": "dataset",
-        "reason": "Supplies speech material for the desired and interfering source simulations.",
-        "status": "external",
-        "linked_card": null
-      },
-      {
-        "title": "Assessment for automatic speech recognition: II. NOISEX-92: A database and an experiment to study the effect of additive noise on speech recognition systems",
-        "doi": "",
-        "year": 1993,
-        "role": "dataset",
-        "reason": "Supplies standard noise material for evaluating speech preservation and noise reduction.",
-        "status": "external",
-        "linked_card": null
-      },
-      {
-        "title": "Beamforming: a versatile approach to spatial filtering",
-        "doi": "",
-        "year": 1988,
-        "role": "foundation",
-        "reason": "Provides foundational spatial filtering concepts relevant to direction-selective control.",
-        "status": "external",
-        "linked_card": null
-      }
-    ],
-    "related": [],
-    "drive": [],
-    "created": "2026-06-13",
-    "rating": null,
-    "comments": [],
-    "uploaded_by": "YZY",
-    "uploaded_at": "2026-06-13",
-    "summary": "This paper extends spatially selective active noise control for open-fitting hearables by allowing acausal relative impulse responses in the speech-preservation constraint. The extra anti-causal freedom improves the approximation of the desired source path, reducing speech distortion and increasing SNR while retaining useful noise attenuation. Simulations also show less sensitivity to the selected processing delay than the causal formulation.",
-    "legacy_type": ""
-  },
-  {
     "slug": "xiao2026robust",
     "path": "official/xiao2026robust.md",
     "folder": "official",
@@ -287,8 +192,8 @@
         "year": 2025,
         "role": "baseline",
         "reason": "Provides the acausal SSANC controller that the robust formulation extends under path variation.",
-        "status": "in_library",
-        "linked_card": "xiao2025spatially"
+        "status": "external",
+        "linked_card": null
       },
       {
         "title": "Soft-constrained spatially selective active noise control for open-fitting hearables",
