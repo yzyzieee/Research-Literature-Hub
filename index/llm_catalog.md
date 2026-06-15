@@ -24,7 +24,7 @@ Papers: 4
   - [related_work] Design and implementation of an active noise control headphone with directional hear-through capability (2020, DOI: 10.1109/TCE.2019.2953712) - This paper presents a related approach for ANC headphones with directional hear-through, offering a point of comparison.
   - [related_work] Integrated active noise control and noise reduction in hearing aids (2010, DOI: 10.1109/TASL.2010.2053743) - This work integrates ANC and noise reduction in hearing aids, touching upon similar concepts of selective noise control.
   - [foundation] Adaptive Filter Theory (2002) - This is a standard textbook on adaptive filters, providing theoretical background for the adaptive algorithms used.
-- Record: https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Xiao2023Spatially.md
+- Record: https://raw.githubusercontent.com/your-org/research-literature-hub/main/official/Xiao2023Spatially.md
 
 ### Xie2024Cognitive
 - Title: Cognitive Virtual Sensing Technique for Feedforward Active Noise Control
@@ -42,7 +42,7 @@ Papers: 4
   - [related_work] Robust performance of virtual sensing methods for active noise control (2021, DOI: 10.1016/j.ymssp.2020.107515) - This paper discusses the robustness of virtual sensing methods, providing context for the challenges addressed by the cognitive VS technique.
   - [method] MobileNets: Efficient convolutional neural networks for mobile vision applications (2017, DOI: 10.48550/arXiv.1704.04816) - This paper introduces depthwise separable convolution, a key component adopted and modified for the lightweight classifier in the proposed cognitive VS technique.
   - [related_work] Feedforward selective fixed-filter active noise control: Algorithm and implementation (2020, DOI: 10.1109/TASLP.2020.2987384) - This paper details the selective fixed-filter active noise control (SFANC) system, which is a foundational concept that the cognitive VS technique builds upon and enhances.
-- Record: https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Xie2024Cognitive.md
+- Record: https://raw.githubusercontent.com/your-org/research-literature-hub/main/official/Xie2024Cognitive.md
 
 ### Yang2026Co-initialization
 - Title: Co-initialization of Control Filter and Secondary Path via Meta-Learning for Active Noise Control
@@ -60,7 +60,7 @@ Papers: 4
   - [related_work] Fast adaptive active noise control based on modified model-agnostic meta-learning algorithm (2021, DOI: 10.1109/LSP.2020.3044781) - This prior work also applies MAML to ANC, but focuses on initializing only the control filter, whereas this paper co-initializes both.
   - [foundation] On comparison of online secondary path modeling methods with auxiliary noise (2005, DOI: 10.1109/TSA.2005.853910) - This paper provides a foundational comparison of online secondary path modeling methods, which is the context for the proposed initialization.
   - [dataset] Acoustic path database for ANC in-ear headphone development (2019, DOI: 10.20382/RWT01386) - This paper provides the measured acoustic paths used for training and evaluation in the proposed method.
-- Record: https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Yang2026Co-initialization.md
+- Record: https://raw.githubusercontent.com/your-org/research-literature-hub/main/official/Yang2026Co-initialization.md
 
 ### jiang2022integration
 - Title: An Integration Development of Traditional Algorithm and Neural Network for Active Noise Cancellation
@@ -78,4 +78,4 @@ Papers: 4
   - [method] Dual-signal transformation LSTM network for real-time noise suppression (2020) - This paper describes the Dual-Signal Transformation LSTM (DTLN) network, which is adapted for the frequency-domain processing in the proposed system.
   - [method] Conv-TasNet: Surpassing Ideal Time–Frequency Magnitude Masking for Speech Separation (2019, DOI: 10.1109/TASLP.2019.2905115) - This paper introduces the TasNet structure, which is adapted for the time-domain processing in the proposed system.
   - [baseline] The Filtered-X LMS Algorithm (1992, DOI: 10.1109/78.67874) - The Filtered-X LMS (FXLMS) algorithm is a widely used traditional method for ANC and serves as a baseline for comparison.
-- Record: https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/jiang2022integration.md
+- Record: https://raw.githubusercontent.com/your-org/research-literature-hub/main/official/jiang2022integration.md
