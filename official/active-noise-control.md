@@ -5,7 +5,7 @@ domain: active-noise-control
 status: official
 tags: [anc, acoustics]
 drive: []
-related: [widrow1975adaptive, fxlms]
+related: [fxlms]
 created: 2026-06-12
 reviewed_by: []
 ---
@@ -30,9 +30,9 @@ Residual error at the error microphone: e(n) = d(n) + s(n) * y(n), where d(n) is
 
 ## My notes
 
-Starting point for the team's headphone / duct ANC experiments; see the paper card [[widrow1975adaptive]] for the adaptive-filtering origin.
+Starting point for the team's headphone / duct ANC experiments.
 
 ## References
 
-- Related cards: [[widrow1975adaptive]], [[fxlms]]
+- Related cards: [[fxlms]]
 - S. M. Kuo and D. R. Morgan, *Active Noise Control Systems*, Wiley, 1996.
