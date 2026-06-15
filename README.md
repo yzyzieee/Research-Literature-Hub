@@ -85,7 +85,8 @@ Drive metadata, provenance, and the PDF reference stored in each literature reco
 | **Organization** | Primary domain, cross-domains, publication type, venue, year, and technical tags |
 | **Deduplication** | DOI, citation key, normalized title, and Drive metadata checks |
 | **Structured records** | Summary, problem, method, key results, strengths, limitations, relevance, and notes |
-| **Team knowledge** | Named accounts, research interests, recommendation/innovation/rigor reviews, comments, and activity history |
+| **Team knowledge** | Named accounts, research interests, shared card editing, recommendation/innovation/rigor reviews, comments, and activity history |
+| **Record governance** | Creator/admin direct deletion, reasoned member deletion requests, and administrator approval |
 | **Original files** | Google Drive adapter, global filenames, archive provenance, and download links |
 | **LLM context** | Markdown/JSON catalog, repository-access prompt, compact catalog, and selected full-record pack |
 | **Interface** | English/Chinese UI with standardized English academic metadata |
@@ -168,7 +169,7 @@ For the complete setup, see [Deployment](docs/DEPLOYMENT.md).
 official/       Published literature records
 index/          Generated indexes and LLM catalogs
 bib/            Shared and personal BibTeX sources
-team/           Team account registry
+team/           Team account and card-deletion request registries
 webapp/         Next.js application
 scripts/        Validation, indexing, promotion, and bibliography tools
 docs/           Deployment, schema, LLM usage, and content policy

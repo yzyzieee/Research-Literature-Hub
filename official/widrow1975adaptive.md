@@ -32,6 +32,8 @@ related:
   - active-noise-control
   - fxlms
 created: '2026-06-12'
+uploaded_by: YZY
+uploaded_at: '2026-06-12'
 reviewed_by:
   - YZY
 rating:

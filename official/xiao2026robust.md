@@ -67,6 +67,8 @@ drive:
   - https://drive.google.com/file/d/169kOYOzTtUgqYjPNuKq5fUHW2Si3_OLR/view?usp=drivesdk
 related: []
 created: '2026-06-13'
+uploaded_by: YZY
+uploaded_at: '2026-06-13'
 reviewed_by: []
 ---
 ## Summary

@@ -274,6 +274,39 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
 .btn.danger:hover { border-color: #d92d20; color: #912018; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.card-actions { margin-top: 14px; }
+.deletion-request-panel,
+.destructive-panel {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border: 1px solid #efb2b2;
+  border-radius: 10px;
+  background: #fff8f7;
+}
+.deletion-request-panel textarea {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  resize: vertical;
+}
+.destructive-panel p { margin: 6px 0 12px; color: var(--text-2); }
+.card-editor textarea {
+  min-height: 68vh;
+  line-height: 1.55;
+  tab-size: 2;
+}
+.editor-guidance {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+.editor-guidance p { margin: 5px 0 0; color: var(--text-2); }
 
 .notice { padding: 10px 16px; border-radius: 8px; font-size: 14px; margin: 12px 0; }
 .notice.ok { background: var(--green-soft); color: var(--green); }

@@ -149,8 +149,8 @@
       "count": 1
     },
     "comments": [],
-    "uploaded_by": "",
-    "uploaded_at": "",
+    "uploaded_by": "YZY",
+    "uploaded_at": "2026-06-12",
     "summary": "This foundational paper presents adaptive noise cancelling as a general estimation problem: a reference input correlated with unwanted interference is adaptively filtered and subtracted from the primary input. The LMS algorithm drives the filter toward the Wiener solution without requiring prior knowledge of signal statistics.",
     "legacy_type": ""
   },
@@ -244,8 +244,8 @@
     "created": "2026-06-13",
     "rating": null,
     "comments": [],
-    "uploaded_by": "",
-    "uploaded_at": "",
+    "uploaded_by": "YZY",
+    "uploaded_at": "2026-06-13",
     "summary": "This paper extends spatially selective active noise control for open-fitting hearables by allowing acausal relative impulse responses in the speech-preservation constraint. The extra anti-causal freedom improves the approximation of the desired source path, reducing speech distortion and increasing SNR while retaining useful noise attenuation. Simulations also show less sensitivity to the selected processing delay than the causal formulation.",
     "legacy_type": ""
   },
@@ -334,8 +334,8 @@
     "created": "2026-06-13",
     "rating": null,
     "comments": [],
-    "uploaded_by": "",
-    "uploaded_at": "",
+    "uploaded_by": "YZY",
+    "uploaded_at": "2026-06-13",
     "summary": "This paper addresses secondary-path variation in spatially selective active noise control for hearables. It computes one soft-constrained controller by averaging the optimization objective over a set of measured secondary-path estimates. Simulations and real-time experiments show that the robust controller gives up a small amount of matched-path performance in exchange for substantially more consistent behavior across users and device fits.",
     "legacy_type": ""
   },

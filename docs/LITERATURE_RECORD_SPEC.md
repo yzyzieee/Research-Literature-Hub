@@ -150,3 +150,17 @@ the Method section remains readable when exported as text as well as rendered in
 Members rate recommendation, innovation, and rigor from 1 to 5. The app converts the
 three averages into a 0-100 team weight. Attributed comments and PDF, publication,
 rating, and comment actions are preserved in the record's audit trail.
+
+## Editing and deletion governance
+
+- Every active team member may edit an official literature record.
+- The server preserves ratings, comments, creator identity, PDF provenance, and prior
+  activity entries when a member saves an edit.
+- Each edit appends a `card_edited` activity entry and records `last_edited_by` and
+  `last_edited_at`.
+- `uploaded_by` is the record creator for permission purposes.
+- The creator and a team administrator may delete a card directly.
+- Other members submit a short deletion reason. An administrator approves or rejects the
+  request in Settings.
+- Card deletion removes the GitHub literature record only. It does not delete the original
+  PDF from external storage.

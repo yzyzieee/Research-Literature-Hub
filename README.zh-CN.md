@@ -79,7 +79,8 @@ PDF 引用保持关联。
 | **学术组织** | 主领域、交叉领域、publication type、venue、year 和技术标签 |
 | **文献去重** | DOI、citation key、标准化标题和 Drive metadata 检查 |
 | **结构化记录** | Summary、Problem、Method、Key results、Strengths、Limitations、Relevance 和 Notes |
-| **团队知识** | 具名账号、研究方向、推荐度/创新性/严谨性评分、评论和活动历史 |
+| **团队知识** | 具名账号、研究方向、多人卡片编辑、推荐度/创新性/严谨性评分、评论和活动历史 |
+| **记录治理** | 创建者/管理员直接删除、成员附理由申请删除、管理员审批 |
 | **原文管理** | Google Drive 适配器、全局统一文件名、归档来源和下载链接 |
 | **LLM 上下文** | Markdown/JSON 目录、仓库访问 Prompt、紧凑目录包和选中文献完整记录包 |
 | **界面语言** | 中英文界面，学术元数据统一使用标准英文 |
@@ -175,7 +176,7 @@ GEMINI_MODEL=gemini-2.5-flash-lite
 official/       已发布的文献记录
 index/          自动生成的索引与 LLM 目录
 bib/            共享和个人 BibTeX 来源
-team/           团队账号登记
+team/           团队账号与卡片删除申请登记
 webapp/         Next.js 应用
 scripts/        检查、索引、发布和参考文献工具
 docs/           部署、Schema、LLM 用法与内容政策

@@ -5,6 +5,7 @@ import { domainLabel, DOMAIN_LABELS, DOMAINS } from "@/lib/types";
 import type { TeamMember } from "@/lib/types";
 import type { DomainProposal } from "@/lib/domain-registry";
 import { useLang } from "@/lib/i18n";
+import DeletionRequestReview from "./DeletionRequestReview";
 
 function DomainPicker({
   selected,
@@ -264,6 +265,10 @@ export default function AccountSettings() {
           </button>
         </div>
       </div>
+
+      {member?.role === "admin" && (
+        <DeletionRequestReview />
+      )}
 
       {member?.role === "admin" && (
         <div className="form-card">

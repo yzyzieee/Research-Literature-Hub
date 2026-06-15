@@ -1,12 +1,10 @@
 import matter from "gray-matter";
 import { NextRequest, NextResponse } from "next/server";
-import { DOMAINS, PUBLICATION_TYPES } from "@/lib/types";
 import { normalizedDoi, normalizedTitle } from "@/lib/duplicates";
 import { isGuest } from "@/lib/guest";
 import { githubServerConfig } from "@/lib/github-config";
 import { readTeam } from "@/lib/team";
-import { getCards } from "@/lib/kb";
-import { linkKeyReferences, parseKeyReferences } from "@/lib/key-references";
+import { stringifyLiteratureContent, validateLiteratureContent } from "@/lib/card-content";
 
 export const runtime = "nodejs";
 
@@ -88,60 +86,13 @@ function validatedOfficialCard(
   username: string,
   archive?: { name?: string; uploadedBy?: string; uploadedAt?: string; reused?: boolean } | null,
 ): string {
-  const parsed = matter(content);
+  const parsed = validateLiteratureContent(slug, content);
   const data = parsed.data as Record<string, unknown>;
-  const entryType = String(data.entry_type || "");
-  const primaryDomain = String(data.primary_domain || "");
-  const domains = Array.isArray(data.domains) ? data.domains.map(String) : [];
-  const publicationType = String(data.publication_type || "");
-  const tags = Array.isArray(data.tags) ? data.tags : [];
-  const errors: string[] = [];
-
-  if (!String(data.title || "").trim()) errors.push("title");
-  if (entryType !== "literature") errors.push("entry_type: literature");
-  if (!DOMAINS.includes(primaryDomain)) errors.push("valid primary domain");
-  if (
-    !domains.length ||
-    !domains.includes(primaryDomain) ||
-    domains.some((domain) => !DOMAINS.includes(domain))
-  ) {
-    errors.push("valid domains including the primary domain");
-  }
-  if (!PUBLICATION_TYPES.includes(publicationType as (typeof PUBLICATION_TYPES)[number])) {
-    errors.push("valid publication type");
-  }
-  if (tags.length < 1 || tags.length > 6) errors.push("1-6 keyword tags");
-  for (const section of [
-    "## Summary",
-    "## Problem",
-    "## Method",
-    "## Key results",
-    "## Strengths",
-    "## Limitations",
-    "## Relevance to our group",
-    "## Notes",
-  ]) {
-    if (!parsed.content.includes(section)) errors.push(`${section.slice(3)} section`);
-  }
-  if (/^## (References|Bibliography|Related work|Works cited)\s*$/im.test(parsed.content)) {
-    errors.push("no bibliography section; use key_references metadata");
-  }
-  if (String(data.citation_key || "") !== slug) errors.push("citation key matching the file name");
-  if (!Array.isArray(data.authors) || !data.authors.length) errors.push("authors");
-  if (!Number(data.year)) errors.push("year");
-  if (errors.length) throw new Error(`Card is incomplete: ${errors.join(", ")}.`);
-
-  if (data.created instanceof Date) data.created = data.created.toISOString().slice(0, 10);
   data.status = "official";
   data.reviewed_by = Array.isArray(data.reviewed_by) ? data.reviewed_by : [];
   data.rating = data.rating || null;
   data.ratings = Array.isArray(data.ratings) ? data.ratings : [];
   data.comments = Array.isArray(data.comments) ? data.comments : [];
-  data.key_references = linkKeyReferences(
-    parseKeyReferences(data.key_references),
-    getCards(),
-    slug,
-  );
   const publishedAt = new Date().toISOString();
   data.uploaded_by = username;
   data.uploaded_at = publishedAt;
@@ -162,7 +113,7 @@ function validatedOfficialCard(
       : []),
     { action: "card_published", by: username, at: publishedAt },
   ];
-  return matter.stringify(parsed.content.trimStart(), data);
+  return stringifyLiteratureContent(parsed);
 }
 
 export async function POST(req: NextRequest) {

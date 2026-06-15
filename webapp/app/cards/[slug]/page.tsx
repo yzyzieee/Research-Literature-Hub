@@ -9,6 +9,7 @@ import CopyButton from "@/components/CopyButton";
 import CommentsPanel from "@/components/CommentsPanel";
 import DownloadButton from "@/components/DownloadButton";
 import KeyReferencesPanel from "@/components/KeyReferencesPanel";
+import CardActions from "@/components/CardActions";
 
 export const dynamic = "force-static";
 
@@ -131,17 +132,10 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
         <div className="btn-row">
           {card.drive.length > 0 && <DownloadButton link={card.drive[0]} />}
           <CopyButton text={cardToPrompt(card, repo)} labelKey="detail.copy" />
-          {repo && (
-            <a
-              className="btn"
-              href={`https://github.com/${repo}/blob/main/${card.folder}/${card.slug}.md`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <T k="detail.edit" />
-            </a>
-          )}
         </div>
+        {card.entry_type === "literature" && (
+          <CardActions slug={card.slug} creator={card.uploaded_by} repo={repo} />
+        )}
       </div>
       <article className="prose" dangerouslySetInnerHTML={{ __html: html }} />
       <KeyReferencesPanel references={card.key_references} />
