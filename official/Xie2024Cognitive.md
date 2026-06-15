@@ -99,7 +99,7 @@ key_references:
     status: external
     linked_card: null
 key_figure:
-  status: suggested
+  status: cached
   figure_id: '1'
   page: 2
   role: method_overview
@@ -110,7 +110,7 @@ key_figure:
     This figure provides a clear, high-level overview of how the cognitive VS
     technique integrates a classifier with the traditional AF method to
     dynamically adjust the control filter based on environmental cognition.
-  image_ref: null
+  image_ref: 1pmWS6nt6v6sb6yjFLo7tGA_41vk8ZHTW
   image_private: true
 drive:
   - >-
@@ -135,6 +135,10 @@ activity:
   - action: card_published
     by: WBX
     at: '2026-06-15T12:48:01.551Z'
+  - action: key_figure_updated
+    by: WBX
+    at: '2026-06-15T13:10:54.600Z'
+    detail: '1'
 ---
 ## Summary
 This paper introduces a cognitive virtual sensing (VS) technique to improve the performance of active noise control (ANC) systems, particularly when noise characteristics or primary paths change over time. Unlike conventional VS methods that struggle with such variations, the proposed cognitive VS technique uses a lightweight classifier to analyze both reference and monitoring microphone signals. This allows the system to dynamically adapt its VS filter based on the identified noise and environmental conditions. Simulation results demonstrate that the cognitive VS technique offers superior adaptivity and generalization compared to existing methods, achieving more effective noise reduction under varying conditions.
