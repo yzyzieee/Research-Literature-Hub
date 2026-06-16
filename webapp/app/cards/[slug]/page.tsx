@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getCards, toMeta } from "@/lib/kb";
 import { getCardRemote, getCardsRemote } from "@/lib/kb-remote";
 import { renderCardBody } from "@/lib/markdown";
-import { cardToPrompt } from "@/lib/export";
+import { cardToBibtex, cardToPrompt, driveViewUrl } from "@/lib/export";
 import { domainLabel, publicationTypeLabel } from "@/lib/types";
 import { T } from "@/lib/i18n";
 import CopyButton from "@/components/CopyButton";
@@ -96,36 +96,6 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
             ))}
           </div>
         )}
-        {(card.uploaded_by || card.pdf_uploaded_by) && (
-          <div className="audit-box">
-            <b><T k="detail.activity" /></b>
-            {card.uploaded_by && (
-              <span><T k="detail.uploadedBy" />: {card.uploaded_by}{card.uploaded_at ? ` · ${card.uploaded_at}` : ""}</span>
-            )}
-            {card.pdf_uploaded_by && (
-              <span>
-                <T k="detail.pdfUploadedBy" />: {card.pdf_uploaded_by}
-                {card.pdf_uploaded_at ? ` · ${card.pdf_uploaded_at}` : ""}
-                {card.pdf_file_name ? ` · ${card.pdf_file_name}` : ""}
-              </span>
-            )}
-          </div>
-        )}
-        {card.activity.length > 0 && (
-          <div className="audit-box">
-            <b><T k="detail.auditTrail" /></b>
-            <ol className="audit-list">
-              {[...card.activity].reverse().map((entry, index) => (
-                <li key={`${entry.at}-${entry.action}-${index}`}>
-                  <span>{entry.action.replaceAll("_", " ")}</span>
-                  <strong>{entry.by}</strong>
-                  <time>{entry.at}</time>
-                  {entry.detail && <small>{entry.detail}</small>}
-                </li>
-              ))}
-            </ol>
-          </div>
-        )}
         {related.length > 0 && (
           <div className="kv">
             <b><T k="detail.related" /></b> ·{" "}
@@ -138,7 +108,13 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
           </div>
         )}
         <div className="btn-row">
+          {card.drive.length > 0 && (
+            <a className="btn" href={driveViewUrl(card.drive[0])} target="_blank" rel="noreferrer">
+              👁 <T k="card.view" />
+            </a>
+          )}
           {card.drive.length > 0 && <DownloadButton link={card.drive[0]} />}
+          <CopyButton text={cardToBibtex(card)} labelKey="detail.copyBibtex" />
           <CopyButton text={cardToPrompt(card, repo)} labelKey="detail.copy" />
         </div>
         {card.entry_type === "literature" && (
@@ -148,6 +124,40 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
       <article className="prose" dangerouslySetInnerHTML={{ __html: html }} />
       <KeyReferencesPanel references={card.key_references} />
       <CommentsPanel slug={card.slug} initialComments={card.comments} />
+      {(card.uploaded_by || card.pdf_uploaded_by || card.activity.length > 0) && (
+        <details className="activity-footer">
+          <summary><T k="detail.activity" /></summary>
+          {(card.uploaded_by || card.pdf_uploaded_by) && (
+            <div className="audit-box">
+              {card.uploaded_by && (
+                <span><T k="detail.uploadedBy" />: {card.uploaded_by}{card.uploaded_at ? ` · ${card.uploaded_at}` : ""}</span>
+              )}
+              {card.pdf_uploaded_by && (
+                <span>
+                  <T k="detail.pdfUploadedBy" />: {card.pdf_uploaded_by}
+                  {card.pdf_uploaded_at ? ` · ${card.pdf_uploaded_at}` : ""}
+                  {card.pdf_file_name ? ` · ${card.pdf_file_name}` : ""}
+                </span>
+              )}
+            </div>
+          )}
+          {card.activity.length > 0 && (
+            <div className="audit-box">
+              <b><T k="detail.auditTrail" /></b>
+              <ol className="audit-list">
+                {[...card.activity].reverse().map((entry, index) => (
+                  <li key={`${entry.at}-${entry.action}-${index}`}>
+                    <span>{entry.action.replaceAll("_", " ")}</span>
+                    <strong>{entry.by}</strong>
+                    <time>{entry.at}</time>
+                    {entry.detail && <small>{entry.detail}</small>}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+        </details>
+      )}
     </>
   );
 }

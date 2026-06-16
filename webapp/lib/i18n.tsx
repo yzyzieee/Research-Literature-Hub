@@ -41,6 +41,8 @@ const dict: Record<Lang, Record<string, string>> = {
     "cards.weightAtLeast": "Weight at least",
     "cards.allUploaders": "All uploaders",
     "cards.unit": "papers",
+    "cards.prevPage": "‹ Prev",
+    "cards.nextPage": "Next ›",
 
     "detail.authors": "Authors",
     "detail.citationKey": "Citation key",
@@ -49,6 +51,7 @@ const dict: Record<Lang, Record<string, string>> = {
     "detail.abstract": "Abstract",
     "detail.related": "Related",
     "detail.copy": "📋 Copy for your LLM",
+    "detail.copyBibtex": "📑 Copy BibTeX",
     "detail.edit": "Edit on GitHub ↗",
     "detail.fulltext": "Full text / data",
     "detail.activity": "Activity",
@@ -412,6 +415,7 @@ const dict: Record<Lang, Record<string, string>> = {
 
     "copy.copied": "✓ Copied",
     "card.download": "Download original PDF",
+    "card.view": "View",
 
     "settings.title": "Account settings",
     "settings.subtitle": "Manage your profile and the research domains that define your personal review queue.",
@@ -503,6 +507,8 @@ const dict: Record<Lang, Record<string, string>> = {
     "cards.weightAtLeast": "权重至少",
     "cards.allUploaders": "全部上传者",
     "cards.unit": "篇文献",
+    "cards.prevPage": "‹ 上一页",
+    "cards.nextPage": "下一页 ›",
 
     "detail.authors": "作者",
     "detail.citationKey": "引用键",
@@ -511,6 +517,7 @@ const dict: Record<Lang, Record<string, string>> = {
     "detail.abstract": "摘要",
     "detail.related": "相关卡片",
     "detail.copy": "📋 复制喂给你的 LLM",
+    "detail.copyBibtex": "📑 复制 BibTeX",
     "detail.edit": "在 GitHub 上编辑 ↗",
     "detail.fulltext": "全文 / 数据",
     "detail.activity": "活动记录",
@@ -874,6 +881,7 @@ const dict: Record<Lang, Record<string, string>> = {
 
     "copy.copied": "✓ 已复制",
     "card.download": "下载原文 PDF",
+    "card.view": "在线查看",
 
     "settings.title": "账号设置",
     "settings.subtitle": "管理个人资料，并选择用于生成个人评审队列的研究方向。",

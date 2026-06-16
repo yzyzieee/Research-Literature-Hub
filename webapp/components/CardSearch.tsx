@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Fuse from "fuse.js";
 import type { CardMeta } from "@/lib/types";
 import { DOMAINS, cardMatchesDomain, domainLabel } from "@/lib/types";
@@ -9,11 +10,21 @@ import CardListItem from "./CardListItem";
 
 type TimeRange = "" | "last-2" | "last-3" | "last-5" | "before-2020";
 
+const PAGE_SIZE = 24;
+
 export default function CardSearch({ cards }: { cards: CardMeta[] }) {
   const { t } = useLang();
+  const searchParams = useSearchParams();
   const [query, setQuery] = useState("");
   const [domain, setDomain] = useState("");
   const [timeRange, setTimeRange] = useState<TimeRange>("");
+  const [tag, setTag] = useState("");
+  const [page, setPage] = useState(1);
+
+  // A tag clicked elsewhere navigates here with ?tag=…; keep the filter in sync.
+  useEffect(() => {
+    setTag(searchParams.get("tag") || "");
+  }, [searchParams]);
 
   const fuse = useMemo(
     () =>
@@ -40,6 +51,7 @@ export default function CardSearch({ cards }: { cards: CardMeta[] }) {
   const results = useMemo(() => {
     const currentYear = new Date().getFullYear();
     let base = query.trim() ? fuse.search(query.trim()).map((result) => result.item) : cards;
+    if (tag) base = base.filter((card) => card.tags.includes(tag));
     if (domain) base = base.filter((card) => cardMatchesDomain(card, domain));
     if (timeRange === "last-2") {
       base = base.filter((card) => Boolean(card.year && card.year >= currentYear - 1));
@@ -51,12 +63,24 @@ export default function CardSearch({ cards }: { cards: CardMeta[] }) {
       base = base.filter((card) => Boolean(card.year && card.year < 2020));
     }
     return base;
-  }, [query, domain, timeRange, cards, fuse]);
+  }, [query, domain, timeRange, tag, cards, fuse]);
+
+  // Any filter change returns to the first page.
+  useEffect(() => {
+    setPage(1);
+  }, [query, domain, timeRange, tag]);
+
+  const totalPages = Math.max(1, Math.ceil(results.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageItems = useMemo(
+    () => results.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [results, currentPage],
+  );
 
   const grouped = useMemo(() => {
     const order = [...DOMAINS, ""];
     const byDomain = new Map<string, CardMeta[]>();
-    for (const card of results) {
+    for (const card of pageItems) {
       const primary = DOMAINS.includes(card.primary_domain) ? card.primary_domain : "";
       if (!byDomain.has(primary)) byDomain.set(primary, []);
       byDomain.get(primary)!.push(card);
@@ -64,7 +88,7 @@ export default function CardSearch({ cards }: { cards: CardMeta[] }) {
     return order
       .filter((item) => byDomain.has(item))
       .map((item) => ({ domain: item, items: byDomain.get(item)! }));
-  }, [results]);
+  }, [pageItems]);
 
   const presentDomains = useMemo(
     () => DOMAINS.filter((item) => cards.some((card) => cardMatchesDomain(card, item))),
@@ -97,6 +121,11 @@ export default function CardSearch({ cards }: { cards: CardMeta[] }) {
           <option value="before-2020">{t("cards.before2020")}</option>
         </select>
       </div>
+      {tag && (
+        <button type="button" className="active-tag" onClick={() => setTag("")}>
+          #{tag} <span aria-hidden="true">✕</span>
+        </button>
+      )}
       <p className="subtitle" style={{ marginBottom: 12 }}>
         {results.length} / {cards.length} {t("cards.unit")}
       </p>
@@ -111,6 +140,17 @@ export default function CardSearch({ cards }: { cards: CardMeta[] }) {
           </div>
         </section>
       ))}
+      {totalPages > 1 && (
+        <div className="pager">
+          <button className="btn" onClick={() => setPage(currentPage - 1)} disabled={currentPage <= 1}>
+            {t("cards.prevPage")}
+          </button>
+          <span className="subtitle">{currentPage} / {totalPages}</span>
+          <button className="btn" onClick={() => setPage(currentPage + 1)} disabled={currentPage >= totalPages}>
+            {t("cards.nextPage")}
+          </button>
+        </div>
+      )}
     </>
   );
 }
