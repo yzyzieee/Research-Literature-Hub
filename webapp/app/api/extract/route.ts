@@ -6,6 +6,7 @@ import { DOMAINS, PUBLICATION_TYPES } from "@/lib/types";
 import { getCards } from "@/lib/kb";
 import { linkKeyReferences, parseKeyReferences } from "@/lib/key-references";
 import { aiKeyFigure, parseKeyFigureCandidates } from "@/lib/key-figure";
+import { normalizedTitle } from "@/lib/duplicates";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -160,7 +161,8 @@ function buildSystem(fromOriginal: boolean): string {
     "Otherwise return empty strings for all three domain suggestion fields. Never create a near-duplicate or narrower version of an approved domain.",
     `Allowed publication_type values: ${PUBLICATION_TYPES.join(", ")}.`,
     "Classify journal articles, conference papers, preprints, review papers, books, chapters, patents, theses, technical reports, and dataset papers carefully.",
-    "Extract venue, DOI, year, authors, and the paper's abstract when present. Use an empty string rather than inventing missing metadata.",
+    "Extract the title, authors, and abstract from the document.",
+    "For venue (journal/conference/container), DOI, and year: return a value ONLY if it is explicitly printed in the document itself — e.g. a journal/conference line, a DOI string, a copyright or publication-date line. If the document is a preprint or author manuscript with no such publication line, return an empty string for venue and DOI and null for year. NEVER infer, guess, or fabricate a venue, DOI, or year from the topic, the authors' usual venues, the reference list, or similar papers. A missing value is correct and expected; an invented one is a serious error that will be published as fact.",
     "Return every field required by the provided JSON schema.",
     "Tags must be 3-6 specific lowercase kebab-case technical keywords ordered broad to narrow.",
     "Never use years, author names, or generic tags such as audio, paper, research, or signal-processing.",
@@ -313,6 +315,90 @@ function shapeLiterature(record: Record<string, unknown>) {
   return shaped;
 }
 
+function crossrefPublicationType(type: string): string {
+  switch (type) {
+    case "proceedings-article": return "conference-paper";
+    case "journal-article": return "journal-paper";
+    case "book-chapter": return "book-chapter";
+    case "book": return "book";
+    case "dissertation": return "thesis";
+    case "report": return "technical-report";
+    default: return "other";
+  }
+}
+
+// Overlap coefficient (shared / smaller set): tolerant of one title being the
+// other plus a subtitle, while the >=4 distinct-token floor avoids matching on
+// short generic titles like "active noise control".
+function titleOverlap(left: string, right: string): number {
+  const tokens = (value: string) => new Set(value.split(" ").filter((word) => word.length > 2));
+  const a = tokens(left);
+  const b = tokens(right);
+  const smaller = Math.min(a.size, b.size);
+  if (smaller < 4) return 0;
+  let common = 0;
+  for (const word of a) if (b.has(word)) common += 1;
+  return common / smaller;
+}
+
+interface CrossrefItem {
+  title?: string[];
+  "container-title"?: string[];
+  issued?: { "date-parts"?: number[][] };
+  DOI?: string;
+  type?: string;
+}
+
+// When the document itself carries no venue/DOI/year (preprints, author
+// manuscripts), look the paper up on Crossref by title rather than let the model
+// guess. Only fills fields that are still missing, and only on a strong title
+// match — so we never overwrite what was genuinely printed in the document, and
+// never fabricate. If nothing matches, the value stays empty and the required
+// fields prompt the submitter to add it.
+async function enrichMissingMetadata<
+  T extends { title: string; authors: string[]; year: number | null; venue: string; doi: string; publication_type: string },
+>(record: T): Promise<T> {
+  if (record.year && record.venue.trim() && record.doi.trim()) return record;
+  const title = record.title.trim();
+  if (title.length < 8) return record;
+  try {
+    // Bibliographic query alone ranks the right paper well; we then re-rank the
+    // returned set by title overlap. (A query.author filter was dropped — it can
+    // reweight the result set away from the correct paper.)
+    const params = new URLSearchParams({ "query.bibliographic": title, rows: "5" });
+    const response = await fetch(`https://api.crossref.org/works?${params.toString()}`, {
+      headers: { "User-Agent": "research-literature-hub (mailto:team@example.com)" },
+    });
+    if (!response.ok) return record;
+    const data = await response.json();
+    const items: CrossrefItem[] = data.message?.items || [];
+    const wanted = normalizedTitle(title);
+    let best: CrossrefItem | null = null;
+    let bestScore = 0;
+    for (const item of items) {
+      const score = titleOverlap(wanted, normalizedTitle(item.title?.[0] || ""));
+      if (score > bestScore) {
+        bestScore = score;
+        best = item;
+      }
+    }
+    if (!best || bestScore < 0.85) return record;
+    const matchedYear = best.issued?.["date-parts"]?.[0]?.[0];
+    return {
+      ...record,
+      year: record.year || (typeof matchedYear === "number" ? matchedYear : record.year),
+      venue: record.venue.trim() || best["container-title"]?.[0] || "",
+      doi: record.doi.trim() || best.DOI || "",
+      publication_type:
+        record.publication_type === "other" && best.type
+          ? crossrefPublicationType(best.type)
+          : record.publication_type,
+    };
+  } catch {
+    return record;
+  }
+}
+
 function invalidRecordResponse(raw: string, error: unknown, provider: string) {
   const message = error instanceof Error ? error.message : String(error);
   console.warn("LLM literature JSON parse failed", {
@@ -364,7 +450,7 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      return NextResponse.json(shapeLiterature(parseJsonLoose(raw)));
+      return NextResponse.json(await enrichMissingMetadata(shapeLiterature(parseJsonLoose(raw))));
     } catch (error) {
       return invalidRecordResponse(raw, error, "gemini-original-pdf");
     }
@@ -403,7 +489,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    return NextResponse.json(shapeLiterature(parseJsonLoose(raw)));
+    return NextResponse.json(await enrichMissingMetadata(shapeLiterature(parseJsonLoose(raw))));
   } catch (error) {
     return invalidRecordResponse(raw, error, llmProvider());
   }
