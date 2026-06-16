@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Fuse from "fuse.js";
 import type { CardMeta } from "@/lib/types";
-import { DOMAINS, cardMatchesDomain, domainLabel } from "@/lib/types";
+import { DOMAINS, cardMatchesDomain, domainLabel, publicationTypeLabel } from "@/lib/types";
 import { useLang } from "@/lib/i18n";
 import CardListItem from "./CardListItem";
 
@@ -19,11 +19,15 @@ export default function CardSearch({ cards }: { cards: CardMeta[] }) {
   const [domain, setDomain] = useState("");
   const [timeRange, setTimeRange] = useState<TimeRange>("");
   const [tag, setTag] = useState("");
+  const [type, setType] = useState("");
   const [page, setPage] = useState(1);
 
-  // A tag clicked elsewhere navigates here with ?tag=…; keep the filter in sync.
+  // A badge clicked elsewhere navigates here with ?tag=/?domain=/?type=; keep the
+  // filters in sync with the URL (each click sets one filter and clears the rest).
   useEffect(() => {
     setTag(searchParams.get("tag") || "");
+    setDomain(searchParams.get("domain") || "");
+    setType(searchParams.get("type") || "");
   }, [searchParams]);
 
   const fuse = useMemo(
@@ -53,6 +57,7 @@ export default function CardSearch({ cards }: { cards: CardMeta[] }) {
     let base = query.trim() ? fuse.search(query.trim()).map((result) => result.item) : cards;
     if (tag) base = base.filter((card) => card.tags.includes(tag));
     if (domain) base = base.filter((card) => cardMatchesDomain(card, domain));
+    if (type) base = base.filter((card) => card.publication_type === type);
     if (timeRange === "last-2") {
       base = base.filter((card) => Boolean(card.year && card.year >= currentYear - 1));
     } else if (timeRange === "last-3") {
@@ -63,12 +68,12 @@ export default function CardSearch({ cards }: { cards: CardMeta[] }) {
       base = base.filter((card) => Boolean(card.year && card.year < 2020));
     }
     return base;
-  }, [query, domain, timeRange, tag, cards, fuse]);
+  }, [query, domain, timeRange, tag, type, cards, fuse]);
 
   // Any filter change returns to the first page.
   useEffect(() => {
     setPage(1);
-  }, [query, domain, timeRange, tag]);
+  }, [query, domain, timeRange, tag, type]);
 
   const totalPages = Math.max(1, Math.ceil(results.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -121,10 +126,19 @@ export default function CardSearch({ cards }: { cards: CardMeta[] }) {
           <option value="before-2020">{t("cards.before2020")}</option>
         </select>
       </div>
-      {tag && (
-        <button type="button" className="active-tag" onClick={() => setTag("")}>
-          #{tag} <span aria-hidden="true">✕</span>
-        </button>
+      {(tag || type) && (
+        <div className="active-filters">
+          {tag && (
+            <button type="button" className="active-tag" onClick={() => setTag("")}>
+              #{tag} <span aria-hidden="true">✕</span>
+            </button>
+          )}
+          {type && (
+            <button type="button" className="active-tag" onClick={() => setType("")}>
+              {publicationTypeLabel(type)} <span aria-hidden="true">✕</span>
+            </button>
+          )}
+        </div>
       )}
       <p className="subtitle" style={{ marginBottom: 12 }}>
         {results.length} / {cards.length} {t("cards.unit")}

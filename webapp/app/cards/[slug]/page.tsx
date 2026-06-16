@@ -36,18 +36,24 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
       <div className="detail-header">
         <h1>{card.title}</h1>
         <div className="meta-row" style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          <span className="badge domain">{domainLabel(card.primary_domain)}</span>
+          <Link className="badge domain badge-tag" href={`/cards?domain=${encodeURIComponent(card.primary_domain)}`}>
+            {domainLabel(card.primary_domain)}
+          </Link>
           {card.domains
             .filter((domain) => domain !== card.primary_domain)
             .map((domain) => (
-              <span className="badge" key={domain}>{domainLabel(domain)}</span>
+              <Link className="badge badge-tag" key={domain} href={`/cards?domain=${encodeURIComponent(domain)}`}>
+                {domainLabel(domain)}
+              </Link>
             ))}
           {card.publication_type && (
-            <span className="badge type">{publicationTypeLabel(card.publication_type)}</span>
+            <Link className="badge type badge-tag" href={`/cards?type=${encodeURIComponent(card.publication_type)}`}>
+              {publicationTypeLabel(card.publication_type)}
+            </Link>
           )}
           {card.year && <span className="badge">{card.year}</span>}
           {card.tags.map((t) => (
-            <span key={t} className="badge">#{t}</span>
+            <Link key={t} className="badge badge-tag" href={`/cards?tag=${encodeURIComponent(t)}`}>#{t}</Link>
           ))}
         </div>
         {card.authors.length > 0 && (
