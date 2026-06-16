@@ -51,7 +51,6 @@
       "role": "member",
       "domains": [
         "active-noise-control",
-        "acoustic-echo-cancellation",
         "machine-learning-audio"
       ],
       "active": true,
