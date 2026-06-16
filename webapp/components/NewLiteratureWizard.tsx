@@ -146,6 +146,9 @@ export default function NewLiteratureWizard() {
   // collapses to a review once extraction explicitly switches these off).
   const [metaEditing, setMetaEditing] = useState(true);
   const [bodyEditing, setBodyEditing] = useState(true);
+  // Optional correction the submitter can pass into a re-read so the AI fixes
+  // what it got wrong last time.
+  const [extractHint, setExtractHint] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const driveFolder = process.env.NEXT_PUBLIC_DRIVE_FOLDER_URL;
   const driveUploadEnabled = process.env.NEXT_PUBLIC_DRIVE_UPLOAD === "1";
@@ -506,7 +509,7 @@ export default function NewLiteratureWizard() {
       const response = await fetch("/api/extract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, hint: extractHint.trim() || undefined }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
@@ -736,10 +739,26 @@ export default function NewLiteratureWizard() {
               onClick={extractSelectedPdf}
               disabled={!pdfFile || busy !== ""}
             >
-              {busy === "extract" ? t("new.pdfBusy") : t("new.aiExtract")}
+              {busy === "extract"
+                ? t("new.pdfBusy")
+                : hasMetadata
+                  ? t("new.aiReExtract")
+                  : t("new.aiExtract")}
             </button>
           </div>
         </div>
+        {pdfFile && hasMetadata && (
+          <label className="reextract-hint">
+            {t("new.reExtractHintLabel")}
+            <input
+              type="text"
+              value={extractHint}
+              onChange={(event) => setExtractHint(event.target.value)}
+              placeholder={t("new.reExtractHintPh")}
+              disabled={busy !== ""}
+            />
+          </label>
+        )}
         {pdfName && <p className="subtitle" style={{ margin: "8px 0 0" }}>{pdfName}</p>}
         <p className="subtitle" style={{ margin: "10px 0 0" }}>
           {driveUploadEnabled ? t("new.driveAuto") : t("new.driveReminder")}

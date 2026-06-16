@@ -695,7 +695,35 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
   background: var(--accent-soft);
 }
 .reextract-row b { font-size: 15px; }
+.reextract-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.reextract-actions input {
+  min-width: 220px;
+  padding: 8px 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
 .pdf-zone b { font-size: 16px; }
+/* Optional correction hint shown only when re-reading a PDF. */
+.reextract-hint {
+  display: block;
+  margin-top: 12px;
+  color: var(--text-2);
+  font-size: 13px;
+}
+.reextract-hint input {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
 
 /* Review-first submit flow: read-only summaries with edit-on-demand. */
 .review-head {
