@@ -21,6 +21,26 @@ function yamlList(items: string[]): string {
   return items.length ? `[${items.map((item) => JSON.stringify(item)).join(", ")}]` : "[]";
 }
 
+// Split a structured reading record into "## Heading" sections for a clean,
+// dependency-free review preview (full Markdown is rendered on the card page).
+function parseBodySections(body: string): { heading: string; text: string }[] {
+  const sections: { heading: string; text: string }[] = [];
+  let current: { heading: string; text: string } | null = null;
+  for (const line of body.split(/\r?\n/)) {
+    const match = line.match(/^#{2,3}\s+(.*)$/);
+    if (match) {
+      current = { heading: match[1].trim(), text: "" };
+      sections.push(current);
+    } else if (current) {
+      current.text += `${line}\n`;
+    } else if (line.trim()) {
+      current = { heading: "", text: `${line}\n` };
+      sections.push(current);
+    }
+  }
+  return sections.map((section) => ({ heading: section.heading, text: section.text.trim() }));
+}
+
 type BusyAction =
   | ""
   | "doi"
@@ -120,6 +140,12 @@ export default function NewLiteratureWizard() {
   const [msg, setMsg] = useState<{ kind: "ok" | "warn"; text: string; link?: string } | null>(null);
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [published, setPublished] = useState<{ slug: string; url: string; demo: boolean } | null>(null);
+  // Review-first UX: after AI extraction the metadata and reading record show as a
+  // clean read-only summary; the editable form is revealed only on demand. Default
+  // to editing so the initial/manual-entry experience is unchanged (the form only
+  // collapses to a review once extraction explicitly switches these off).
+  const [metaEditing, setMetaEditing] = useState(true);
+  const [bodyEditing, setBodyEditing] = useState(true);
   const fileRef = useRef<HTMLInputElement>(null);
   const driveFolder = process.env.NEXT_PUBLIC_DRIVE_FOLDER_URL;
   const driveUploadEnabled = process.env.NEXT_PUBLIC_DRIVE_UPLOAD === "1";
@@ -169,6 +195,10 @@ export default function NewLiteratureWizard() {
     !citationKeyValid ? t("new.missingCitationKey") : "",
   ].filter(Boolean);
   const ready = missingRequirements.length === 0;
+  // Something worth reviewing exists once any core field is filled (after AI extract
+  // or DOI lookup). Until then we keep the editable form so manual entry still works.
+  const hasMetadata = Boolean(title.trim() || primaryDomain || abstract.trim() || authors.trim());
+  const showMetaForm = metaEditing || !hasMetadata;
   const archiveSignature = `${slug}:${doi.trim().toLowerCase()}`;
   const archiveCurrent = Boolean(
     archived &&
@@ -362,6 +392,8 @@ export default function NewLiteratureWizard() {
     setDrive("");
     setNotes("");
     setBody("");
+    setMetaEditing(true);
+    setBodyEditing(true);
     setPdfName("");
     setPdfFile(null);
     setArchived(null);
@@ -479,6 +511,9 @@ export default function NewLiteratureWizard() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       applyLiterature(data);
+      // Land in review mode: everything is shown read-only until the user opts to edit.
+      setMetaEditing(false);
+      setBodyEditing(false);
       let duplicateError = "";
       let candidates: DuplicateCandidate[] = [];
       try {
@@ -834,6 +869,20 @@ export default function NewLiteratureWizard() {
       )}
 
       <div className="form-card">
+        <div className="review-head">
+          <h2 className="review-head-title">{t("new.detailsTitle")}</h2>
+          {hasMetadata && (
+            <button
+              className="btn"
+              onClick={() => setMetaEditing((value) => !value)}
+              disabled={busy !== ""}
+            >
+              {metaEditing ? t("new.reviewDone") : t("new.editDetails")}
+            </button>
+          )}
+        </div>
+        {showMetaForm ? (
+        <>
         <label>{t("new.primaryDomain")}</label>
         <select value={primaryDomain} onChange={(event) => choosePrimaryDomain(event.target.value)}>
           <option value="">{t("new.primaryDomainPick")}</option>
@@ -963,10 +1012,84 @@ export default function NewLiteratureWizard() {
             {t("new.fileName")}: <code>official/{slug}.md</code>
           </p>
         )}
+        </>
+        ) : (
+          <div className="meta-review">
+            <h3 className="meta-review-title">{title || t("new.untitled")}</h3>
+            <div className="meta-row">
+              {primaryDomain && (
+                <span className="badge domain">
+                  {DOMAIN_LABELS[primaryDomain as keyof typeof DOMAIN_LABELS] || primaryDomain}
+                </span>
+              )}
+              {domains.filter((item) => item !== primaryDomain).map((item) => (
+                <span className="badge" key={item}>
+                  {DOMAIN_LABELS[item as keyof typeof DOMAIN_LABELS] || item}
+                </span>
+              ))}
+              {publicationType && (
+                <span className="badge type">
+                  {PUBLICATION_TYPE_LABELS[publicationType as keyof typeof PUBLICATION_TYPE_LABELS] || publicationType}
+                </span>
+              )}
+              {year && <span className="badge">{year}</span>}
+            </div>
+            {authors.trim() && <div className="kv"><b>{t("new.authors")}</b> · {authors}</div>}
+            {citationKey.trim() && (
+              <div className="kv"><b>{t("new.citationKey")}</b> · <code>{citationKey}</code></div>
+            )}
+            {venue.trim() && <div className="kv"><b>{t("new.venue")}</b> · {venue}</div>}
+            {doi.trim() && (
+              <div className="kv">
+                <b>{t("new.doi")}</b> ·{" "}
+                <a href={`https://doi.org/${doi.trim()}`} target="_blank" rel="noreferrer">{doi}</a>
+              </div>
+            )}
+            {abstract.trim() && (
+              <div className="abstract-box"><b>{t("new.abstract")}</b><p>{abstract}</p></div>
+            )}
+            {tagList.length > 0 && (
+              <div className="meta-row">
+                {tagList.map((tag) => <span className="badge" key={tag}>#{tag}</span>)}
+              </div>
+            )}
+            {keyReferences.length > 0 && (
+              <div className="kv"><b>{t("new.keyReferences")}</b> · {keyReferences.length}</div>
+            )}
+            {driveList.length > 0 && (
+              <div className="kv">
+                <b>{t("new.drive")}</b> ·{" "}
+                {driveList.map((link, index) => (
+                  <a key={link} href={link} target="_blank" rel="noreferrer">PDF {index + 1} </a>
+                ))}
+              </div>
+            )}
+            {notes.trim() && <div className="kv"><b>{t("new.notes")}</b> · {notes}</div>}
+            {slug && (
+              <p className="subtitle" style={{ margin: "8px 0 0" }}>
+                {t("new.fileName")}: <code>official/{slug}.md</code>
+              </p>
+            )}
+            {domainSuggestion && primaryDomain === "other" && (
+              <div className="notice warn" style={{ marginTop: 10 }}>
+                {t("new.domainSuggestionTitle")}: {domainSuggestion.label} — {t("new.editToReview")}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="form-card">
-        <label>{t("new.bodyLabel")}</label>
+        {bodyEditing || !body.trim() ? (
+        <>
+        <div className="review-head">
+          <label className="review-head-title">{t("new.bodyLabel")}</label>
+          {body.trim() && (
+            <button className="btn" onClick={() => setBodyEditing(false)} disabled={busy !== ""}>
+              {t("new.reviewDone")}
+            </button>
+          )}
+        </div>
         <div className="btn-row" style={{ marginBottom: 10 }}>
           <button className="btn" onClick={draft} disabled={!title.trim() || busy !== ""}>
             {busy === "draft" ? t("new.drafting") : t("new.draft")}
@@ -976,6 +1099,26 @@ export default function NewLiteratureWizard() {
           </button>
         </div>
         <textarea rows={24} value={body} onChange={(event) => setBody(event.target.value)} />
+        </>
+        ) : (
+          <div className="body-review-card">
+            <div className="review-head">
+              <h2 className="review-head-title">{t("new.bodyLabel")}</h2>
+              <button className="btn" onClick={() => setBodyEditing(true)} disabled={busy !== ""}>
+                {t("new.editBody")}
+              </button>
+            </div>
+            <p className="subtitle">{t("new.bodyReviewHint")}</p>
+            <div className="body-review">
+              {parseBodySections(body).map((section, index) => (
+                <div className="body-review-section" key={`${section.heading}-${index}`}>
+                  {section.heading && <h4>{section.heading}</h4>}
+                  {section.text && <p>{section.text}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {driveUploadEnabled && pdfFile && archived && (
