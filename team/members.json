@@ -35,7 +35,13 @@
       "id": "LHW",
       "name": "LHW",
       "role": "member",
-      "domains": [],
+      "domains": [
+        "source-separation",
+        "speech-enhancement",
+        "beamforming-arrays",
+        "spatial-audio",
+        "room-acoustics"
+      ],
       "active": true,
       "created": "2026-06-16"
     },
