@@ -184,6 +184,72 @@
     "card_url": "https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Oh2024Enhancing.md"
   },
   {
+    "slug": "Wang2024Transferable",
+    "title": "Transferable Selective Virtual Sensing Active Noise Control Technique Based on Metric Learning",
+    "year": 2024,
+    "venue": "IEEE/ACM Transactions on Audio, Speech, and Language Processing",
+    "publication_type": "journal-paper",
+    "primary_domain": "active-noise-control",
+    "domains": [
+      "active-noise-control",
+      "machine-learning-audio"
+    ],
+    "tags": [
+      "virtual-sensing",
+      "auxiliary-filter",
+      "metric-learning",
+      "convolutional-neural-network",
+      "transfer-learning"
+    ],
+    "team_weight": null,
+    "summary": "This paper introduces a novel Transferable Selective Virtual Sensing (VS) Active Noise Control (ANC) technique that leverages metric learning to enhance the transferability of Convolutional Neural Network (CNN)-based VS systems. The core innovation is a pre-trained CNN feature extraction module that can be applied to new ANC systems without retraining, enabling it to handle unseen noise types. This approach signific…",
+    "key_references": [
+      {
+        "title": "Selective virtual sensing technique for multi-channel feed-forward active noise control systems",
+        "doi": "10.1109/ICASSP.2019.8683940",
+        "year": 2019,
+        "role": "foundation",
+        "reason": "Introduces the selective virtual sensing technique which is a precursor to the proposed method."
+      },
+      {
+        "title": "Cognitive virtual sensing technique for feedforward active noise control",
+        "doi": "10.1109/ICASSP48709.2024.10447397",
+        "year": 2024,
+        "role": "related_work",
+        "reason": "Presents a related CNN-based approach for virtual sensing that the proposed method builds upon and aims to improve."
+      },
+      {
+        "title": "Transferable latent of cnn-based selective fixed-filter active noise control",
+        "doi": "10.1109/TASLP.2023.3275859",
+        "year": 2023,
+        "role": "foundation",
+        "reason": "This work demonstrates the transferability of CNN models in a related ANC context, providing motivation and a foundation for the proposed transferable approach."
+      },
+      {
+        "title": "Distance metric learning: A comprehensive survey",
+        "doi": "",
+        "year": 2006,
+        "role": "foundation",
+        "reason": "Provides a foundational overview of metric learning, a core technology used in the proposed method."
+      },
+      {
+        "title": "Metric learning: A survey",
+        "doi": "",
+        "year": 2013,
+        "role": "foundation",
+        "reason": "Offers a comprehensive survey of metric learning techniques, relevant to understanding the theoretical underpinnings of the proposed approach."
+      },
+      {
+        "title": "Deep residual learning for image recognition",
+        "doi": "10.1109/CVPR.2016.90",
+        "year": 2016,
+        "role": "method",
+        "reason": "Introduces residual learning, which is incorporated into the CNN architecture used in the proposed method."
+      }
+    ],
+    "card_url": "https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Wang2024Transferable.md"
+  },
+  {
     "slug": "Xiao2023Spatially",
     "title": "Spatially selective active noise control systems",
     "year": 2023,

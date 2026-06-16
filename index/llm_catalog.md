@@ -4,7 +4,7 @@ Use this file as the entry point for searching our internal literature library.
 Search this catalog first, then open only the most relevant literature record files.
 Do not assume private Google Drive PDFs are accessible.
 
-Papers: 7
+Papers: 8
 
 ## Papers
 
@@ -62,6 +62,25 @@ Papers: 7
   - [related_work] Deep learning-based active noise control: A deep learning approach to active noise control (2021, DOI: 10.1016/j.neunet.2021.03.037) - Represents prior work applying deep learning to ANC, though not specifically for real-time secondary path estimation in vehicles.
   - [related_work] Deep learning-assisted active noise control in a time-varying environment (2023, DOI: 10.1007/s12206-023-0206-2) - Explores deep learning for ANC in time-varying environments, similar to the dynamic conditions addressed in this paper.
 - Record: https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Oh2024Enhancing.md
+
+### Wang2024Transferable
+- Title: Transferable Selective Virtual Sensing Active Noise Control Technique Based on Metric Learning
+- Year: 2024
+- Venue: IEEE/ACM Transactions on Audio, Speech, and Language Processing
+- Publication type: journal-paper
+- Primary domain: active-noise-control
+- Domains: active-noise-control, machine-learning-audio
+- Tags: virtual-sensing, auxiliary-filter, metric-learning, convolutional-neural-network, transfer-learning
+- Team weight: unrated
+- Summary: This paper introduces a novel Transferable Selective Virtual Sensing (VS) Active Noise Control (ANC) technique that leverages metric learning to enhance the transferability of Convolutional Neural Network (CNN)-based VS systems. The core innovation is a pre-trained CNN feature extraction module that can be applied to new ANC systems without retraining, enabling it to handle unseen noise types. This approach signific…
+- Key related papers:
+  - [foundation] Selective virtual sensing technique for multi-channel feed-forward active noise control systems (2019, DOI: 10.1109/ICASSP.2019.8683940) - Introduces the selective virtual sensing technique which is a precursor to the proposed method.
+  - [related_work] Cognitive virtual sensing technique for feedforward active noise control (2024, DOI: 10.1109/ICASSP48709.2024.10447397) - Presents a related CNN-based approach for virtual sensing that the proposed method builds upon and aims to improve.
+  - [foundation] Transferable latent of cnn-based selective fixed-filter active noise control (2023, DOI: 10.1109/TASLP.2023.3275859) - This work demonstrates the transferability of CNN models in a related ANC context, providing motivation and a foundation for the proposed transferable approach.
+  - [foundation] Distance metric learning: A comprehensive survey (2006) - Provides a foundational overview of metric learning, a core technology used in the proposed method.
+  - [foundation] Metric learning: A survey (2013) - Offers a comprehensive survey of metric learning techniques, relevant to understanding the theoretical underpinnings of the proposed approach.
+  - [method] Deep residual learning for image recognition (2016, DOI: 10.1109/CVPR.2016.90) - Introduces residual learning, which is incorporated into the CNN architecture used in the proposed method.
+- Record: https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Wang2024Transferable.md
 
 ### Xiao2023Spatially
 - Title: Spatially selective active noise control systems

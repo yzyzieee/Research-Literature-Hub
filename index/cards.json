@@ -285,6 +285,107 @@
     "legacy_type": ""
   },
   {
+    "slug": "Wang2024Transferable",
+    "path": "official/Wang2024Transferable.md",
+    "folder": "official",
+    "title": "Transferable Selective Virtual Sensing Active Noise Control Technique Based on Metric Learning",
+    "entry_type": "literature",
+    "publication_type": "journal-paper",
+    "primary_domain": "active-noise-control",
+    "domains": [
+      "active-noise-control",
+      "machine-learning-audio"
+    ],
+    "venue": "IEEE/ACM Transactions on Audio, Speech, and Language Processing",
+    "doi": "",
+    "abstract": "Virtual sensing (VS) technology enables active noise control (ANC) systems to attenuate noise at virtual locations distant from the physical error microphones. Appropriate auxiliary filters (AF) can significantly enhance the effectiveness of VS approaches. The selection of appropriate AF for various types of noise can be automatically achieved using convolutional neural networks (CNNs). However, training the CNN model for different ANC systems is often labour-intensive and time-consuming. To tackle this problem, we propose a novel method, Transferable Selective VS, by integrating metric-learning technology into CNN-based VS approaches. The Transferable Selective VS method allows a pre-trained CNN to be applied directly to new ANC systems without requiring retraining, and it can handle unseen noise types. Numerical simulations demonstrate the effectiveness of the proposed method in attenuating sudden-varying broadband noises and real-world noises.",
+    "status": "official",
+    "tags": [
+      "virtual-sensing",
+      "auxiliary-filter",
+      "metric-learning",
+      "convolutional-neural-network",
+      "transfer-learning"
+    ],
+    "authors": [
+      "Boxiang Wang",
+      "Dongyuan Shi",
+      "Zhengding Luo",
+      "Xiaoyi Shen",
+      "Junwei Ji",
+      "Woon-Seng Gan"
+    ],
+    "year": 2024,
+    "citation_key": "Wang2024Transferable",
+    "key_references": [
+      {
+        "title": "Selective virtual sensing technique for multi-channel feed-forward active noise control systems",
+        "doi": "10.1109/ICASSP.2019.8683940",
+        "year": 2019,
+        "role": "foundation",
+        "reason": "Introduces the selective virtual sensing technique which is a precursor to the proposed method.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Cognitive virtual sensing technique for feedforward active noise control",
+        "doi": "10.1109/ICASSP48709.2024.10447397",
+        "year": 2024,
+        "role": "related_work",
+        "reason": "Presents a related CNN-based approach for virtual sensing that the proposed method builds upon and aims to improve.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Transferable latent of cnn-based selective fixed-filter active noise control",
+        "doi": "10.1109/TASLP.2023.3275859",
+        "year": 2023,
+        "role": "foundation",
+        "reason": "This work demonstrates the transferability of CNN models in a related ANC context, providing motivation and a foundation for the proposed transferable approach.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Distance metric learning: A comprehensive survey",
+        "doi": "",
+        "year": 2006,
+        "role": "foundation",
+        "reason": "Provides a foundational overview of metric learning, a core technology used in the proposed method.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Metric learning: A survey",
+        "doi": "",
+        "year": 2013,
+        "role": "foundation",
+        "reason": "Offers a comprehensive survey of metric learning techniques, relevant to understanding the theoretical underpinnings of the proposed approach.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Deep residual learning for image recognition",
+        "doi": "10.1109/CVPR.2016.90",
+        "year": 2016,
+        "role": "method",
+        "reason": "Introduces residual learning, which is incorporated into the CNN architecture used in the proposed method.",
+        "status": "external",
+        "linked_card": null
+      }
+    ],
+    "related": [],
+    "drive": [
+      "https://drive.google.com/file/d/1N1BE0fHVLYGN4LOmSxWB4hUCSiMlxyaB/view?usp=drivesdk"
+    ],
+    "created": "2026-06-16",
+    "rating": null,
+    "comments": [],
+    "uploaded_by": "WBX",
+    "uploaded_at": "2026-06-16T09:48:20.080Z",
+    "summary": "This paper introduces a novel Transferable Selective Virtual Sensing (VS) Active Noise Control (ANC) technique that leverages metric learning to enhance the transferability of Convolutional Neural Network (CNN)-based VS systems. The core innovation is a pre-trained CNN feature extraction module that can be applied to new ANC systems without retraining, enabling it to handle unseen noise types. This approach significantly reduces the labor and time required for training and deployment across different systems. Numerical simulations confirm the method's effectiveness in attenuating sudden-varying broadband and real-world noises, achieving performance close to optimal control.",
+    "legacy_type": ""
+  },
+  {
     "slug": "Xiao2023Spatially",
     "path": "official/Xiao2023Spatially.md",
     "folder": "official",
