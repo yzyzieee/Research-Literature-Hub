@@ -1,6 +1,6 @@
 {
   "name": "research-literature-hub",
-  "version": "0.1.54",
+  "version": "0.1.55",
   "description": "A paper-first research literature management and LLM-context hub for research groups.",
   "license": "MIT",
   "private": true,
