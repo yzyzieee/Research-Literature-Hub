@@ -412,8 +412,21 @@ function invalidRecordResponse(raw: string, error: unknown, provider: string) {
   );
 }
 
+// Optional reviewer correction carried into a re-read so the model can fix what
+// it got wrong last time (without licence to invent unverifiable metadata).
+function reviewerHintBlock(hint?: string): string {
+  const note = String(hint || "").replace(/\s+/g, " ").trim().slice(0, 800);
+  if (!note) return "";
+  return `\n\nA reviewer checked a previous AI reading of THIS document and asks you to correct it. Treat their note as authoritative about this document and fix accordingly — but still never fabricate a venue, DOI, or year that is not in the document. Reviewer note:\n${note}`;
+}
+
 export async function POST(req: NextRequest) {
-  const { text, driveFileId } = (await req.json()) as { text?: string; driveFileId?: string };
+  const { text, driveFileId, hint } = (await req.json()) as {
+    text?: string;
+    driveFileId?: string;
+    hint?: string;
+  };
+  const hintBlock = reviewerHintBlock(hint);
   if (isGuest(req.headers.get("x-kb-user"))) {
     return NextResponse.json({
       ...guestLiteratureDraft(text || driveFileId || ""),
@@ -438,7 +451,7 @@ export async function POST(req: NextRequest) {
       raw = await geminiStructured(
         [
           { inlineData: { mimeType: "application/pdf", data: pdf.toString("base64") } },
-          { text: "Produce the literature record now." },
+          { text: `Produce the literature record now.${hintBlock}` },
         ],
         buildSystem(true),
       );
@@ -471,7 +484,7 @@ export async function POST(req: NextRequest) {
 
   let raw: string;
   try {
-    const user = `Full document text:\n\n${text.slice(0, MAX_INPUT_CHARS)}`;
+    const user = `Full document text:\n\n${text.slice(0, MAX_INPUT_CHARS)}${hintBlock}`;
     raw =
       llmProvider() === "gemini"
         ? await geminiStructured([{ text: user }], buildSystem(false))

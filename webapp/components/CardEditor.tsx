@@ -10,6 +10,7 @@ export default function CardEditor({ slug }: { slug: string }) {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [reextracting, setReextracting] = useState(false);
+  const [reextractHint, setReextractHint] = useState("");
   const [saved, setSaved] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
@@ -34,7 +35,7 @@ export default function CardEditor({ slug }: { slug: string }) {
       const extractResponse = await fetch("/api/extract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ driveFileId: fileId }),
+        body: JSON.stringify({ driveFileId: fileId, hint: reextractHint.trim() || undefined }),
       });
       const record = await extractResponse.json();
       if (!extractResponse.ok) throw new Error(record.error);
@@ -109,9 +110,18 @@ export default function CardEditor({ slug }: { slug: string }) {
           <b>{t("edit.reextractTitle")}</b>
           <p className="subtitle">{t("edit.reextractHint")}</p>
         </div>
-        <button className="btn" onClick={reextract} disabled={busy || reextracting}>
-          {reextracting ? t("edit.reextracting") : t("edit.reextract")}
-        </button>
+        <div className="reextract-actions">
+          <input
+            type="text"
+            value={reextractHint}
+            onChange={(event) => setReextractHint(event.target.value)}
+            placeholder={t("edit.reextractHintPh")}
+            disabled={busy || reextracting}
+          />
+          <button className="btn" onClick={reextract} disabled={busy || reextracting}>
+            {reextracting ? t("edit.reextracting") : t("edit.reextract")}
+          </button>
+        </div>
       </div>
       <label htmlFor="card-markdown">{t("edit.markdown")}</label>
       <textarea
