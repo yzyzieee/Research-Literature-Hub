@@ -462,6 +462,10 @@ export default function NewLiteratureWizard() {
 
   const extractSelectedPdf = async () => {
     if (!pdfFile) return;
+    // First extraction is one-click; only a re-run over an existing draft
+    // (which overwrites it and costs another AI call) asks for confirmation.
+    const alreadyDrafted = Boolean(title.trim() || body.trim());
+    if (alreadyDrafted && !window.confirm(t("new.reextractConfirm"))) return;
     setBusy("extract");
     setMsg(null);
     try {

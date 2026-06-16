@@ -27,6 +27,7 @@ export default function CardEditor({ slug }: { slug: string }) {
       setMessage({ ok: false, text: t("edit.reextractNoPdf") });
       return;
     }
+    if (!window.confirm(t("edit.reextractConfirm"))) return;
     setReextracting(true);
     setMessage(null);
     try {
