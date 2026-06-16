@@ -579,6 +579,15 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
 .key-figure-heading h2 { margin: 0; font-size: 18px; }
 .key-figure-heading .subtitle { margin: 5px 0 0; }
 .key-figure-title-row { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.key-figure-actions {
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  margin-top: 0;
+}
+.key-figure-actions .btn {
+  padding: 7px 14px;
+  white-space: nowrap;
+}
 .badge.figure-status { text-transform: capitalize; }
 .badge.figure-status.cached { border-color: #9bd3ad; background: #edf9f1; color: #19713a; }
 .badge.figure-status.suggested { border-color: #b8c8ff; background: #f0f3ff; color: #3b4eb0; }

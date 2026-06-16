@@ -376,7 +376,7 @@ export default function KeyFigurePanel({
           <p className="subtitle">{t("figure.subtitle")}</p>
         </div>
         {figure.status === "cached" && !editing && (
-          <div className="btn-row">
+          <div className="btn-row key-figure-actions">
             <button className="btn" onClick={() => setEditing(true)} disabled={busy}>
               {t("figure.replace")}
             </button>
