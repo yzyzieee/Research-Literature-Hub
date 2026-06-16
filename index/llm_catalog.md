@@ -4,7 +4,7 @@ Use this file as the entry point for searching our internal literature library.
 Search this catalog first, then open only the most relevant literature record files.
 Do not assume private Google Drive PDFs are accessible.
 
-Papers: 8
+Papers: 9
 
 ## Papers
 
@@ -44,6 +44,25 @@ Papers: 8
   - [foundation] Deep learning (2015, DOI: 10.1038/521436a) - This is a foundational paper on deep learning, providing context for the use of DNNs in the proposed method.
   - [method] Scikit-learn: machine learning in Python (2011, DOI: 10.1109/TPAMI.2011.239) - This reference details the Scikit-learn library used for implementing the DNN models.
 - Record: https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Im2023Deep.md
+
+### Luo2024Real-time
+- Title: Real-time implementation and explainable AI analysis of delayless CNN-based selective fixed-filter active noise control
+- Year: 2024
+- Venue: Mechanical Systems and Signal Processing
+- Publication type: journal-paper
+- Primary domain: active-noise-control
+- Domains: active-noise-control, machine-learning-audio
+- Tags: active-noise-control, selective-fixed-filter-anc, delayless-noise-control, convolutional-neural-network, explainable-ai, layercam
+- Team weight: unrated
+- Summary: This paper presents a real-time implementation and explainable AI analysis of a delayless Convolutional Neural Network (CNN)-based Selective Fixed-Filter Active Noise Control (SFANC) method. The approach leverages CNNs to automatically learn parameters for selecting appropriate pre-trained control filters based on noise characteristics. Theoretical analysis frames ANC as a Markov process to justify the CNN-based SFA…
+- Key related papers:
+  - [foundation] Selective fixed-filter active noise control based on frequency response matching in headphones (2023, DOI: 10.1016/j.apacoust.2023.109505) - This paper introduces the selective fixed-filter ANC (SFANC) concept, which is foundational to the presented work.
+  - [foundation] Feedforward selective fixed-filter active noise control: Algorithm and implementation (2020, DOI: 10.1109/TASLP.2020.2987499) - This work provides the algorithmic basis for SFANC, which the current paper builds upon.
+  - [method] Selective fixed-filter active noise control based on convolutional neural network (2022, DOI: 10.1016/j.sigpro.2021.108317) - This paper first proposed using CNNs for SFANC, directly preceding the current work.
+  - [method] LayerCAM: Exploring hierarchical class activation maps for localization (2021, DOI: 10.1109/TIP.2021.3090407) - This paper introduces LayerCAM, the explainable AI technique used in the current study.
+  - [method] ShuffleNet V2: Practical guidelines for efficient CNN architecture design (2018, DOI: 10.1007/978-3-030-00827-1_3) - The paper's CNN architecture is based on ShuffleNet V2, making it a relevant methodological reference.
+  - [related_work] Transferable latent of cnn-based selective fixed-filter active noise control (2023, DOI: 10.1109/TASLP.2023.3334327) - This related work by the same authors investigates the transferability of CNN-based SFANC, a key aspect also addressed in the current paper.
+- Record: https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Luo2024Real-time.md
 
 ### Oh2024Enhancing
 - Title: Enhancing active noise control of road noise using deep neural network to update secondary path estimate in real time

@@ -194,6 +194,107 @@
     "legacy_type": ""
   },
   {
+    "slug": "Luo2024Real-time",
+    "path": "official/Luo2024Real-time.md",
+    "folder": "official",
+    "title": "Real-time implementation and explainable AI analysis of delayless CNN-based selective fixed-filter active noise control",
+    "entry_type": "literature",
+    "publication_type": "journal-paper",
+    "primary_domain": "active-noise-control",
+    "domains": [
+      "active-noise-control",
+      "machine-learning-audio"
+    ],
+    "venue": "Mechanical Systems and Signal Processing",
+    "doi": "https://doi.org/10.1016/j.ymssp.2024.111364",
+    "abstract": "The selective fixed-filter active noise control (SFANC) approach can select suitable pre-trained control filters for different types of noise. With the learning ability of convolutional neural network (CNN), the CNN-based SFANC method can automatically learn its parameters from noise data. Combining practical experience, this paper abstracts ANC as a Markov progress and provides a detailed theoretical analysis to verify the reasonableness of the CNN-based SFANC method. To validate its effectiveness, we implement the method in a multichannel ANC window, where the CNN operating in the co-processor collaborates with the real-time controller to realize delayless noise control. Additionally, an explainable AI technique is used to analyze the underlying principle of the CNN-based SFANC method, enhancing its interpretability in acoustic applications. Numerical simulations and real-time experiments demonstrate that the CNN-based SFANC method achieves not only satisfactory noise reduction performance for broadband and real-world noises but also excellent transferability.",
+    "status": "official",
+    "tags": [
+      "active-noise-control",
+      "selective-fixed-filter-anc",
+      "delayless-noise-control",
+      "convolutional-neural-network",
+      "explainable-ai",
+      "layercam"
+    ],
+    "authors": [
+      "Zhengding Luo",
+      "Dongyuan Shi",
+      "Junwei Ji",
+      "Xiaoyi Shen",
+      "Woon-Seng Gan"
+    ],
+    "year": 2024,
+    "citation_key": "Luo2024Real-time",
+    "key_references": [
+      {
+        "title": "Selective fixed-filter active noise control based on frequency response matching in headphones",
+        "doi": "10.1016/j.apacoust.2023.109505",
+        "year": 2023,
+        "role": "foundation",
+        "reason": "This paper introduces the selective fixed-filter ANC (SFANC) concept, which is foundational to the presented work.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Feedforward selective fixed-filter active noise control: Algorithm and implementation",
+        "doi": "10.1109/TASLP.2020.2987499",
+        "year": 2020,
+        "role": "foundation",
+        "reason": "This work provides the algorithmic basis for SFANC, which the current paper builds upon.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Selective fixed-filter active noise control based on convolutional neural network",
+        "doi": "10.1016/j.sigpro.2021.108317",
+        "year": 2022,
+        "role": "method",
+        "reason": "This paper first proposed using CNNs for SFANC, directly preceding the current work.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "LayerCAM: Exploring hierarchical class activation maps for localization",
+        "doi": "10.1109/TIP.2021.3090407",
+        "year": 2021,
+        "role": "method",
+        "reason": "This paper introduces LayerCAM, the explainable AI technique used in the current study.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "ShuffleNet V2: Practical guidelines for efficient CNN architecture design",
+        "doi": "10.1007/978-3-030-00827-1_3",
+        "year": 2018,
+        "role": "method",
+        "reason": "The paper's CNN architecture is based on ShuffleNet V2, making it a relevant methodological reference.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Transferable latent of cnn-based selective fixed-filter active noise control",
+        "doi": "10.1109/TASLP.2023.3334327",
+        "year": 2023,
+        "role": "related_work",
+        "reason": "This related work by the same authors investigates the transferability of CNN-based SFANC, a key aspect also addressed in the current paper.",
+        "status": "external",
+        "linked_card": null
+      }
+    ],
+    "related": [],
+    "drive": [
+      "https://drive.google.com/file/d/1qs_pcOysc9-9UKFgp0oKyyRDHVga03_V/view?usp=drivesdk"
+    ],
+    "created": "2026-06-16",
+    "rating": null,
+    "comments": [],
+    "uploaded_by": "YZY",
+    "uploaded_at": "2026-06-16T12:43:41.900Z",
+    "summary": "This paper presents a real-time implementation and explainable AI analysis of a delayless Convolutional Neural Network (CNN)-based Selective Fixed-Filter Active Noise Control (SFANC) method. The approach leverages CNNs to automatically learn parameters for selecting appropriate pre-trained control filters based on noise characteristics. Theoretical analysis frames ANC as a Markov process to justify the CNN-based SFANC method. The system was implemented in a multichannel ANC window, achieving delayless noise control through efficient co-processor and real-time controller coordination. Explainable AI (LayerCAM) was used to analyze the CNN's decision-making process. Simulations and experiments confirm the method's effectiveness in reducing broadband and real-world noises, demonstrating satisfactory noise reduction and excellent transferability.",
+    "legacy_type": ""
+  },
+  {
     "slug": "Oh2024Enhancing",
     "path": "official/Oh2024Enhancing.md",
     "folder": "official",
