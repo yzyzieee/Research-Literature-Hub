@@ -149,6 +149,8 @@ export default function NewLiteratureWizard() {
   // Optional correction the submitter can pass into a re-read so the AI fixes
   // what it got wrong last time.
   const [extractHint, setExtractHint] = useState("");
+  // Seconds elapsed during an AI read, so the user sees it is working (not frozen).
+  const [extractElapsed, setExtractElapsed] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
   const driveFolder = process.env.NEXT_PUBLIC_DRIVE_FOLDER_URL;
   const driveUploadEnabled = process.env.NEXT_PUBLIC_DRIVE_UPLOAD === "1";
@@ -162,6 +164,17 @@ export default function NewLiteratureWizard() {
       })
       .catch(() => {});
   }, []);
+
+  // Tick the elapsed-seconds counter while an AI read is in flight.
+  useEffect(() => {
+    if (busy !== "extract" && busy !== "original") {
+      setExtractElapsed(0);
+      return;
+    }
+    const start = Date.now();
+    const id = setInterval(() => setExtractElapsed(Math.round((Date.now() - start) / 1000)), 1000);
+    return () => clearInterval(id);
+  }, [busy]);
 
   const slug = citationKey.trim();
   const authorList = authors.split(/[;,]/).map((author) => author.trim()).filter(Boolean);
@@ -495,6 +508,31 @@ export default function NewLiteratureWizard() {
     }
   };
 
+  // Calls /api/extract with a client-side timeout so a stuck/very slow request
+  // surfaces a clear message instead of an indefinite spinner.
+  const callExtract = async (payload: Record<string, unknown>) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 150_000);
+    try {
+      const response = await fetch("/api/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+      return data;
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+
+  const extractError = (error: unknown): string =>
+    error instanceof DOMException && error.name === "AbortError"
+      ? t("new.extractTimeout")
+      : `${t("new.pdfFail")}: ${error instanceof Error ? error.message : error}`;
+
   const extractSelectedPdf = async () => {
     if (!pdfFile) return;
     // First extraction is one-click; only a re-run over an existing draft
@@ -506,13 +544,7 @@ export default function NewLiteratureWizard() {
     try {
       const text = await extractPdfText(pdfFile);
       if (text.length < 80) throw new Error(t("new.pdfNoText"));
-      const response = await fetch("/api/extract", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, hint: extractHint.trim() || undefined }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
+      const data = await callExtract({ text, hint: extractHint.trim() || undefined });
       applyLiterature(data);
       // Land in review mode: everything is shown read-only until the user opts to edit.
       setMetaEditing(false);
@@ -558,10 +590,7 @@ export default function NewLiteratureWizard() {
         });
       }
     } catch (error) {
-      setMsg({
-        kind: "warn",
-        text: `${t("new.pdfFail")}: ${error instanceof Error ? error.message : error}`,
-      });
+      setMsg({ kind: "warn", text: extractError(error) });
     } finally {
       setBusy("");
     }
@@ -572,13 +601,7 @@ export default function NewLiteratureWizard() {
     setBusy("original");
     setMsg(null);
     try {
-      const response = await fetch("/api/extract", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ driveFileId: archived.id }),
-      });
-      const extracted = await response.json();
-      if (!response.ok) throw new Error(extracted.error);
+      const extracted = await callExtract({ driveFileId: archived.id, hint: extractHint.trim() || undefined });
       applyLiterature(extracted, true);
       let duplicateError = "";
       try {
@@ -600,9 +623,12 @@ export default function NewLiteratureWizard() {
         link: archived.link,
       });
     } catch (error) {
+      const aborted = error instanceof DOMException && error.name === "AbortError";
       setMsg({
         kind: "warn",
-        text: `${t("new.originalReadFail")}: ${error instanceof Error ? error.message : error}`,
+        text: aborted
+          ? t("new.extractTimeout")
+          : `${t("new.originalReadFail")}: ${error instanceof Error ? error.message : error}`,
         link: archived.link,
       });
     } finally {
@@ -850,7 +876,11 @@ export default function NewLiteratureWizard() {
         {busy === "extract" && (
           <div className="wizard-extracting" role="status">
             <span className="spinner" aria-hidden="true" />
-            <span>{t("new.extractingNotice")}</span>
+            <span>
+              {t("new.extractingNotice")}
+              {extractElapsed > 0 ? ` (${extractElapsed}s)` : ""}
+              {extractElapsed >= 25 ? ` — ${t("new.extractingSlow")}` : ""}
+            </span>
           </div>
         )}
         <div className={busy === "extract" ? "is-extracting" : ""}>

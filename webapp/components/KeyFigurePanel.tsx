@@ -65,6 +65,10 @@ export default function KeyFigurePanel({
   const customRef = useRef<HTMLInputElement>(null);
   const docRef = useRef<PdfDoc | null>(null);
   const renderSeq = useRef(0);
+  // The page the canvas should show — driven by the AI-suggested figure. Kept in a
+  // ref so the doc-load effect renders the latest target even if the suggestion
+  // arrives after the document has already loaded.
+  const desiredPageRef = useRef(initialFigure.page || 1);
 
   // A stable identity for the PDF source so we reload the doc only when it changes.
   const sourceKey = pdfFile ? `file:${pdfFile.name}:${pdfFile.size}` : pdfLink ? `link:${pdfLink}` : "";
@@ -77,8 +81,20 @@ export default function KeyFigurePanel({
 
   useEffect(() => {
     setFigure(initialFigure);
-    setPage(initialFigure.page || 1);
     setEditing(!persist && initialFigure.status !== "cached");
+    // Only navigate when the target page genuinely changes (a new AI suggestion),
+    // not on every field edit echoed back through onChange — otherwise editing a
+    // field would snap the preview away from the page the user navigated to.
+    const target = initialFigure.page || 1;
+    if (target !== desiredPageRef.current) {
+      desiredPageRef.current = target;
+      setPage(target);
+      const doc = docRef.current;
+      if (doc && !customFile) {
+        renderAll(doc, Math.min(Math.max(target, 1), pdfPageCount(doc))).catch(() => {});
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialFigure, persist]);
 
   useEffect(() => () => {
@@ -118,7 +134,7 @@ export default function KeyFigurePanel({
         docRef.current = doc;
         const count = pdfPageCount(doc);
         setPageCount(count);
-        const safe = Math.min(Math.max(page, 1), count);
+        const safe = Math.min(Math.max(desiredPageRef.current, 1), count);
         setPage(safe);
         await renderAll(doc, safe);
         if (!cancelled) setMessage({ ok: true, text: t("figure.dragHint") });
