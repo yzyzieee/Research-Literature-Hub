@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { CardMeta } from "@/lib/types";
 import { domainLabel, publicationTypeLabel } from "@/lib/types";
+import { cardToBibtex } from "@/lib/export";
 import DownloadButton from "./DownloadButton";
+import CopyButton from "./CopyButton";
 
 export default function CardListItem({ card }: { card: CardMeta }) {
   const router = useRouter();
@@ -33,12 +35,15 @@ export default function CardListItem({ card }: { card: CardMeta }) {
       <div className="card-item-content">
         <div className="titles">
           {card.title}
-          {card.drive.length > 0 && (
-            <span className="dl-slot">
-              <DownloadButton link={card.drive[0]} variant="view" compact />
-              <DownloadButton link={card.drive[0]} compact />
-            </span>
-          )}
+          <span className="dl-slot">
+            {card.drive.length > 0 && (
+              <>
+                <DownloadButton link={card.drive[0]} variant="view" compact />
+                <DownloadButton link={card.drive[0]} compact />
+              </>
+            )}
+            <CopyButton text={cardToBibtex(card)} labelKey="detail.copyBibtex" compact />
+          </span>
         </div>
         {cite && <div className="cite">{cite}{card.authors.length > 1 ? " et al." : ""}</div>}
         {card.summary && <div className="excerpt">{card.summary.slice(0, 180)}</div>}

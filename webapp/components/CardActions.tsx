@@ -10,11 +10,9 @@ import { useLang } from "@/lib/i18n";
 export default function CardActions({
   slug,
   creator,
-  repo,
 }: {
   slug: string;
   creator: string;
-  repo?: string;
 }) {
   const { t } = useLang();
   const router = useRouter();
@@ -108,16 +106,6 @@ export default function CardActions({
     <div className="card-actions">
       <div className="btn-row">
         <Link className="btn" href={`/cards/${slug}/edit`}>{t("cardActions.edit")}</Link>
-        {repo && (
-          <a
-            className="btn"
-            href={`https://github.com/${repo}/blob/main/official/${slug}.md`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {t("cardActions.source")}
-          </a>
-        )}
         {canDelete && !confirmDelete && (
           <button className="btn danger" onClick={() => setConfirmDelete(true)}>
             {t("cardActions.delete")}

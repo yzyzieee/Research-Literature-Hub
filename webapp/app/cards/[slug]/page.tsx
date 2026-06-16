@@ -71,6 +71,15 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
             <a href={`https://doi.org/${card.doi}`} target="_blank" rel="noreferrer">{card.doi}</a>
           </div>
         )}
+        <div className="btn-row detail-actions">
+          {card.drive.length > 0 && (
+            <a className="btn primary" href={driveViewUrl(card.drive[0])} target="_blank" rel="noreferrer">
+              👁 <T k="card.view" />
+            </a>
+          )}
+          {card.drive.length > 0 && <DownloadButton link={card.drive[0]} />}
+          <CopyButton text={cardToBibtex(card)} labelKey="detail.copyBibtex" />
+        </div>
         {card.abstract && (
           <div className="abstract-box">
             <b><T k="detail.abstract" /></b>
@@ -114,17 +123,10 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
           </div>
         )}
         <div className="btn-row">
-          {card.drive.length > 0 && (
-            <a className="btn" href={driveViewUrl(card.drive[0])} target="_blank" rel="noreferrer">
-              👁 <T k="card.view" />
-            </a>
-          )}
-          {card.drive.length > 0 && <DownloadButton link={card.drive[0]} />}
-          <CopyButton text={cardToBibtex(card)} labelKey="detail.copyBibtex" />
           <CopyButton text={cardToPrompt(card, repo)} labelKey="detail.copy" />
         </div>
         {card.entry_type === "literature" && (
-          <CardActions slug={card.slug} creator={card.uploaded_by} repo={repo} />
+          <CardActions slug={card.slug} creator={card.uploaded_by} />
         )}
       </div>
       <article className="prose" dangerouslySetInnerHTML={{ __html: html }} />
