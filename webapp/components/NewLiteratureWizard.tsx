@@ -71,6 +71,7 @@ interface ExtractedLiterature {
   suggested_domain_label?: string;
   domain_suggestion_reason?: string;
   body?: string;
+  demo?: boolean;
 }
 
 interface DuplicateCandidate {
@@ -534,7 +535,7 @@ export default function NewLiteratureWizard() {
       : `${t("new.pdfFail")}: ${error instanceof Error ? error.message : error}`;
 
   const extractSelectedPdf = async () => {
-    if (!pdfFile) return;
+    if (!pdfFile && !archived) return;
     // First extraction is one-click; only a re-run over an existing draft
     // (which overwrites it and costs another AI call) asks for confirmation.
     const alreadyDrafted = Boolean(title.trim() || body.trim());
@@ -542,10 +543,17 @@ export default function NewLiteratureWizard() {
     setBusy("extract");
     setMsg(null);
     try {
-      const text = await extractPdfText(pdfFile);
-      if (text.length < 80) throw new Error(t("new.pdfNoText"));
-      const data = await callExtract({ text, hint: extractHint.trim() || undefined });
-      applyLiterature(data);
+      let data: ExtractedLiterature;
+      if (archived) {
+        // Once archived, re-read the original PDF on Drive directly (vision) — it's
+        // higher quality, and we keep the existing identity so the archive stays valid.
+        data = await callExtract({ driveFileId: archived.id, hint: extractHint.trim() || undefined });
+      } else {
+        const text = await extractPdfText(pdfFile!);
+        if (text.length < 80) throw new Error(t("new.pdfNoText"));
+        data = await callExtract({ text, hint: extractHint.trim() || undefined });
+      }
+      applyLiterature(data, Boolean(archived));
       // Land in review mode: everything is shown read-only until the user opts to edit.
       setMetaEditing(false);
       setBodyEditing(false);
@@ -591,46 +599,6 @@ export default function NewLiteratureWizard() {
       }
     } catch (error) {
       setMsg({ kind: "warn", text: extractError(error) });
-    } finally {
-      setBusy("");
-    }
-  };
-
-  const analyzeOriginalPdf = async () => {
-    if (!archived) return;
-    setBusy("original");
-    setMsg(null);
-    try {
-      const extracted = await callExtract({ driveFileId: archived.id, hint: extractHint.trim() || undefined });
-      applyLiterature(extracted, true);
-      let duplicateError = "";
-      try {
-        await checkDuplicates({
-          title,
-          doi: extracted.doi || doi,
-          citationKey,
-          authors: authorList,
-          year: year ? Number(year) : null,
-        });
-      } catch (error) {
-        duplicateError = error instanceof Error ? error.message : String(error);
-      }
-      setMsg({
-        kind: duplicateError ? "warn" : "ok",
-        text: `${t(extracted.demo ? "new.demoExtracted" : "new.driveVisionOk")}${
-          duplicateError ? ` ${t("new.duplicateFailed")}: ${duplicateError}` : ""
-        }`,
-        link: archived.link,
-      });
-    } catch (error) {
-      const aborted = error instanceof DOMException && error.name === "AbortError";
-      setMsg({
-        kind: "warn",
-        text: aborted
-          ? t("new.extractTimeout")
-          : `${t("new.originalReadFail")}: ${error instanceof Error ? error.message : error}`,
-        link: archived.link,
-      });
     } finally {
       setBusy("");
     }
@@ -760,30 +728,33 @@ export default function NewLiteratureWizard() {
             <button className="btn" onClick={() => fileRef.current?.click()} disabled={busy !== ""}>
               {t("new.pdfBtn")}
             </button>
-            <button
-              className="btn primary"
-              onClick={extractSelectedPdf}
-              disabled={!pdfFile || busy !== ""}
-            >
-              {busy === "extract"
-                ? t("new.pdfBusy")
-                : hasMetadata
-                  ? t("new.aiReExtract")
-                  : t("new.aiExtract")}
-            </button>
+            {!hasMetadata && (
+              <button
+                className="btn primary"
+                onClick={extractSelectedPdf}
+                disabled={!pdfFile || busy !== ""}
+              >
+                {busy === "extract" ? t("new.pdfBusy") : t("new.aiExtract")}
+              </button>
+            )}
           </div>
         </div>
-        {pdfFile && hasMetadata && (
-          <label className="reextract-hint">
-            {t("new.reExtractHintLabel")}
-            <input
-              type="text"
-              value={extractHint}
-              onChange={(event) => setExtractHint(event.target.value)}
-              placeholder={t("new.reExtractHintPh")}
-              disabled={busy !== ""}
-            />
-          </label>
+        {hasMetadata && (pdfFile || archived) && (
+          <div className="reread-row">
+            <label className="reextract-hint">
+              {t("new.reExtractHintLabel")}
+              <input
+                type="text"
+                value={extractHint}
+                onChange={(event) => setExtractHint(event.target.value)}
+                placeholder={t("new.reExtractHintPh")}
+                disabled={busy !== ""}
+              />
+            </label>
+            <button className="btn primary" onClick={extractSelectedPdf} disabled={busy !== ""}>
+              {busy === "extract" ? t("new.pdfBusy") : t("new.aiReExtract")}
+            </button>
+          </div>
         )}
         {pdfName && <p className="subtitle" style={{ margin: "8px 0 0" }}>{pdfName}</p>}
         <p className="subtitle" style={{ margin: "10px 0 0" }}>
@@ -795,7 +766,7 @@ export default function NewLiteratureWizard() {
             </>
           )}
         </p>
-        {driveUploadEnabled && pdfFile && (
+        {driveUploadEnabled && pdfFile && !archiveCurrent && (
           <div className="pdf-archive">
             {busy === "drive" && (
               <div className="upload-progress" aria-label={`${uploadProgress}%`}>
@@ -806,71 +777,52 @@ export default function NewLiteratureWizard() {
               <button
                 className="btn primary"
                 onClick={() => uploadDrive()}
-                disabled={!ready || !duplicateResolved || duplicateConfirmed || busy !== "" || archiveCurrent}
+                disabled={!ready || !duplicateResolved || duplicateConfirmed || busy !== ""}
               >
                 {busy === "drive"
                   ? `${t("new.driveUploading")} ${uploadProgress}%`
-                  : archiveCurrent
-                    ? t("new.driveArchived")
-                    : t("new.driveConfirmUpload")}
+                  : t("new.driveConfirmUpload")}
               </button>
             </div>
-            {!archiveCurrent && !ready && <p className="subtitle">{t("new.archiveNeedsFields")}</p>}
+            {!ready && <p className="subtitle">{t("new.archiveNeedsFields")}</p>}
+            {archived && <div className="notice warn">{t("new.archiveChanged")}</div>}
+          </div>
+        )}
+        {driveUploadEnabled && archived && (
+          <div className="pdf-archive">
+            <p className="subtitle">
+              {t("new.driveArchived")}: <code>{archived.name}</code>
+            </p>
+            <div className="btn-row">
+              <a className="btn" href={archived.link} target="_blank" rel="noreferrer">
+                {t("new.driveOpenFile")}
+              </a>
+              {!archiveDeleteArmed ? (
+                <button
+                  className="btn danger"
+                  onClick={() => setArchiveDeleteArmed(true)}
+                  disabled={busy !== ""}
+                >
+                  {archived.reused ? t("new.driveDetach") : t("new.driveDeleteReset")}
+                </button>
+              ) : (
+                <>
+                  <button className="btn danger" onClick={removeArchivedPdf} disabled={busy !== ""}>
+                    {busy === "delete"
+                      ? t("new.driveDeleting")
+                      : archived.reused
+                        ? t("new.driveConfirmDetach")
+                        : t("new.driveConfirmDelete")}
+                  </button>
+                  <button className="btn" onClick={() => setArchiveDeleteArmed(false)} disabled={busy !== ""}>
+                    {t("new.cancel")}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         )}
       </div>
-
-      {driveUploadEnabled && pdfFile && archived && (
-        <div className="form-card archive-controls">
-          <h2 style={{ marginTop: 0 }}>{t("new.archiveTitle")}</h2>
-          <p className="subtitle">
-            {t("new.archiveTarget")}: <code>{archived.name}</code>
-          </p>
-          <div className="btn-row">
-            <button
-              className="btn"
-              onClick={analyzeOriginalPdf}
-              disabled={busy !== "" || !archiveCurrent}
-            >
-              {busy === "original" ? t("new.originalAnalyzing") : t("new.originalAnalyze")}
-            </button>
-            <a className="btn" href={archived.link} target="_blank" rel="noreferrer">
-              {t("new.driveOpenFile")}
-            </a>
-            {!archiveDeleteArmed ? (
-              <button
-                className="btn danger"
-                onClick={() => setArchiveDeleteArmed(true)}
-                disabled={busy !== ""}
-              >
-                {archived.reused ? t("new.driveDetach") : t("new.driveDeleteReset")}
-              </button>
-            ) : (
-              <>
-                <button
-                  className="btn danger"
-                  onClick={removeArchivedPdf}
-                  disabled={busy !== ""}
-                >
-                  {busy === "delete"
-                    ? t("new.driveDeleting")
-                    : archived.reused
-                      ? t("new.driveConfirmDetach")
-                      : t("new.driveConfirmDelete")}
-                </button>
-                <button
-                  className="btn"
-                  onClick={() => setArchiveDeleteArmed(false)}
-                  disabled={busy !== ""}
-                >
-                  {t("new.cancel")}
-                </button>
-              </>
-            )}
-          </div>
-          {!archiveCurrent && <div className="notice warn">{t("new.archiveChanged")}</div>}
-        </div>
-      )}
 
       <div className="wizard-review-area">
         {busy === "extract" && (
@@ -1164,7 +1116,38 @@ export default function NewLiteratureWizard() {
               </div>
             )}
             {keyReferences.length > 0 && (
-              <div className="kv"><b>{t("new.keyReferences")}</b> · {keyReferences.length}</div>
+              <details className="key-reference-editor">
+                <summary>
+                  <span>{t("new.keyReferences")}</span>
+                  <span className="badge">{keyReferences.length}</span>
+                </summary>
+                <div className="key-reference-list">
+                  {keyReferences.map((reference, index) => (
+                    <div className="key-reference-item" key={`${reference.title}-${index}`}>
+                      <div>
+                        <div className="key-reference-title">
+                          {reference.role && <span className="badge type">{reference.role.replaceAll("_", " ")}</span>}
+                          <strong>{reference.title}</strong>
+                        </div>
+                        {reference.reason && <p>{reference.reason}</p>}
+                        <small>
+                          {[reference.year, reference.doi ? `DOI: ${reference.doi}` : ""]
+                            .filter(Boolean)
+                            .join(" · ")}
+                          {reference.linked_card ? (
+                            <>
+                              {(reference.year || reference.doi) ? " · " : ""}
+                              <a href={`/cards/${reference.linked_card}`}>→ {reference.linked_card}</a>
+                            </>
+                          ) : (
+                            <>{(reference.year || reference.doi) ? " · " : ""}{t("new.keyReferenceExternal")}</>
+                          )}
+                        </small>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </details>
             )}
             {driveList.length > 0 && (
               <div className="kv">
