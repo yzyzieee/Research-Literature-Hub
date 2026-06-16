@@ -16,10 +16,11 @@ const REVALIDATE_SECONDS = 300;
 interface DirEntry {
   name: string;
   path: string;
+  sha: string;
   type: "file" | "dir" | "symlink" | "submodule";
 }
 
-interface ContentFile {
+interface Blob {
   content: string;
   encoding: string;
 }
@@ -32,39 +33,61 @@ function ghHeaders(token: string): HeadersInit {
   };
 }
 
-async function ghGet<T>(token: string, repo: string, ref: string, path: string): Promise<T | null> {
-  const response = await fetch(`${GH}/repos/${repo}/contents/${path}?ref=${encodeURIComponent(ref)}`, {
+// The only per-render cost: list each card directory. Tag-busted on mutation so
+// new/deleted cards are seen instantly; `fresh` bypasses the cache for the
+// authoritative publish-time duplicate guard.
+async function listDir(token: string, repo: string, ref: string, dir: string, fresh: boolean): Promise<DirEntry[]> {
+  const response = await fetch(`${GH}/repos/${repo}/contents/${dir}?ref=${encodeURIComponent(ref)}`, {
     headers: ghHeaders(token),
-    next: { tags: [CARDS_TAG], revalidate: REVALIDATE_SECONDS },
+    ...(fresh ? { cache: "no-store" } : { next: { tags: [CARDS_TAG], revalidate: REVALIDATE_SECONDS } }),
   });
-  if (response.status === 404) return null;
+  if (response.status === 404) return [];
   if (!response.ok) {
-    throw new Error(`GitHub read ${path} -> ${response.status}: ${(await response.text()).slice(0, 200)}`);
+    throw new Error(`GitHub list ${dir} -> ${response.status}: ${(await response.text()).slice(0, 200)}`);
   }
-  return response.json() as Promise<T>;
+  const entries = await response.json();
+  return Array.isArray(entries) ? (entries as DirEntry[]) : [];
 }
 
-async function readDir(token: string, repo: string, ref: string, dir: string): Promise<Card[]> {
-  const entries = (await ghGet<DirEntry[]>(token, repo, ref, dir)) || [];
-  if (!Array.isArray(entries)) return [];
+// Blobs are content-addressed (the SHA *is* the content hash), so a given SHA is
+// immutable: cache it indefinitely. An edited card gets a new SHA -> new URL ->
+// fetched once; unchanged cards are never re-fetched, even on a cold render.
+async function readBlob(token: string, repo: string, sha: string): Promise<string | null> {
+  const response = await fetch(`${GH}/repos/${repo}/git/blobs/${sha}`, {
+    headers: ghHeaders(token),
+    next: { revalidate: false },
+  });
+  if (!response.ok) return null;
+  const blob = (await response.json()) as Blob;
+  if (!blob.content) return null;
+  return Buffer.from(blob.content.replace(/\n/g, ""), blob.encoding as BufferEncoding).toString("utf-8");
+}
+
+async function readDir(token: string, repo: string, ref: string, dir: string, fresh: boolean): Promise<Card[]> {
+  const entries = await listDir(token, repo, ref, dir, fresh);
   const files = entries.filter((entry) => entry.type === "file" && entry.name.endsWith(".md"));
   const cards = await Promise.all(
     files.map(async (entry) => {
-      const file = await ghGet<ContentFile>(token, repo, ref, entry.path);
-      if (!file?.content) return null;
-      const raw = Buffer.from(file.content.replace(/\n/g, ""), file.encoding as BufferEncoding).toString("utf-8");
-      return parseCardContent(entry.name.replace(/\.md$/, ""), dir, raw);
+      const raw = await readBlob(token, repo, entry.sha);
+      return raw ? parseCardContent(entry.name.replace(/\.md$/, ""), dir, raw) : null;
     }),
   );
   return cards.filter((card): card is Card => card !== null);
 }
 
-export async function getCardsRemote(): Promise<Card[]> {
+export async function getCardsRemote({ fresh = false }: { fresh?: boolean } = {}): Promise<Card[]> {
   const { token, repo, ref } = githubServerConfig();
   // Local dev or missing config: fall back to the on-disk reader.
   if (!token || !repo) return getCards();
-  const groups = await Promise.all(KB_CARD_DIRS.map((dir) => readDir(token, repo, ref, dir)));
-  return linkCardReferences(groups.flat());
+  try {
+    const groups = await Promise.all(KB_CARD_DIRS.map((dir) => readDir(token, repo, ref, dir, fresh)));
+    return linkCardReferences(groups.flat());
+  } catch (error) {
+    // GitHub outage / rate limit: serve the build-time snapshot (stale but complete,
+    // bundled via outputFileTracingIncludes) instead of failing the page.
+    console.warn("Live GitHub card read failed; serving the on-disk snapshot.", error);
+    return getCards();
+  }
 }
 
 export async function getCardRemote(slug: string): Promise<Card | null> {

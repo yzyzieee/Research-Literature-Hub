@@ -1062,6 +1062,11 @@ export default function NewLiteratureWizard() {
             <p>{t(published.demo ? "new.demoPublishedHint" : "new.publishedHint")}</p>
             <div className="btn-row">
               {!published.demo && (
+                <a className="btn primary" href={`/cards/${published.slug}`}>
+                  {t("new.viewCard")}
+                </a>
+              )}
+              {!published.demo && (
                 <a className="btn" href={published.url} target="_blank" rel="noreferrer">
                   {t("new.openPublished")}
                 </a>
