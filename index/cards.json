@@ -849,5 +849,107 @@
     "uploaded_at": "2026-06-15T12:55:11.329Z",
     "summary": "This paper proposes an integrated active noise cancellation (ANC) system that combines a traditional adaptive IIR filter with a deep learning model to address nonlinear distortions that limit the performance of conventional ANC methods. The adaptive IIR filter first handles the linear component of the noise, and a subsequent neural network, specifically a Dual-Signal Transformation LSTM (DTLN) followed by a TasNet-like convolutional encoder-decoder structure, is used to eliminate residual nonlinear distortions. Experimental results demonstrate that this hybrid approach achieves significantly better noise reduction compared to traditional methods like FXLMS and FULMS, particularly on complex noises and noisy speech, while also showing good generalization to unseen noise types.",
     "legacy_type": ""
+  },
+  {
+    "slug": "Casebeer2023MetaAF",
+    "path": "official/Casebeer2023MetaAF.md",
+    "folder": "official",
+    "title": "Meta-AF: Meta-Learning for Adaptive Filters",
+    "entry_type": "literature",
+    "publication_type": "journal-paper",
+    "primary_domain": "machine-learning-audio",
+    "domains": [
+      "machine-learning-audio",
+      "active-noise-control",
+      "acoustic-echo-cancellation",
+      "speech-enhancement",
+      "beamforming-arrays",
+      "fundamentals-dsp"
+    ],
+    "venue": "IEEE/ACM Transactions on Audio, Speech, and Language Processing",
+    "doi": "10.1109/TASLP.2022.3224288",
+    "abstract": "Adaptive filtering algorithms are pervasive throughout signal processing and have had a material impact on a wide variety of domains including audio processing, telecommunications, biomedical sensing, astrophysics and cosmology, seismology, and many more. Adaptive filters typically operate via specialized online, iterative optimization methods such as least-mean squares or recursive least squares and aim to process signals in unknown or nonstationary environments. Such algorithms, however, can be slow and laborious to develop, require domain expertise to create, and necessitate mathematical insight for improvement. In this work, we seek to improve upon hand-derived adaptive filter algorithms and present a comprehensive framework for learning online, adaptive signal processing algorithms or update rules directly from data. To do so, we frame the development of adaptive filters as a meta-learning problem in the context of deep learning and use a form of self-supervision to learn online iterative update rules for adaptive filters. To demonstrate our approach, we focus on audio applications and systematically develop meta-learned adaptive filters for five canonical audio problems including system identification, acoustic echo cancellation, blind equalization, multi-channel dereverberation, and beamforming. We compare our approach against common baselines and/or recent state-of-the-art methods. We show we can learn high-performing adaptive filters that operate in real-time and, in most cases, significantly outperform each method we compare against – all using a single general-purpose configuration of our approach.",
+    "status": "official",
+    "tags": [
+      "adaptive-filters",
+      "meta-learning",
+      "online-optimization",
+      "deep-learning",
+      "learned-optimizers"
+    ],
+    "authors": [
+      "Jonah Casebeer",
+      "Nicholas J. Bryan",
+      "Paris Smaragdis"
+    ],
+    "year": 2023,
+    "citation_key": "Casebeer2023MetaAF",
+    "key_references": [
+      {
+        "title": "Recursive least squares: Adaptive filtering algorithms",
+        "doi": "",
+        "year": 1987,
+        "role": "foundation",
+        "reason": "This foundational work describes the Recursive Least Squares (RLS) algorithm, a key baseline and inspiration for adaptive filter optimizers.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Least mean squares: Adaptive filtering algorithms",
+        "doi": "",
+        "year": 1987,
+        "role": "foundation",
+        "reason": "This foundational work describes the Least Mean Squares (LMS) algorithm, a fundamental adaptive filter optimizer and baseline.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Deep learning for acoustic echo cancellation",
+        "doi": "10.1109/TASLP.2020.3031923",
+        "year": 2020,
+        "role": "related_work",
+        "reason": "This paper represents prior work in using deep learning for acoustic echo cancellation, a task addressed by the proposed Meta-AF.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Learning to learn by gradient descent by gradient descent",
+        "doi": "10.15614/15614",
+        "year": 2017,
+        "role": "foundation",
+        "reason": "This paper introduced the concept of learning optimizers using meta-learning, which is a core inspiration for the Meta-AF framework.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "NARA-WPE: A novel algorithm for weighted prediction error dereverberation",
+        "doi": "10.1109/ICASSP.2019.8683344",
+        "year": 2019,
+        "role": "baseline",
+        "reason": "This paper presents NARA-WPE, a strong baseline for dereverberation that the proposed Meta-AF is compared against.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "WebRTC noise suppression and echo cancellation",
+        "doi": "10.1109/ICASSP.2021.9452806",
+        "year": 2021,
+        "role": "baseline",
+        "reason": "This paper describes WebRTC-AEC3, a state-of-the-art acoustic echo cancellation system used as a baseline for comparison.",
+        "status": "external",
+        "linked_card": null
+      }
+    ],
+    "related": [],
+    "drive": [
+      "https://drive.google.com/file/d/1BcF23NZD0pLD-ZNvWsfiMhYTMU5F1SHC/view?usp=drivesdk"
+    ],
+    "created": "2026-06-16",
+    "rating": null,
+    "comments": [],
+    "uploaded_by": "YZY",
+    "uploaded_at": "2026-06-16T14:37:37.224Z",
+    "summary": "This paper introduces Meta-AF, a novel framework that frames the development of adaptive filters (AFs) as a meta-learning problem. Instead of relying on hand-derived update rules, Meta-AF learns these rules directly from data using self-supervision and deep learning. The approach is demonstrated across five canonical audio processing tasks: system identification, acoustic echo cancellation (AEC), blind equalization, multi-channel dereverberation, and beamforming. Meta-AF consistently achieves real-time performance and, in most cases, significantly outperforms conventional baselines and state-of-the-art methods, even with a single, general-purpose configuration.",
+    "legacy_type": ""
   }
 ]

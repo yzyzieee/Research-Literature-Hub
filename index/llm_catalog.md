@@ -4,7 +4,7 @@ Use this file as the entry point for searching our internal literature library.
 Search this catalog first, then open only the most relevant literature record files.
 Do not assume private Google Drive PDFs are accessible.
 
-Papers: 9
+Papers: 10
 
 ## Papers
 
@@ -172,3 +172,22 @@ Papers: 9
   - [method] Conv-TasNet: Surpassing Ideal Time–Frequency Magnitude Masking for Speech Separation (2019, DOI: 10.1109/TASLP.2019.2905115) - This paper introduces the TasNet structure, which is adapted for the time-domain processing in the proposed system.
   - [baseline] The Filtered-X LMS Algorithm (1992, DOI: 10.1109/78.67874) - The Filtered-X LMS (FXLMS) algorithm is a widely used traditional method for ANC and serves as a baseline for comparison.
 - Record: https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/jiang2022integration.md
+
+### Casebeer2023MetaAF
+- Title: Meta-AF: Meta-Learning for Adaptive Filters
+- Year: 2023
+- Venue: IEEE/ACM Transactions on Audio, Speech, and Language Processing
+- Publication type: journal-paper
+- Primary domain: machine-learning-audio
+- Domains: machine-learning-audio, active-noise-control, acoustic-echo-cancellation, speech-enhancement, beamforming-arrays, fundamentals-dsp
+- Tags: adaptive-filters, meta-learning, online-optimization, deep-learning, learned-optimizers
+- Team weight: unrated
+- Summary: This paper introduces Meta-AF, a novel framework that frames the development of adaptive filters (AFs) as a meta-learning problem. Instead of relying on hand-derived update rules, Meta-AF learns these rules directly from data using self-supervision and deep learning. The approach is demonstrated across five canonical audio processing tasks: system identification, acoustic echo cancellation (AEC), blind equalization,…
+- Key related papers:
+  - [foundation] Recursive least squares: Adaptive filtering algorithms (1987) - This foundational work describes the Recursive Least Squares (RLS) algorithm, a key baseline and inspiration for adaptive filter optimizers.
+  - [foundation] Least mean squares: Adaptive filtering algorithms (1987) - This foundational work describes the Least Mean Squares (LMS) algorithm, a fundamental adaptive filter optimizer and baseline.
+  - [related_work] Deep learning for acoustic echo cancellation (2020, DOI: 10.1109/TASLP.2020.3031923) - This paper represents prior work in using deep learning for acoustic echo cancellation, a task addressed by the proposed Meta-AF.
+  - [foundation] Learning to learn by gradient descent by gradient descent (2017, DOI: 10.15614/15614) - This paper introduced the concept of learning optimizers using meta-learning, which is a core inspiration for the Meta-AF framework.
+  - [baseline] NARA-WPE: A novel algorithm for weighted prediction error dereverberation (2019, DOI: 10.1109/ICASSP.2019.8683344) - This paper presents NARA-WPE, a strong baseline for dereverberation that the proposed Meta-AF is compared against.
+  - [baseline] WebRTC noise suppression and echo cancellation (2021, DOI: 10.1109/ICASSP.2021.9452806) - This paper describes WebRTC-AEC3, a state-of-the-art acoustic echo cancellation system used as a baseline for comparison.
+- Record: https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Casebeer2023MetaAF.md

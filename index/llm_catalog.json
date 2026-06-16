@@ -552,5 +552,75 @@
       }
     ],
     "card_url": "https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/jiang2022integration.md"
+  },
+  {
+    "slug": "Casebeer2023MetaAF",
+    "title": "Meta-AF: Meta-Learning for Adaptive Filters",
+    "year": 2023,
+    "venue": "IEEE/ACM Transactions on Audio, Speech, and Language Processing",
+    "publication_type": "journal-paper",
+    "primary_domain": "machine-learning-audio",
+    "domains": [
+      "machine-learning-audio",
+      "active-noise-control",
+      "acoustic-echo-cancellation",
+      "speech-enhancement",
+      "beamforming-arrays",
+      "fundamentals-dsp"
+    ],
+    "tags": [
+      "adaptive-filters",
+      "meta-learning",
+      "online-optimization",
+      "deep-learning",
+      "learned-optimizers"
+    ],
+    "team_weight": null,
+    "summary": "This paper introduces Meta-AF, a novel framework that frames the development of adaptive filters (AFs) as a meta-learning problem. Instead of relying on hand-derived update rules, Meta-AF learns these rules directly from data using self-supervision and deep learning. The approach is demonstrated across five canonical audio processing tasks: system identification, acoustic echo cancellation (AEC), blind equalization,…",
+    "key_references": [
+      {
+        "title": "Recursive least squares: Adaptive filtering algorithms",
+        "doi": "",
+        "year": 1987,
+        "role": "foundation",
+        "reason": "This foundational work describes the Recursive Least Squares (RLS) algorithm, a key baseline and inspiration for adaptive filter optimizers."
+      },
+      {
+        "title": "Least mean squares: Adaptive filtering algorithms",
+        "doi": "",
+        "year": 1987,
+        "role": "foundation",
+        "reason": "This foundational work describes the Least Mean Squares (LMS) algorithm, a fundamental adaptive filter optimizer and baseline."
+      },
+      {
+        "title": "Deep learning for acoustic echo cancellation",
+        "doi": "10.1109/TASLP.2020.3031923",
+        "year": 2020,
+        "role": "related_work",
+        "reason": "This paper represents prior work in using deep learning for acoustic echo cancellation, a task addressed by the proposed Meta-AF."
+      },
+      {
+        "title": "Learning to learn by gradient descent by gradient descent",
+        "doi": "10.15614/15614",
+        "year": 2017,
+        "role": "foundation",
+        "reason": "This paper introduced the concept of learning optimizers using meta-learning, which is a core inspiration for the Meta-AF framework."
+      },
+      {
+        "title": "NARA-WPE: A novel algorithm for weighted prediction error dereverberation",
+        "doi": "10.1109/ICASSP.2019.8683344",
+        "year": 2019,
+        "role": "baseline",
+        "reason": "This paper presents NARA-WPE, a strong baseline for dereverberation that the proposed Meta-AF is compared against."
+      },
+      {
+        "title": "WebRTC noise suppression and echo cancellation",
+        "doi": "10.1109/ICASSP.2021.9452806",
+        "year": 2021,
+        "role": "baseline",
+        "reason": "This paper describes WebRTC-AEC3, a state-of-the-art acoustic echo cancellation system used as a baseline for comparison."
+      }
+    ],
+    "card_url": "https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Casebeer2023MetaAF.md"
   }
 ]
