@@ -3,6 +3,13 @@
 All notable human-facing changes are summarized here. The app version is bumped
 automatically by the maintenance workflow after changes land on `main`.
 
+## v0.1.62 - 2026-06-16
+
+- Fixed Key Figure candidate page selection more precisely: figure pages are now
+  resolved from the figure label found in the PDF itself, so a mixed AI result
+  such as `Fig. 1` on page 7 can be corrected to the actual PDF page without
+  shifting already-correct candidates such as `Fig. 4` on page 8.
+
 ## v0.1.58 - 2026-06-16
 
 - Added this changelog so release history is readable outside Git commit logs.

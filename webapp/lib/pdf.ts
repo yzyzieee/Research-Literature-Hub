@@ -7,6 +7,7 @@ export interface ExtractedPdfText {
   text: string;
   pageCount: number;
   printedPageMap: Record<string, number>;
+  figurePageMap: Record<string, number>;
 }
 
 async function pdfJs() {
@@ -48,12 +49,30 @@ function likelyPrintedPageNumbers(text: string): number[] {
   return [...values];
 }
 
+export function visualLabelKey(value: unknown): string | null {
+  const text = String(value ?? "").replace(/\s+/g, " ").trim().toLowerCase();
+  const match = text.match(/\b(fig(?:ure)?\.?|algorithm|table)\s*([0-9]+[a-z]?)\b/i);
+  if (!match) return null;
+  const kind = match[1].startsWith("fig") ? "fig" : match[1];
+  return `${kind}:${match[2].toLowerCase()}`;
+}
+
+function likelyVisualLabelKeys(text: string): string[] {
+  const keys = new Set<string>();
+  for (const match of text.matchAll(/\b(?:fig(?:ure)?\.?|algorithm|table)\s*[0-9]+[a-z]?\b/gi)) {
+    const key = visualLabelKey(match[0]);
+    if (key) keys.add(key);
+  }
+  return [...keys];
+}
+
 export async function extractPdfTextWithPageInfo(
   file: File,
   maxChars = 60000,
 ): Promise<ExtractedPdfText> {
   const doc = await openPdf(file);
   const printedPages = new Map<number, Set<number>>();
+  const figurePages = new Map<string, number>();
   let out = "";
   try {
     const labels = await (doc as { getPageLabels?: () => Promise<(string | null)[] | null> })
@@ -74,6 +93,9 @@ export async function extractPdfTextWithPageInfo(
     for (const printed of likelyPrintedPageNumbers(line)) {
       addPrintedPage(printedPages, printed, i);
     }
+    for (const key of likelyVisualLabelKeys(line)) {
+      if (!figurePages.has(key)) figurePages.set(key, i);
+    }
     // Keep scanning after maxChars so printed page labels can still be mapped
     // back to real PDF pages, while only the capped text is sent to the LLM.
     if (out.length < maxChars) out += `\n--- PDF PAGE ${i} ---\n${line}\n`;
@@ -86,6 +108,7 @@ export async function extractPdfTextWithPageInfo(
     text: out.slice(0, maxChars).trim(),
     pageCount: doc.numPages,
     printedPageMap,
+    figurePageMap: Object.fromEntries(figurePages.entries()),
   };
 }
 

@@ -12,7 +12,7 @@ import {
   type KeyReference,
 } from "@/lib/types";
 import { useLang } from "@/lib/i18n";
-import { extractPdfTextWithPageInfo, type ExtractedPdfText } from "@/lib/pdf";
+import { extractPdfTextWithPageInfo, visualLabelKey, type ExtractedPdfText } from "@/lib/pdf";
 import { uploadToDrive } from "@/lib/drive";
 import { EMPTY_KEY_FIGURE } from "@/lib/key-figure";
 import KeyFigurePanel from "@/components/KeyFigurePanel";
@@ -90,7 +90,14 @@ interface DuplicateCandidate {
 
 type DuplicateDecision = "" | "clear" | "duplicate" | "different";
 
-function normalizeAiFigurePage(page: number | null | undefined, info: ExtractedPdfText | null): number | null {
+function normalizeAiFigurePage(
+  page: number | null | undefined,
+  info: ExtractedPdfText | null,
+  figureId?: string | null,
+): number | null {
+  const key = visualLabelKey(figureId);
+  const locatedPage = key && info?.figurePageMap[key];
+  if (locatedPage) return locatedPage;
   const value = Number(page);
   if (!Number.isInteger(value) || value < 1) return null;
   if (!info) return value;
@@ -101,12 +108,12 @@ function normalizeAiFigurePage(page: number | null | undefined, info: ExtractedP
 function normalizeAiFigurePages(data: ExtractedLiterature, info: ExtractedPdfText | null): ExtractedLiterature {
   if (!info) return data;
   const figure = data.key_figure
-    ? { ...data.key_figure, page: normalizeAiFigurePage(data.key_figure.page, info) }
+    ? { ...data.key_figure, page: normalizeAiFigurePage(data.key_figure.page, info, data.key_figure.figure_id) }
     : data.key_figure;
   const candidates = Array.isArray(data.key_figure_candidates)
     ? data.key_figure_candidates.map((candidate) => ({
         ...candidate,
-        page: normalizeAiFigurePage(candidate.page, info),
+        page: normalizeAiFigurePage(candidate.page, info, candidate.figure_id),
       }))
     : data.key_figure_candidates;
   return { ...data, key_figure: figure, key_figure_candidates: candidates };
