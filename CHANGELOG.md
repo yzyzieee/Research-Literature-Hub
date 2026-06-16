@@ -3,6 +3,11 @@
 All notable human-facing changes are summarized here. The app version is bumped
 automatically by the maintenance workflow after changes land on `main`.
 
+## v0.1.73 - 2026-06-17
+
+- Simplified the cached Key Figure header to a single edit action; remove and
+  replacement controls now live inside the expanded editor.
+
 ## v0.1.63 - 2026-06-17
 
 - Unified clickable library filter chips for domains, publication type, venue,

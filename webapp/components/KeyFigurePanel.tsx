@@ -378,10 +378,7 @@ export default function KeyFigurePanel({
         {figure.status === "cached" && !editing && (
           <div className="btn-row key-figure-actions">
             <button className="btn" onClick={() => setEditing(true)} disabled={busy}>
-              {t("figure.replace")}
-            </button>
-            <button className="btn danger" onClick={removeFigure} disabled={busy}>
-              {t("figure.remove")}
+              {t("figure.edit")}
             </button>
           </div>
         )}
@@ -593,7 +590,7 @@ export default function KeyFigurePanel({
             </div>
           )}
 
-          {(rendered || customFile) && (
+          {(rendered || customFile || (persist && figure.status === "cached")) && (
             <>
               {!canCache && <div className="notice warn">{t("figure.archiveFirst")}</div>}
               {busy && progress > 0 && (
@@ -602,9 +599,11 @@ export default function KeyFigurePanel({
                 </div>
               )}
               <div className="btn-row">
-                <button className="btn primary" onClick={confirmFigure} disabled={busy || !canCache}>
-                  {busy && progress > 0 ? `${t("figure.caching")} ${progress}%` : t("figure.confirm")}
-                </button>
+                {(rendered || customFile) && (
+                  <button className="btn primary" onClick={confirmFigure} disabled={busy || !canCache}>
+                    {busy && progress > 0 ? `${t("figure.caching")} ${progress}%` : t("figure.confirm")}
+                  </button>
+                )}
                 {persist && figure.status === "cached" && (
                   <button
                     className="btn"
@@ -620,6 +619,11 @@ export default function KeyFigurePanel({
                     disabled={busy}
                   >
                     {t("figure.cancel")}
+                  </button>
+                )}
+                {persist && figure.status === "cached" && (
+                  <button className="btn danger" onClick={removeFigure} disabled={busy}>
+                    {t("figure.remove")}
                   </button>
                 )}
               </div>
