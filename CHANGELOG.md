@@ -3,6 +3,13 @@
 All notable human-facing changes are summarized here. The app version is bumped
 automatically by the maintenance workflow after changes land on `main`.
 
+## v0.1.63 - 2026-06-17
+
+- Unified clickable library filter chips for domains, publication type, venue,
+  year, and tags so linked badges keep the compact metadata size.
+- Moved detail-page LLM/edit/delete actions into the main action row and made
+  the abstract a compact expandable preview.
+
 ## v0.1.62 - 2026-06-16
 
 - Fixed Key Figure candidate page selection more precisely: figure pages are now

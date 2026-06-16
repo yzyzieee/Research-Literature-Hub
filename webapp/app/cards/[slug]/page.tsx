@@ -30,12 +30,13 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
     .map((r) => all.find((c) => c.slug === r))
     .filter((c): c is NonNullable<typeof c> => Boolean(c));
   const repo = process.env.NEXT_PUBLIC_GITHUB_REPO;
+  const firstDrive = card.drive[0] || "";
 
   return (
     <>
       <div className="detail-header">
         <h1>{card.title}</h1>
-        <div className="meta-row" style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <div className="meta-row detail-chip-row">
           <Link className="badge domain badge-tag" href={`/cards?domain=${encodeURIComponent(card.primary_domain)}`}>
             {domainLabel(card.primary_domain)}
           </Link>
@@ -51,45 +52,70 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
               {publicationTypeLabel(card.publication_type)}
             </Link>
           )}
-          {card.year && <span className="badge">{card.year}</span>}
-          {card.tags.map((t) => (
-            <Link key={t} className="badge badge-tag" href={`/cards?tag=${encodeURIComponent(t)}`}>#{t}</Link>
+          {card.year && (
+            <Link className="badge badge-tag" href={`/cards?year=${encodeURIComponent(String(card.year))}`}>
+              {card.year}
+            </Link>
+          )}
+          {card.venue && (
+            <Link className="badge badge-tag venue" href={`/cards?venue=${encodeURIComponent(card.venue)}`}>
+              {card.venue}
+            </Link>
+          )}
+          {card.tags.map((tag) => (
+            <Link key={tag} className="badge badge-tag" href={`/cards?tag=${encodeURIComponent(tag)}`}>
+              #{tag}
+            </Link>
           ))}
         </div>
         {card.authors.length > 0 && (
-          <div className="kv"><b><T k="detail.authors" /></b> · {card.authors.join(", ")}</div>
+          <div className="kv"><b><T k="detail.authors" /></b> - {card.authors.join(", ")}</div>
         )}
         {card.citation_key && (
-          <div className="kv"><b><T k="detail.citationKey" /></b> · <code>{card.citation_key}</code></div>
+          <div className="kv"><b><T k="detail.citationKey" /></b> - <code>{card.citation_key}</code></div>
         )}
         {card.venue && (
-          <div className="kv"><b><T k="detail.venue" /></b> · {card.venue}</div>
+          <div className="kv">
+            <b><T k="detail.venue" /></b> -{" "}
+            <Link href={`/cards?venue=${encodeURIComponent(card.venue)}`}>{card.venue}</Link>
+          </div>
         )}
         {card.doi && (
           <div className="kv">
-            <b><T k="detail.doi" /></b> ·{" "}
+            <b><T k="detail.doi" /></b> -{" "}
             <a href={`https://doi.org/${card.doi}`} target="_blank" rel="noreferrer">{card.doi}</a>
           </div>
         )}
         <div className="btn-row detail-actions">
-          {card.drive.length > 0 && (
-            <a className="btn primary" href={driveViewUrl(card.drive[0])} target="_blank" rel="noreferrer">
-              👁 <T k="card.view" />
+          {firstDrive && (
+            <a className="btn primary" href={driveViewUrl(firstDrive)} target="_blank" rel="noreferrer">
+              <T k="card.view" />
             </a>
           )}
-          {card.drive.length > 0 && <DownloadButton link={card.drive[0]} />}
+          {firstDrive && <DownloadButton link={firstDrive} />}
           <CopyButton text={cardToBibtex(card)} labelKey="detail.copyBibtex" />
+          <CopyButton text={cardToPrompt(card, repo)} labelKey="detail.copy" />
+          {card.entry_type === "literature" && (
+            <CardActions slug={card.slug} creator={card.uploaded_by} />
+          )}
         </div>
         {card.abstract && (
-          <div className="abstract-box">
-            <b><T k="detail.abstract" /></b>
-            <p>{card.abstract}</p>
-          </div>
+          <details className="abstract-box abstract-box-collapsible">
+            <summary>
+              <span className="abstract-summary-head">
+                <b><T k="detail.abstract" /></b>
+                <span className="abstract-expand"><T k="detail.expandAbstract" /></span>
+                <span className="abstract-collapse"><T k="detail.collapseAbstract" /></span>
+              </span>
+              <p className="abstract-preview">{card.abstract}</p>
+            </summary>
+            <p className="abstract-full">{card.abstract}</p>
+          </details>
         )}
         <KeyFigurePanel
           slug={card.slug}
           initialFigure={card.key_figure}
-          pdfLink={card.drive[0] || ""}
+          pdfLink={firstDrive}
           persist
         />
         {card.rating && (
@@ -102,31 +128,25 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
           </div>
         )}
         {card.drive.length > 0 && (
-          <div className="kv">
-            <b><T k="detail.fulltext" /></b> ·{" "}
-            {card.drive.map((d, i) => (
-              <a key={d} href={d} target="_blank" rel="noreferrer">
-                PDF {i + 1} ↗{" "}
+          <div className="kv detail-fulltext">
+            <b><T k="detail.fulltext" /></b> -{" "}
+            {card.drive.map((driveLink, index) => (
+              <a key={driveLink} href={driveLink} target="_blank" rel="noreferrer">
+                PDF {index + 1} ↗{" "}
               </a>
             ))}
           </div>
         )}
         {related.length > 0 && (
           <div className="kv">
-            <b><T k="detail.related" /></b> ·{" "}
-            {related.map((r, i) => (
-              <span key={r.slug}>
-                {i > 0 && " · "}
-                <Link href={`/cards/${r.slug}`}>{r.title}</Link>
+            <b><T k="detail.related" /></b> -{" "}
+            {related.map((item, index) => (
+              <span key={item.slug}>
+                {index > 0 && " - "}
+                <Link href={`/cards/${item.slug}`}>{item.title}</Link>
               </span>
             ))}
           </div>
-        )}
-        <div className="btn-row">
-          <CopyButton text={cardToPrompt(card, repo)} labelKey="detail.copy" />
-        </div>
-        {card.entry_type === "literature" && (
-          <CardActions slug={card.slug} creator={card.uploaded_by} />
         )}
       </div>
       <article className="prose" dangerouslySetInnerHTML={{ __html: html }} />
@@ -138,13 +158,13 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
           {(card.uploaded_by || card.pdf_uploaded_by) && (
             <div className="audit-box">
               {card.uploaded_by && (
-                <span><T k="detail.uploadedBy" />: {card.uploaded_by}{card.uploaded_at ? ` · ${card.uploaded_at}` : ""}</span>
+                <span><T k="detail.uploadedBy" />: {card.uploaded_by}{card.uploaded_at ? ` - ${card.uploaded_at}` : ""}</span>
               )}
               {card.pdf_uploaded_by && (
                 <span>
                   <T k="detail.pdfUploadedBy" />: {card.pdf_uploaded_by}
-                  {card.pdf_uploaded_at ? ` · ${card.pdf_uploaded_at}` : ""}
-                  {card.pdf_file_name ? ` · ${card.pdf_file_name}` : ""}
+                  {card.pdf_uploaded_at ? ` - ${card.pdf_uploaded_at}` : ""}
+                  {card.pdf_file_name ? ` - ${card.pdf_file_name}` : ""}
                 </span>
               )}
             </div>

@@ -13,7 +13,11 @@ export default function CardListItem({ card }: { card: CardMeta }) {
   const router = useRouter();
   const cite = [card.authors[0], card.year].filter(Boolean).join(" · ");
   // Badges double as navigation: clicking one opens the library filtered to it.
-  const openFilter = (event: React.MouseEvent, key: "tag" | "domain" | "type", value: string) => {
+  const openFilter = (
+    event: React.MouseEvent,
+    key: "tag" | "domain" | "type" | "venue" | "year",
+    value: string,
+  ) => {
     event.preventDefault();
     event.stopPropagation();
     router.push(`/cards?${key}=${encodeURIComponent(value)}`);
@@ -66,7 +70,24 @@ export default function CardListItem({ card }: { card: CardMeta }) {
               {publicationTypeLabel(card.publication_type)}
             </button>
           )}
-          {card.venue && <span className="badge">{card.venue}</span>}
+          {card.year && (
+            <button
+              type="button"
+              className="badge badge-tag"
+              onClick={(event) => openFilter(event, "year", String(card.year))}
+            >
+              {card.year}
+            </button>
+          )}
+          {card.venue && (
+            <button
+              type="button"
+              className="badge badge-tag venue"
+              onClick={(event) => openFilter(event, "venue", card.venue)}
+            >
+              {card.venue}
+            </button>
+          )}
           {card.rating && <span className="badge weight">Weight {card.rating.weight}</span>}
           {card.comments.length > 0 && <span className="badge">Comments {card.comments.length}</span>}
           {card.tags.map((t) => (
