@@ -1,8 +1,8 @@
 import matter from "gray-matter";
 import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
-import { CARDS_TAG } from "@/lib/kb-remote";
-import { normalizedDoi, normalizedTitle } from "@/lib/duplicates";
+import { CARDS_TAG, getCardsRemote } from "@/lib/kb-remote";
+import { findDuplicateCandidates } from "@/lib/duplicates";
 import { isGuest } from "@/lib/guest";
 import { githubServerConfig } from "@/lib/github-config";
 import { readTeam } from "@/lib/team";
@@ -46,40 +46,6 @@ async function fileExists(repo: string, path: string, ref: string, token: string
     throw new Error(`GitHub duplicate check -> ${response.status}: ${(await response.text()).slice(0, 300)}`);
   }
   return true;
-}
-
-async function findMetadataDuplicate(
-  repo: string,
-  ref: string,
-  token: string,
-  title: string,
-  doi: string,
-): Promise<string | null> {
-  const params = new URLSearchParams({ ref });
-  const response = await fetch(`${GH}/repos/${repo}/contents/index/cards.json?${params}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2022-11-28",
-    },
-    cache: "no-store",
-  });
-  if (response.status === 404) return null;
-  if (!response.ok) {
-    throw new Error(`GitHub duplicate metadata check -> ${response.status}`);
-  }
-  const file = await response.json();
-  const raw = Buffer.from(String(file.content || "").replace(/\n/g, ""), "base64").toString("utf-8");
-  const records = JSON.parse(raw) as Array<{ slug?: string; title?: string; doi?: string; entry_type?: string }>;
-  const wantedDoi = normalizedDoi(doi);
-  const wantedTitle = normalizedTitle(title);
-  const duplicate = records.find((record) => {
-    if (record.entry_type && record.entry_type !== "literature") return false;
-    const recordDoi = normalizedDoi(record.doi);
-    if (wantedDoi && recordDoi && wantedDoi === recordDoi) return true;
-    return wantedTitle.length > 12 && normalizedTitle(record.title) === wantedTitle;
-  });
-  return duplicate?.slug || null;
 }
 
 function validatedOfficialCard(
@@ -173,21 +139,25 @@ export async function POST(req: NextRequest) {
       }
     }
     const parsed = matter(content);
-    const duplicate = await findMetadataDuplicate(
-      repo!,
-      base,
-      token!,
-      String(parsed.data.title || ""),
-      String(parsed.data.doi || ""),
-    );
-    if (duplicate && !allowDuplicate) {
-      return NextResponse.json(
-        {
-          error: `This literature appears to already exist as "${duplicate}". Review the duplicate candidate before publishing.`,
-          duplicate,
-        },
-        { status: 409 },
-      );
+    if (!allowDuplicate) {
+      // Same matcher as the pre-submit /api/duplicates check, over fresh live
+      // cards, so a paper a teammate just published is still caught here.
+      const [duplicate] = findDuplicateCandidates(await getCardsRemote({ fresh: true }), {
+        title: String(parsed.data.title || ""),
+        doi: String(parsed.data.doi || ""),
+        citation_key: slug,
+        authors: Array.isArray(parsed.data.authors) ? parsed.data.authors.map(String) : [],
+        year: parsed.data.year ? Number(parsed.data.year) : null,
+      });
+      if (duplicate) {
+        return NextResponse.json(
+          {
+            error: `This literature appears to already exist as "${duplicate.slug}". Review the duplicate candidate before publishing.`,
+            duplicate: duplicate.slug,
+          },
+          { status: 409 },
+        );
+      }
     }
 
     const officialContent = validatedOfficialCard(slug, content, username, archive);
