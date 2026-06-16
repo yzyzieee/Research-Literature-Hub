@@ -49,7 +49,11 @@
       "id": "LXX",
       "name": "LXX",
       "role": "member",
-      "domains": [],
+      "domains": [
+        "active-noise-control",
+        "acoustic-echo-cancellation",
+        "machine-learning-audio"
+      ],
       "active": true,
       "created": "2026-06-16"
     }
