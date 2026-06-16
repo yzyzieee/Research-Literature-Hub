@@ -386,6 +386,126 @@
     "legacy_type": ""
   },
   {
+    "slug": "Petersen2008Kalman",
+    "path": "official/Petersen2008Kalman.md",
+    "folder": "official",
+    "title": "A Kalman filter approach to virtual sensing for active noise control",
+    "entry_type": "literature",
+    "publication_type": "journal-paper",
+    "primary_domain": "active-noise-control",
+    "domains": [
+      "active-noise-control",
+      "machine-learning-audio",
+      "fundamentals-dsp"
+    ],
+    "venue": "Mechanical Systems and Signal Processing",
+    "doi": "10.1016/j.ymssp.2007.06.007",
+    "abstract": "Local active noise control systems aim to produce zones of quiet at a number of desired locations within a sound field, such as the ears of an observer. The resulting zones of quiet are usually centred at the error sensors, and are often too small to extend from the error sensors to the observer’s ears. To overcome these problems, virtual sensing methods have been suggested. These methods are based on estimating the error signals at a number of locations remote from the physical locations of the error sensors. By minimising the estimated error signals, the zones of quiet can be moved away from the error sensors to the locations where noise control is desired, i.e. the virtual locations. In this paper, the active noise control problem under consideration is analysed using a state-space model of the plant. Kalman filtering theory is then used to develop a virtual sensing algorithm that computes optimal estimates of the error signals at the virtual locations. The developed algorithm is implemented on an acoustic duct arrangement, and the real-time estimation performance at a virtual location inside the acoustic duct is analysed. Furthermore, the developed algorithm is combined with the filtered-x LMS, and the results of real-time broadband feedforward control experiments at the virtual location are presented.",
+    "status": "official",
+    "tags": [
+      "kalman-filtering",
+      "state-space-model",
+      "virtual-sensing",
+      "active-noise-control",
+      "filtered-x-lms",
+      "real-time-implementation"
+    ],
+    "authors": [
+      "Cornelis D. Petersen",
+      "Rufus Fraanje",
+      "Ben S. Cazzolato",
+      "Anthony C. Zander",
+      "Colin H. Hansen"
+    ],
+    "year": 2008,
+    "citation_key": "Petersen2008Kalman",
+    "key_references": [
+      {
+        "title": "Virtual microphone arrangement for active noise control",
+        "doi": "10.1109/ICASSP.1999.754004",
+        "year": 1999,
+        "role": "foundation",
+        "reason": "Introduces the 'virtual microphone arrangement' concept, a foundational virtual sensing method.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Active noise control using remote microphone technique",
+        "doi": "10.1109/ISCAS.2003.1207407",
+        "year": 2003,
+        "role": "foundation",
+        "reason": "Presents the 'remote microphone technique', another early virtual sensing approach.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Adaptive LMS virtual microphone technique for active noise control",
+        "doi": "10.1109/ISCAS.2004.1325558",
+        "year": 2004,
+        "role": "foundation",
+        "reason": "Describes the 'adaptive LMS virtual microphone technique', an alternative to filter-based methods.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "State-space methods for control",
+        "doi": "10.1007/978-1-4615-6311-6",
+        "year": 1991,
+        "role": "foundation",
+        "reason": "Provides the theoretical basis for state-space modeling and Kalman filtering used in the paper.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "An introduction to the Kalman filter",
+        "doi": "10.1109/7.102263",
+        "year": 1993,
+        "role": "foundation",
+        "reason": "A foundational reference for Kalman filter theory, underpinning the paper's approach.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Active noise control systems: techniques and applications",
+        "doi": "10.1017/CBO9780511535795",
+        "year": 2007,
+        "role": "foundation",
+        "reason": "A comprehensive text on active noise control, providing context for the problem addressed.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Subspace identification for linear systems: a survey",
+        "doi": "10.1016/S0005-1098(99)00004-1",
+        "year": 1999,
+        "role": "method",
+        "reason": "Details subspace model identification techniques used for plant modeling.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Adaptive filter theory",
+        "doi": "10.1017/CBO9780511779417",
+        "year": 2002,
+        "role": "method",
+        "reason": "Provides the theoretical background for the Filtered-x LMS algorithm used in control experiments.",
+        "status": "external",
+        "linked_card": null
+      }
+    ],
+    "related": [],
+    "drive": [
+      "https://drive.google.com/file/d/1wpxL9NUxHoKCmv3FHYYSsPI1vYCihuZH/view?usp=drivesdk"
+    ],
+    "created": "2026-06-16",
+    "rating": null,
+    "comments": [],
+    "uploaded_by": "LXX",
+    "uploaded_at": "2026-06-16T16:00:54.566Z",
+    "summary": "This paper presents a novel virtual sensing algorithm for active noise control (ANC) systems, leveraging Kalman filtering theory to estimate error signals at desired virtual locations remote from physical sensors. The approach models the ANC system using a state-space representation, allowing for optimal estimation of virtual error signals even in the presence of measurement noise. The algorithm was implemented and validated on an acoustic duct, demonstrating accurate real-time estimation and effective broadband feedforward control at the virtual location. The results show significant noise attenuation at the virtual location, outperforming traditional methods that focus on physical sensor locations.",
+    "legacy_type": ""
+  },
+  {
     "slug": "Wang2024Transferable",
     "path": "official/Wang2024Transferable.md",
     "folder": "official",

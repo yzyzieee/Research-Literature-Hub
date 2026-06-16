@@ -4,7 +4,7 @@ Use this file as the entry point for searching our internal literature library.
 Search this catalog first, then open only the most relevant literature record files.
 Do not assume private Google Drive PDFs are accessible.
 
-Papers: 10
+Papers: 11
 
 ## Papers
 
@@ -81,6 +81,27 @@ Papers: 10
   - [related_work] Deep learning-based active noise control: A deep learning approach to active noise control (2021, DOI: 10.1016/j.neunet.2021.03.037) - Represents prior work applying deep learning to ANC, though not specifically for real-time secondary path estimation in vehicles.
   - [related_work] Deep learning-assisted active noise control in a time-varying environment (2023, DOI: 10.1007/s12206-023-0206-2) - Explores deep learning for ANC in time-varying environments, similar to the dynamic conditions addressed in this paper.
 - Record: https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Oh2024Enhancing.md
+
+### Petersen2008Kalman
+- Title: A Kalman filter approach to virtual sensing for active noise control
+- Year: 2008
+- Venue: Mechanical Systems and Signal Processing
+- Publication type: journal-paper
+- Primary domain: active-noise-control
+- Domains: active-noise-control, machine-learning-audio, fundamentals-dsp
+- Tags: kalman-filtering, state-space-model, virtual-sensing, active-noise-control, filtered-x-lms, real-time-implementation
+- Team weight: unrated
+- Summary: This paper presents a novel virtual sensing algorithm for active noise control (ANC) systems, leveraging Kalman filtering theory to estimate error signals at desired virtual locations remote from physical sensors. The approach models the ANC system using a state-space representation, allowing for optimal estimation of virtual error signals even in the presence of measurement noise. The algorithm was implemented and…
+- Key related papers:
+  - [foundation] Virtual microphone arrangement for active noise control (1999, DOI: 10.1109/ICASSP.1999.754004) - Introduces the 'virtual microphone arrangement' concept, a foundational virtual sensing method.
+  - [foundation] Active noise control using remote microphone technique (2003, DOI: 10.1109/ISCAS.2003.1207407) - Presents the 'remote microphone technique', another early virtual sensing approach.
+  - [foundation] Adaptive LMS virtual microphone technique for active noise control (2004, DOI: 10.1109/ISCAS.2004.1325558) - Describes the 'adaptive LMS virtual microphone technique', an alternative to filter-based methods.
+  - [foundation] State-space methods for control (1991, DOI: 10.1007/978-1-4615-6311-6) - Provides the theoretical basis for state-space modeling and Kalman filtering used in the paper.
+  - [foundation] An introduction to the Kalman filter (1993, DOI: 10.1109/7.102263) - A foundational reference for Kalman filter theory, underpinning the paper's approach.
+  - [foundation] Active noise control systems: techniques and applications (2007, DOI: 10.1017/CBO9780511535795) - A comprehensive text on active noise control, providing context for the problem addressed.
+  - [method] Subspace identification for linear systems: a survey (1999, DOI: 10.1016/S0005-1098(99)00004-1) - Details subspace model identification techniques used for plant modeling.
+  - [method] Adaptive filter theory (2002, DOI: 10.1017/CBO9780511779417) - Provides the theoretical background for the Filtered-x LMS algorithm used in control experiments.
+- Record: https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Petersen2008Kalman.md
 
 ### Wang2024Transferable
 - Title: Transferable Selective Virtual Sensing Active Noise Control Technique Based on Metric Learning
