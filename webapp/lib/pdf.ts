@@ -3,6 +3,12 @@
 
 type PdfSource = File | Blob | ArrayBuffer | string;
 
+export interface ExtractedPdfText {
+  text: string;
+  pageCount: number;
+  printedPageMap: Record<string, number>;
+}
+
 async function pdfJs() {
   const pdfjs = await import("pdfjs-dist");
   pdfjs.GlobalWorkerOptions.workerSrc =
@@ -20,18 +26,67 @@ async function openPdf(source: PdfSource) {
 }
 
 export async function extractPdfText(file: File, maxChars = 60000): Promise<string> {
+  return (await extractPdfTextWithPageInfo(file, maxChars)).text;
+}
+
+function addPrintedPage(seen: Map<number, Set<number>>, printed: number, pdfPage: number) {
+  if (!seen.has(printed)) seen.set(printed, new Set());
+  seen.get(printed)!.add(pdfPage);
+}
+
+function likelyPrintedPageNumbers(text: string): number[] {
+  const compact = text.replace(/\s+/g, " ").trim();
+  const zones = [compact.slice(0, 420), compact.slice(-420)];
+  const values = new Set<number>();
+  for (const zone of zones) {
+    for (const match of zone.matchAll(/\b([1-9]\d{0,4})\b/g)) {
+      const value = Number(match[1]);
+      if (value >= 1900 && value <= 2099) continue;
+      values.add(value);
+    }
+  }
+  return [...values];
+}
+
+export async function extractPdfTextWithPageInfo(
+  file: File,
+  maxChars = 60000,
+): Promise<ExtractedPdfText> {
   const doc = await openPdf(file);
+  const printedPages = new Map<number, Set<number>>();
   let out = "";
+  try {
+    const labels = await (doc as { getPageLabels?: () => Promise<(string | null)[] | null> })
+      .getPageLabels?.();
+    labels?.forEach((label, index) => {
+      const numeric = Number(String(label || "").trim());
+      if (Number.isInteger(numeric) && numeric > 0) addPrintedPage(printedPages, numeric, index + 1);
+    });
+  } catch {
+    // Page labels are optional PDF metadata; text headers/footers are the fallback.
+  }
   for (let i = 1; i <= doc.numPages; i++) {
     const page = await doc.getPage(i);
     const content = await page.getTextContent();
     const line = content.items
       .map((item) => ("str" in item ? (item as { str: string }).str : ""))
       .join(" ");
-    out += `\n--- PDF PAGE ${i} ---\n${line}\n`;
-    if (out.length >= maxChars) break;
+    for (const printed of likelyPrintedPageNumbers(line)) {
+      addPrintedPage(printedPages, printed, i);
+    }
+    // Keep scanning after maxChars so printed page labels can still be mapped
+    // back to real PDF pages, while only the capped text is sent to the LLM.
+    if (out.length < maxChars) out += `\n--- PDF PAGE ${i} ---\n${line}\n`;
   }
-  return out.slice(0, maxChars).trim();
+  const printedPageMap: Record<string, number> = {};
+  for (const [printed, pages] of printedPages.entries()) {
+    if (pages.size === 1) printedPageMap[String(printed)] = [...pages][0];
+  }
+  return {
+    text: out.slice(0, maxChars).trim(),
+    pageCount: doc.numPages,
+    printedPageMap,
+  };
 }
 
 // A loaded document, opened once so page navigation doesn't re-download the PDF.

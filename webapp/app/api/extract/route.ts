@@ -148,11 +148,18 @@ const LITERATURE_JSON_SCHEMA = {
   additionalProperties: false,
 };
 
-function buildSystem(fromOriginal: boolean): string {
+function pageCountInstruction(pdfPageCount?: number): string {
+  return pdfPageCount && Number.isInteger(pdfPageCount) && pdfPageCount > 0
+    ? `The uploaded PDF file has exactly ${pdfPageCount} pages. Any key_figure.page and key_figure_candidates[].page MUST be the 1-based PDF file page number in the range 1-${pdfPageCount}. Do not use printed journal page numbers, article page numbers, page labels in headers/footers, or bibliography page numbers.`
+    : "";
+}
+
+function buildSystem(fromOriginal: boolean, pdfPageCount?: number): string {
   return [
     fromOriginal
       ? "You read the original PDF, including figures, equations, and tables, for an audio research group's literature hub."
       : "You process extracted document text for an audio research group's literature hub.",
+    pageCountInstruction(pdfPageCount),
     "Produce one structured English literature record. entry_type must always be literature.",
     `Allowed research domains: ${DOMAINS.join(", ")}.`,
     "Choose one primary_domain for filing and statistics. Also return domains as all genuinely relevant research domains, including primary_domain. Avoid weak or speculative cross-domain labels.",
@@ -421,11 +428,15 @@ function reviewerHintBlock(hint?: string): string {
 }
 
 export async function POST(req: NextRequest) {
-  const { text, driveFileId, hint } = (await req.json()) as {
+  const { text, driveFileId, hint, pdfPageCount } = (await req.json()) as {
     text?: string;
     driveFileId?: string;
     hint?: string;
+    pdfPageCount?: number;
   };
+  const pageCount = Number.isInteger(Number(pdfPageCount)) && Number(pdfPageCount) > 0
+    ? Number(pdfPageCount)
+    : undefined;
   const hintBlock = reviewerHintBlock(hint);
   if (isGuest(req.headers.get("x-kb-user"))) {
     return NextResponse.json({
@@ -451,9 +462,9 @@ export async function POST(req: NextRequest) {
       raw = await geminiStructured(
         [
           { inlineData: { mimeType: "application/pdf", data: pdf.toString("base64") } },
-          { text: `Produce the literature record now.${hintBlock}` },
+          { text: `${pageCountInstruction(pageCount)}\nProduce the literature record now.${hintBlock}` },
         ],
-        buildSystem(true),
+        buildSystem(true, pageCount),
       );
     } catch (error) {
       return NextResponse.json(
@@ -484,12 +495,12 @@ export async function POST(req: NextRequest) {
 
   let raw: string;
   try {
-    const user = `Full document text:\n\n${text.slice(0, MAX_INPUT_CHARS)}${hintBlock}`;
+    const user = `${pageCountInstruction(pageCount)}\nFull document text:\n\n${text.slice(0, MAX_INPUT_CHARS)}${hintBlock}`;
     raw =
       llmProvider() === "gemini"
-        ? await geminiStructured([{ text: user }], buildSystem(false))
+        ? await geminiStructured([{ text: user }], buildSystem(false, pageCount))
         : await llmChat({
-            system: buildSystem(false),
+            system: buildSystem(false, pageCount),
             user,
             maxTokens: MAX_TOKENS,
             json: true,

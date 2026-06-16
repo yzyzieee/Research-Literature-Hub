@@ -12,7 +12,7 @@ import {
   type KeyReference,
 } from "@/lib/types";
 import { useLang } from "@/lib/i18n";
-import { extractPdfText } from "@/lib/pdf";
+import { extractPdfTextWithPageInfo, type ExtractedPdfText } from "@/lib/pdf";
 import { uploadToDrive } from "@/lib/drive";
 import { EMPTY_KEY_FIGURE } from "@/lib/key-figure";
 import KeyFigurePanel from "@/components/KeyFigurePanel";
@@ -89,6 +89,28 @@ interface DuplicateCandidate {
 }
 
 type DuplicateDecision = "" | "clear" | "duplicate" | "different";
+
+function normalizeAiFigurePage(page: number | null | undefined, info: ExtractedPdfText | null): number | null {
+  const value = Number(page);
+  if (!Number.isInteger(value) || value < 1) return null;
+  if (!info) return value;
+  if (value <= info.pageCount) return value;
+  return info.printedPageMap[String(value)] ?? null;
+}
+
+function normalizeAiFigurePages(data: ExtractedLiterature, info: ExtractedPdfText | null): ExtractedLiterature {
+  if (!info) return data;
+  const figure = data.key_figure
+    ? { ...data.key_figure, page: normalizeAiFigurePage(data.key_figure.page, info) }
+    : data.key_figure;
+  const candidates = Array.isArray(data.key_figure_candidates)
+    ? data.key_figure_candidates.map((candidate) => ({
+        ...candidate,
+        page: normalizeAiFigurePage(candidate.page, info),
+      }))
+    : data.key_figure_candidates;
+  return { ...data, key_figure: figure, key_figure_candidates: candidates };
+}
 
 export default function NewLiteratureWizard() {
   const { t } = useLang();
@@ -544,15 +566,27 @@ export default function NewLiteratureWizard() {
     setMsg(null);
     try {
       let data: ExtractedLiterature;
+      let pageInfo: ExtractedPdfText | null = null;
       if (archived) {
         // Once archived, re-read the original PDF on Drive directly (vision) — it's
         // higher quality, and we keep the existing identity so the archive stays valid.
-        data = await callExtract({ driveFileId: archived.id, hint: extractHint.trim() || undefined });
+        if (pdfFile) pageInfo = await extractPdfTextWithPageInfo(pdfFile, 20000);
+        data = await callExtract({
+          driveFileId: archived.id,
+          pdfPageCount: pageInfo?.pageCount,
+          hint: extractHint.trim() || undefined,
+        });
       } else {
-        const text = await extractPdfText(pdfFile!);
+        pageInfo = await extractPdfTextWithPageInfo(pdfFile!);
+        const text = pageInfo.text;
         if (text.length < 80) throw new Error(t("new.pdfNoText"));
-        data = await callExtract({ text, hint: extractHint.trim() || undefined });
+        data = await callExtract({
+          text,
+          pdfPageCount: pageInfo.pageCount,
+          hint: extractHint.trim() || undefined,
+        });
       }
+      data = normalizeAiFigurePages(data, pageInfo);
       applyLiterature(data, Boolean(archived));
       // Land in review mode: everything is shown read-only until the user opts to edit.
       setMetaEditing(false);
