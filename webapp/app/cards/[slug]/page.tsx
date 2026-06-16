@@ -71,9 +71,6 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
         {card.authors.length > 0 && (
           <div className="kv"><b><T k="detail.authors" /></b> - {card.authors.join(", ")}</div>
         )}
-        {card.citation_key && (
-          <div className="kv"><b><T k="detail.citationKey" /></b> - <code>{card.citation_key}</code></div>
-        )}
         {card.venue && (
           <div className="kv">
             <b><T k="detail.venue" /></b> -{" "}

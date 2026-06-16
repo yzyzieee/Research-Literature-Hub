@@ -54,6 +54,7 @@ export default function KeyFigurePanel({
   const [customFile, setCustomFile] = useState<File | null>(null);
   const [customPreview, setCustomPreview] = useState("");
   const [imageBroken, setImageBroken] = useState(false);
+  const [focusOpen, setFocusOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [loadingDoc, setLoadingDoc] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -365,6 +366,15 @@ export default function KeyFigurePanel({
       ? `/api/drive/file?id=${encodeURIComponent(figure.image_ref)}`
       : "");
 
+  useEffect(() => {
+    if (!focusOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setFocusOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [focusOpen]);
+
   return (
     <section className="key-figure-panel">
       <div className="key-figure-heading">
@@ -403,11 +413,19 @@ export default function KeyFigurePanel({
       {figure.status === "cached" && !editing && (
         <div className="key-figure-display">
           {!imageBroken ? (
-            <img
-              src={imageSrc}
-              alt={figure.caption || figure.figure_id || t("figure.title")}
-              onError={() => setImageBroken(true)}
-            />
+            <button
+              type="button"
+              className="key-figure-image-button"
+              onClick={() => setFocusOpen(true)}
+              aria-label={t("figure.focus")}
+            >
+              <img
+                src={imageSrc}
+                alt={figure.caption || figure.figure_id || t("figure.title")}
+                onError={() => setImageBroken(true)}
+              />
+              <span className="key-figure-focus-icon" aria-hidden="true">⛶</span>
+            </button>
           ) : (
             <div className="notice warn">{t("figure.missingImage")}</div>
           )}
@@ -629,6 +647,23 @@ export default function KeyFigurePanel({
               </div>
             </>
           )}
+        </div>
+      )}
+
+      {focusOpen && imageSrc && !imageBroken && (
+        <div className="figure-focus-backdrop" role="dialog" aria-modal="true" onClick={() => setFocusOpen(false)}>
+          <div className="figure-focus-view" onClick={(event) => event.stopPropagation()}>
+            <button className="figure-focus-close" type="button" onClick={() => setFocusOpen(false)}>
+              {t("figure.closeFocus")}
+            </button>
+            <img src={imageSrc} alt={figure.caption || figure.figure_id || t("figure.title")} />
+            {(figure.caption || figure.reason) && (
+              <div className="figure-focus-caption">
+                {figure.caption && <strong>{figure.caption}</strong>}
+                {figure.reason && <p>{figure.reason}</p>}
+              </div>
+            )}
+          </div>
         </div>
       )}
 

@@ -3,6 +3,14 @@
 All notable human-facing changes are summarized here. The app version is bumped
 automatically by the maintenance workflow after changes land on `main`.
 
+## v0.1.75 - 2026-06-17
+
+- Set the literature library to 14 papers per page so figure-heavy cards remain
+  easy to scan.
+- Added labeled active filters with a clear-all action.
+- Added a Key Figure focus view for larger image inspection.
+- Hid the citation key line from the detail header; BibTeX export still keeps it.
+
 ## v0.1.73 - 2026-06-17
 
 - Simplified the cached Key Figure header to a single edit action; remove and

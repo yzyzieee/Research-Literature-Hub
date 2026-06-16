@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Fuse from "fuse.js";
 import type { CardMeta } from "@/lib/types";
 import { DOMAINS, cardMatchesDomain, domainLabel, publicationTypeLabel } from "@/lib/types";
@@ -10,10 +10,11 @@ import CardListItem from "./CardListItem";
 
 type TimeRange = "" | "last-2" | "last-3" | "last-5" | "before-2020";
 
-const PAGE_SIZE = 24;
+const PAGE_SIZE = 14;
 
 export default function CardSearch({ cards }: { cards: CardMeta[] }) {
   const { t } = useLang();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [query, setQuery] = useState("");
   const [domain, setDomain] = useState("");
@@ -105,6 +106,23 @@ export default function CardSearch({ cards }: { cards: CardMeta[] }) {
     [cards],
   );
 
+  const clearAllFilters = () => {
+    setQuery("");
+    setDomain("");
+    setTimeRange("");
+    setTag("");
+    setType("");
+    setVenue("");
+    setYear("");
+    setPage(1);
+    router.replace("/cards");
+  };
+  const timeRangeLabel =
+    timeRange === "last-2" ? t("cards.last2Years") :
+    timeRange === "last-3" ? t("cards.last3Years") :
+    timeRange === "last-5" ? t("cards.last5Years") :
+    timeRange === "before-2020" ? t("cards.before2020") : "";
+
   return (
     <>
       <div className="toolbar">
@@ -132,28 +150,47 @@ export default function CardSearch({ cards }: { cards: CardMeta[] }) {
         </select>
       </div>
 
-      {(tag || type || venue || year) && (
+      {(domain || timeRange || tag || type || venue || year) && (
         <div className="active-filters">
+          {domain && (
+            <button type="button" className="active-tag" onClick={() => setDomain("")}>
+              <span className="active-tag-label">{t("cards.filterDomain")}</span>
+              {domainLabel(domain)} <span aria-hidden="true">x</span>
+            </button>
+          )}
+          {timeRange && (
+            <button type="button" className="active-tag" onClick={() => setTimeRange("")}>
+              <span className="active-tag-label">{t("cards.filterTime")}</span>
+              {timeRangeLabel} <span aria-hidden="true">x</span>
+            </button>
+          )}
           {tag && (
             <button type="button" className="active-tag" onClick={() => setTag("")}>
+              <span className="active-tag-label">{t("cards.filterTag")}</span>
               #{tag} <span aria-hidden="true">x</span>
             </button>
           )}
           {type && (
             <button type="button" className="active-tag" onClick={() => setType("")}>
+              <span className="active-tag-label">{t("cards.filterType")}</span>
               {publicationTypeLabel(type)} <span aria-hidden="true">x</span>
             </button>
           )}
           {venue && (
             <button type="button" className="active-tag" onClick={() => setVenue("")}>
+              <span className="active-tag-label">{t("cards.filterVenue")}</span>
               {venue} <span aria-hidden="true">x</span>
             </button>
           )}
           {year && (
             <button type="button" className="active-tag" onClick={() => setYear("")}>
+              <span className="active-tag-label">{t("cards.filterYear")}</span>
               {year} <span aria-hidden="true">x</span>
             </button>
           )}
+          <button type="button" className="active-filter-clear" onClick={clearAllFilters}>
+            {t("cards.clearFilters")}
+          </button>
         </div>
       )}
 
