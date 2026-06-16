@@ -719,6 +719,35 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
 }
 .body-review-section h4 { margin: 14px 0 4px; font-size: 14px; }
 .body-review-section p { margin: 0 0 8px; color: var(--text); white-space: pre-wrap; line-height: 1.5; }
+
+/* While AI extraction runs, dim the form below and show a clear waiting banner. */
+.wizard-review-area { position: relative; }
+.is-extracting { opacity: 0.45; filter: grayscale(0.4); pointer-events: none; transition: opacity 0.2s ease; }
+.wizard-extracting {
+  position: sticky;
+  top: 12px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border: 1px solid #cfe2f7;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--text);
+  font-weight: 600;
+}
+.wizard-extracting .spinner {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  border-top-color: #1769d2;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 .upload-progress { height: 8px; overflow: hidden; border-radius: 999px; background: var(--border); margin: 14px 0; }
 .upload-progress span { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width 180ms ease; }
 
