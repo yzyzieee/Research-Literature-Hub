@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { toMeta } from "@/lib/kb";
 import { getCardsRemote } from "@/lib/kb-remote";
 import { isLiterature } from "@/lib/types";
@@ -12,7 +13,9 @@ export default async function CardsPage() {
     <>
       <h1><T k="cards.title" /></h1>
       <p className="subtitle"><T k="cards.subtitle" /></p>
-      <CardSearch cards={cards} />
+      <Suspense fallback={null}>
+        <CardSearch cards={cards} />
+      </Suspense>
     </>
   );
 }

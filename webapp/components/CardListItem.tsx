@@ -1,13 +1,21 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { CardMeta } from "@/lib/types";
 import { domainLabel, publicationTypeLabel } from "@/lib/types";
 import DownloadButton from "./DownloadButton";
 
 export default function CardListItem({ card }: { card: CardMeta }) {
+  const router = useRouter();
   const cite = [card.authors[0], card.year].filter(Boolean).join(" · ");
+  // Tags double as navigation: clicking one opens the library filtered to it.
+  const openTag = (event: React.MouseEvent, tag: string) => {
+    event.preventDefault();
+    event.stopPropagation();
+    router.push(`/cards?tag=${encodeURIComponent(tag)}`);
+  };
   const [figureVisible, setFigureVisible] = useState(
     card.key_figure.status === "cached" && Boolean(card.key_figure.image_ref),
   );
@@ -27,6 +35,7 @@ export default function CardListItem({ card }: { card: CardMeta }) {
           {card.title}
           {card.drive.length > 0 && (
             <span className="dl-slot">
+              <DownloadButton link={card.drive[0]} variant="view" compact />
               <DownloadButton link={card.drive[0]} compact />
             </span>
           )}
@@ -44,7 +53,9 @@ export default function CardListItem({ card }: { card: CardMeta }) {
           {card.rating && <span className="badge weight">Weight {card.rating.weight}</span>}
           {card.comments.length > 0 && <span className="badge">Comments {card.comments.length}</span>}
           {card.tags.map((t) => (
-            <span key={t} className="badge">#{t}</span>
+            <button key={t} type="button" className="badge badge-tag" onClick={(event) => openTag(event, t)}>
+              #{t}
+            </button>
           ))}
         </div>
       </div>

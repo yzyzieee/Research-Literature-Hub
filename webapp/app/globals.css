@@ -695,6 +695,47 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
   background: var(--accent-soft);
 }
 .reextract-row b { font-size: 15px; }
+
+/* Tags as navigation, library pagination, and the collapsed activity footer. */
+.badge-tag {
+  cursor: pointer;
+  border: none;
+  font: inherit;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.badge-tag:hover { background: var(--accent-soft); color: #1769d2; }
+.active-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 5px 12px;
+  border: 1px solid #1769d2;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: #1769d2;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 8px 0 24px;
+}
+.activity-footer {
+  margin-top: 28px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+.activity-footer > summary {
+  cursor: pointer;
+  color: var(--text-2);
+  font-size: 13px;
+}
+.activity-footer .audit-box { margin-top: 12px; }
 .reextract-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .reextract-actions input {
   min-width: 220px;

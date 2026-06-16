@@ -108,10 +108,53 @@ export function compactCatalogPrompt(cards: ExportCardMeta[], idea: string, repo
   return lines.join("\n");
 }
 
+function driveFileIdOf(link: string): string {
+  const match = link.match(/\/d\/([a-zA-Z0-9_-]+)/) || link.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  return match ? match[1] : "";
+}
+
 /** Turn a Drive view link into a direct-download link. */
 export function driveDownloadUrl(link: string): string {
-  const match = link.match(/\/d\/([a-zA-Z0-9_-]+)/) || link.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  return match ? `https://drive.google.com/uc?export=download&id=${match[1]}` : link;
+  const id = driveFileIdOf(link);
+  return id ? `https://drive.google.com/uc?export=download&id=${id}` : link;
+}
+
+/** In-app inline view: the app proxies the file with the owner's credentials, so
+ *  team members can read private archived PDFs in the browser without downloading. */
+export function driveViewUrl(link: string): string {
+  const id = driveFileIdOf(link);
+  return id ? `/api/drive/file?id=${encodeURIComponent(id)}` : link;
+}
+
+const BIBTEX_TYPE: Record<string, string> = {
+  "journal-paper": "article",
+  "conference-paper": "inproceedings",
+  preprint: "misc",
+  "review-paper": "article",
+  book: "book",
+  "book-chapter": "incollection",
+  patent: "patent",
+  thesis: "phdthesis",
+  "technical-report": "techreport",
+  "dataset-paper": "misc",
+  other: "misc",
+};
+
+/** A BibTeX entry built from the card's verified metadata, for one-click citing. */
+export function cardToBibtex(
+  card: Pick<Card, "citation_key" | "slug" | "publication_type" | "title" | "authors" | "year" | "venue" | "doi">,
+): string {
+  const type = BIBTEX_TYPE[card.publication_type] || "misc";
+  const fields: [string, string][] = [["title", card.title]];
+  if (card.authors.length) fields.push(["author", card.authors.join(" and ")]);
+  if (card.year) fields.push(["year", String(card.year)]);
+  if (card.venue) {
+    const venueField = type === "inproceedings" ? "booktitle" : type === "article" ? "journal" : "howpublished";
+    fields.push([venueField, card.venue]);
+  }
+  if (card.doi) fields.push(["doi", card.doi]);
+  const body = fields.map(([key, value]) => `  ${key} = {${value}}`).join(",\n");
+  return `@${type}{${card.citation_key || card.slug},\n${body}\n}`;
 }
 
 export function cardToPrompt(card: Card, repo?: string): string {
