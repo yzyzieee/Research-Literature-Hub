@@ -38,6 +38,14 @@
       "domains": [],
       "active": true,
       "created": "2026-06-16"
+    },
+    {
+      "id": "LXX",
+      "name": "LXX",
+      "role": "member",
+      "domains": [],
+      "active": true,
+      "created": "2026-06-16"
     }
   ]
 }
