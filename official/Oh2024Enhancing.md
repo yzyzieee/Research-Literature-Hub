@@ -46,55 +46,41 @@ tags:
   - real-time-update
   - principal-component-analysis
 key_references:
-  - title: >-
-      Advances in active noise control: A survey, with emphasis on recent
-      nonlinear techniques
-    doi: 10.1016/j.sigpro.2012.08.013
-    year: 2013
-    role: foundation
-    reason: >-
-      Provides a broad overview of active noise control techniques, setting the
-      foundation for the problem addressed in the paper.
-    status: external
-    linked_card: null
-  - title: 'Active noise control systems: algorithms and DSP implementations'
-    doi: 10.1016/j.ymssp.2015.01.008
-    year: 2015
-    role: foundation
-    reason: >-
-      Discusses fundamental algorithms like FxLMS, which are central to ANC
-      systems and the context of this work.
-    status: external
-    linked_card: null
-  - title: A review of virtual sensing algorithms for active noise control
-    doi: 10.3390/a1020069
-    year: 2008
-    role: related_work
-    reason: >-
-      Introduces virtual sensing, a related concept to real-time path estimation
-      for ANC in dynamic environments.
-    status: external
-    linked_card: null
-  - title: >-
-      Deep learning-based active noise control: A deep learning approach to
-      active noise control
-    doi: 10.1016/j.neunet.2021.03.037
-    year: 2021
-    role: related_work
-    reason: >-
-      Represents prior work applying deep learning to ANC, though not
-      specifically for real-time secondary path estimation in vehicles.
-    status: external
-    linked_card: null
-  - title: Deep learning-assisted active noise control in a time-varying environment
-    doi: 10.1007/s12206-023-0206-2
-    year: 2023
-    role: related_work
-    reason: >-
-      Explores deep learning for ANC in time-varying environments, similar to
-      the dynamic conditions addressed in this paper.
-    status: external
-    linked_card: null
+- title: 'Advances in active noise control: A survey, with emphasis on recent nonlinear techniques'
+  doi: 10.1016/j.sigpro.2012.08.013
+  year: 2013
+  role: foundation
+  reason: Provides a broad overview of active noise control techniques, setting the foundation for the problem addressed in the paper.
+  status: external
+  linked_card: null
+- title: 'Active noise control systems: algorithms and DSP implementations'
+  doi: 10.1016/j.ymssp.2015.01.008
+  year: 2015
+  role: foundation
+  reason: Discusses fundamental algorithms like FxLMS, which are central to ANC systems and the context of this work.
+  status: external
+  linked_card: null
+- title: A review of virtual sensing algorithms for active noise control
+  doi: 10.3390/a1020069
+  year: 2008
+  role: related_work
+  reason: Introduces virtual sensing, a related concept to real-time path estimation for ANC in dynamic environments.
+  status: external
+  linked_card: null
+- title: 'Deep learning-based active noise control: A deep learning approach to active noise control'
+  doi: 10.1016/j.neunet.2021.03.037
+  year: 2021
+  role: related_work
+  reason: Represents prior work applying deep learning to ANC, though not specifically for real-time secondary path estimation in vehicles.
+  status: external
+  linked_card: null
+- title: Deep learning-assisted active noise control in a time-varying environment
+  doi: 10.1007/s12206-023-0206-2
+  year: 2023
+  role: related_work
+  reason: Explores deep learning for ANC in time-varying environments, similar to the dynamic conditions addressed in this paper.
+  status: in_library
+  linked_card: Im2023Deep
 key_figure:
   status: cached
   figure_id: Fig. 11

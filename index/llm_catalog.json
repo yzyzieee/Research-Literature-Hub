@@ -59,6 +59,72 @@
     "card_url": "https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Chen2022Secondary.md"
   },
   {
+    "slug": "Im2023Deep",
+    "title": "Deep learning-assisted active noise control in a time-varying environment",
+    "year": 2023,
+    "venue": "Journal of Mechanical Science and Technology",
+    "publication_type": "journal-paper",
+    "primary_domain": "active-noise-control",
+    "domains": [
+      "active-noise-control",
+      "machine-learning-audio"
+    ],
+    "tags": [
+      "active-noise-control",
+      "secondary-path-modeling",
+      "deep-neural-networks",
+      "time-varying-environments",
+      "filtered-x-least-mean-square"
+    ],
+    "team_weight": null,
+    "summary": "This paper introduces a novel deep learning-assisted method for active noise control (ANC) in time-varying environments. The core innovation lies in a two-stage deep neural network (DNN) designed to estimate the secondary path impulse response in real-time, adapting to changing acoustic conditions. This addresses a critical limitation of traditional ANC systems, which struggle when the environment changes. The propo…",
+    "key_references": [
+      {
+        "title": "Process of Silencing Sound Oscillations",
+        "doi": "US2043416A",
+        "year": 1936,
+        "role": "foundation",
+        "reason": "This reference provides the foundational patent for active noise control."
+      },
+      {
+        "title": "Active noise control: A tutorial review",
+        "doi": "10.1109/5.763000",
+        "year": 1999,
+        "role": "survey",
+        "reason": "This is a comprehensive tutorial review of active noise control, covering algorithms and implementations."
+      },
+      {
+        "title": "Active Noise Control Systems: Algorithms and DSP Implementations",
+        "doi": "",
+        "year": 1996,
+        "role": "foundation",
+        "reason": "This book is cited multiple times for fundamental concepts and algorithms in ANC, including the FxLMS algorithm and secondary path modeling."
+      },
+      {
+        "title": "Online secondary path modeling for active sound quality control systems",
+        "doi": "10.1016/j.apacoust.2019.06.010",
+        "year": 2019,
+        "role": "related_work",
+        "reason": "This paper discusses online secondary path modeling, a relevant technique for time-varying environments."
+      },
+      {
+        "title": "Deep learning",
+        "doi": "10.1038/521436a",
+        "year": 2015,
+        "role": "foundation",
+        "reason": "This is a foundational paper on deep learning, providing context for the use of DNNs in the proposed method."
+      },
+      {
+        "title": "Scikit-learn: machine learning in Python",
+        "doi": "10.1109/TPAMI.2011.239",
+        "year": 2011,
+        "role": "method",
+        "reason": "This reference details the Scikit-learn library used for implementing the DNN models."
+      }
+    ],
+    "card_url": "https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Im2023Deep.md"
+  },
+  {
     "slug": "Oh2024Enhancing",
     "title": "Enhancing active noise control of road noise using deep neural network to update secondary path estimate in real time",
     "year": 2024,

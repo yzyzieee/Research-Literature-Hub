@@ -91,6 +91,109 @@
     "legacy_type": ""
   },
   {
+    "slug": "Im2023Deep",
+    "path": "official/Im2023Deep.md",
+    "folder": "official",
+    "title": "Deep learning-assisted active noise control in a time-varying environment",
+    "entry_type": "literature",
+    "publication_type": "journal-paper",
+    "primary_domain": "active-noise-control",
+    "domains": [
+      "active-noise-control",
+      "machine-learning-audio"
+    ],
+    "venue": "Journal of Mechanical Science and Technology",
+    "doi": "10.1007/s12206-023-0206-2",
+    "abstract": "The success of active noise control (ANC) is largely determined by the fidelity of the estimated secondary path, which encapsulates the \"room acoustics\" between the secondary sound source and the error sensor. In a time-invariant system the secondary path is usually measured and hard-coded in the controller prior to the ANC operation. When ANC is to be performed in a time-varying environment, however, the estimated secondary path should be updated accordingly, a task that poses many challenges in terms of efficacy, cost, and user comfort. In this paper we present a deep learning-assisted secondary path update technique, in which deep neural networks are trained to estimate the secondary path in real time according to changing boundary conditions. The feasibility of the technique is tested in an airborne duct, where the error sensor is allowed to move along the duct to simulate changes in boundary conditions. Results have shown that even in the face of a dramatic change in boundary conditions, the ANC system equipped with the present update scheme is capable of reducing broadband noise by up to 10 dB.",
+    "status": "official",
+    "tags": [
+      "active-noise-control",
+      "secondary-path-modeling",
+      "deep-neural-networks",
+      "time-varying-environments",
+      "filtered-x-least-mean-square"
+    ],
+    "authors": [
+      "Seonghun Im",
+      "Siwon Kim",
+      "Sunghwa Woo",
+      "Inman Jang",
+      "Taewoo Han",
+      "Uiwon Hwang",
+      "Won-Suk Ohm",
+      "Myunghan Lee"
+    ],
+    "year": 2023,
+    "citation_key": "Im2023Deep",
+    "key_references": [
+      {
+        "title": "Process of Silencing Sound Oscillations",
+        "doi": "US2043416A",
+        "year": 1936,
+        "role": "foundation",
+        "reason": "This reference provides the foundational patent for active noise control.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Active noise control: A tutorial review",
+        "doi": "10.1109/5.763000",
+        "year": 1999,
+        "role": "survey",
+        "reason": "This is a comprehensive tutorial review of active noise control, covering algorithms and implementations.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Active Noise Control Systems: Algorithms and DSP Implementations",
+        "doi": "",
+        "year": 1996,
+        "role": "foundation",
+        "reason": "This book is cited multiple times for fundamental concepts and algorithms in ANC, including the FxLMS algorithm and secondary path modeling.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Online secondary path modeling for active sound quality control systems",
+        "doi": "10.1016/j.apacoust.2019.06.010",
+        "year": 2019,
+        "role": "related_work",
+        "reason": "This paper discusses online secondary path modeling, a relevant technique for time-varying environments.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Deep learning",
+        "doi": "10.1038/521436a",
+        "year": 2015,
+        "role": "foundation",
+        "reason": "This is a foundational paper on deep learning, providing context for the use of DNNs in the proposed method.",
+        "status": "external",
+        "linked_card": null
+      },
+      {
+        "title": "Scikit-learn: machine learning in Python",
+        "doi": "10.1109/TPAMI.2011.239",
+        "year": 2011,
+        "role": "method",
+        "reason": "This reference details the Scikit-learn library used for implementing the DNN models.",
+        "status": "external",
+        "linked_card": null
+      }
+    ],
+    "related": [],
+    "drive": [
+      "https://drive.google.com/file/d/1EuaEMyg9AsogT6D5jtsvd8kvYS3avmZo/view?usp=drivesdk"
+    ],
+    "created": "2026-06-16",
+    "rating": null,
+    "comments": [],
+    "uploaded_by": "WBX",
+    "uploaded_at": "2026-06-16T08:45:54.395Z",
+    "summary": "This paper introduces a novel deep learning-assisted method for active noise control (ANC) in time-varying environments. The core innovation lies in a two-stage deep neural network (DNN) designed to estimate the secondary path impulse response in real-time, adapting to changing acoustic conditions. This addresses a critical limitation of traditional ANC systems, which struggle when the environment changes. The proposed method was experimentally validated in an airborne duct with a movable error sensor, simulating significant boundary condition shifts. Results demonstrated that the DNN-assisted ANC system could effectively reduce broadband noise by up to 10 dB, even under dramatic environmental changes, outperforming systems without real-time secondary path updates.",
+    "legacy_type": ""
+  },
+  {
     "slug": "Oh2024Enhancing",
     "path": "official/Oh2024Enhancing.md",
     "folder": "official",
@@ -165,8 +268,8 @@
         "year": 2023,
         "role": "related_work",
         "reason": "Explores deep learning for ANC in time-varying environments, similar to the dynamic conditions addressed in this paper.",
-        "status": "external",
-        "linked_card": null
+        "status": "in_library",
+        "linked_card": "Im2023Deep"
       }
     ],
     "related": [],

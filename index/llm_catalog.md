@@ -4,7 +4,7 @@ Use this file as the entry point for searching our internal literature library.
 Search this catalog first, then open only the most relevant literature record files.
 Do not assume private Google Drive PDFs are accessible.
 
-Papers: 6
+Papers: 7
 
 ## Papers
 
@@ -25,6 +25,25 @@ Papers: 6
   - [method] A time-domain convolutional recurrent network for packet loss concealment (2021, DOI: 10.1109/ICASSP47223.2021.9438948) - Introduces the time-domain convolutional recurrent network (CRN) architecture used in the proposed method.
   - [baseline] Performance comparison of the FXLMS, non-linear FXLMS and leaky FXLMS algorithms in nonlinear active control applications (2002, DOI: 10.1109/EUSIPCO.2002.1043226) - Compares traditional and nonlinear FXLMS algorithms, providing context for performance evaluation.
 - Record: https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Chen2022Secondary.md
+
+### Im2023Deep
+- Title: Deep learning-assisted active noise control in a time-varying environment
+- Year: 2023
+- Venue: Journal of Mechanical Science and Technology
+- Publication type: journal-paper
+- Primary domain: active-noise-control
+- Domains: active-noise-control, machine-learning-audio
+- Tags: active-noise-control, secondary-path-modeling, deep-neural-networks, time-varying-environments, filtered-x-least-mean-square
+- Team weight: unrated
+- Summary: This paper introduces a novel deep learning-assisted method for active noise control (ANC) in time-varying environments. The core innovation lies in a two-stage deep neural network (DNN) designed to estimate the secondary path impulse response in real-time, adapting to changing acoustic conditions. This addresses a critical limitation of traditional ANC systems, which struggle when the environment changes. The propo…
+- Key related papers:
+  - [foundation] Process of Silencing Sound Oscillations (1936, DOI: US2043416A) - This reference provides the foundational patent for active noise control.
+  - [survey] Active noise control: A tutorial review (1999, DOI: 10.1109/5.763000) - This is a comprehensive tutorial review of active noise control, covering algorithms and implementations.
+  - [foundation] Active Noise Control Systems: Algorithms and DSP Implementations (1996) - This book is cited multiple times for fundamental concepts and algorithms in ANC, including the FxLMS algorithm and secondary path modeling.
+  - [related_work] Online secondary path modeling for active sound quality control systems (2019, DOI: 10.1016/j.apacoust.2019.06.010) - This paper discusses online secondary path modeling, a relevant technique for time-varying environments.
+  - [foundation] Deep learning (2015, DOI: 10.1038/521436a) - This is a foundational paper on deep learning, providing context for the use of DNNs in the proposed method.
+  - [method] Scikit-learn: machine learning in Python (2011, DOI: 10.1109/TPAMI.2011.239) - This reference details the Scikit-learn library used for implementing the DNN models.
+- Record: https://raw.githubusercontent.com/yzyzieee/Research-Literature-Hub/main/official/Im2023Deep.md
 
 ### Oh2024Enhancing
 - Title: Enhancing active noise control of road noise using deep neural network to update secondary path estimate in real time
