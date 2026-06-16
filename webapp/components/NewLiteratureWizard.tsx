@@ -775,6 +775,67 @@ export default function NewLiteratureWizard() {
         )}
       </div>
 
+      {driveUploadEnabled && pdfFile && archived && (
+        <div className="form-card archive-controls">
+          <h2 style={{ marginTop: 0 }}>{t("new.archiveTitle")}</h2>
+          <p className="subtitle">
+            {t("new.archiveTarget")}: <code>{archived.name}</code>
+          </p>
+          <div className="btn-row">
+            <button
+              className="btn"
+              onClick={analyzeOriginalPdf}
+              disabled={busy !== "" || !archiveCurrent}
+            >
+              {busy === "original" ? t("new.originalAnalyzing") : t("new.originalAnalyze")}
+            </button>
+            <a className="btn" href={archived.link} target="_blank" rel="noreferrer">
+              {t("new.driveOpenFile")}
+            </a>
+            {!archiveDeleteArmed ? (
+              <button
+                className="btn danger"
+                onClick={() => setArchiveDeleteArmed(true)}
+                disabled={busy !== ""}
+              >
+                {archived.reused ? t("new.driveDetach") : t("new.driveDeleteReset")}
+              </button>
+            ) : (
+              <>
+                <button
+                  className="btn danger"
+                  onClick={removeArchivedPdf}
+                  disabled={busy !== ""}
+                >
+                  {busy === "delete"
+                    ? t("new.driveDeleting")
+                    : archived.reused
+                      ? t("new.driveConfirmDetach")
+                      : t("new.driveConfirmDelete")}
+                </button>
+                <button
+                  className="btn"
+                  onClick={() => setArchiveDeleteArmed(false)}
+                  disabled={busy !== ""}
+                >
+                  {t("new.cancel")}
+                </button>
+              </>
+            )}
+          </div>
+          {!archiveCurrent && <div className="notice warn">{t("new.archiveChanged")}</div>}
+        </div>
+      )}
+
+      <div className="wizard-review-area">
+        {busy === "extract" && (
+          <div className="wizard-extracting" role="status">
+            <span className="spinner" aria-hidden="true" />
+            <span>{t("new.extractingNotice")}</span>
+          </div>
+        )}
+        <div className={busy === "extract" ? "is-extracting" : ""}>
+
       {title.trim() && citationKeyValid && (
         <div className={`duplicate-review ${duplicateConfirmed ? "confirmed" : ""}`}>
           <div className="duplicate-review-head">
@@ -1121,58 +1182,6 @@ export default function NewLiteratureWizard() {
         )}
       </div>
 
-      {driveUploadEnabled && pdfFile && archived && (
-        <div className="form-card">
-          <h2 style={{ marginTop: 0 }}>{t("new.archiveTitle")}</h2>
-          <p className="subtitle">
-            {t("new.archiveTarget")}: <code>{archived.name}</code>
-          </p>
-          <div className="btn-row">
-            <button
-              className="btn"
-              onClick={analyzeOriginalPdf}
-              disabled={busy !== "" || !archiveCurrent}
-            >
-              {busy === "original" ? t("new.originalAnalyzing") : t("new.originalAnalyze")}
-            </button>
-            <a className="btn" href={archived.link} target="_blank" rel="noreferrer">
-              {t("new.driveOpenFile")}
-            </a>
-            {!archiveDeleteArmed ? (
-              <button
-                className="btn danger"
-                onClick={() => setArchiveDeleteArmed(true)}
-                disabled={busy !== ""}
-              >
-                {archived.reused ? t("new.driveDetach") : t("new.driveDeleteReset")}
-              </button>
-            ) : (
-              <>
-                <button
-                  className="btn danger"
-                  onClick={removeArchivedPdf}
-                  disabled={busy !== ""}
-                >
-                  {busy === "delete"
-                    ? t("new.driveDeleting")
-                    : archived.reused
-                      ? t("new.driveConfirmDetach")
-                      : t("new.driveConfirmDelete")}
-                </button>
-                <button
-                  className="btn"
-                  onClick={() => setArchiveDeleteArmed(false)}
-                  disabled={busy !== ""}
-                >
-                  {t("new.cancel")}
-                </button>
-              </>
-            )}
-          </div>
-          {!archiveCurrent && <div className="notice warn">{t("new.archiveChanged")}</div>}
-        </div>
-      )}
-
       <div className="form-card">
         <KeyFigurePanel
           slug={slug}
@@ -1183,6 +1192,8 @@ export default function NewLiteratureWizard() {
           canCache={Boolean(archived) || guest}
           onChange={setKeyFigure}
         />
+      </div>
+        </div>
       </div>
 
       {msg && !published && (
