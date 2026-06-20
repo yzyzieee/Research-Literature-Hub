@@ -9,6 +9,9 @@ automatically by the maintenance workflow after changes land on `main`.
   to a configured service account.
 - Documented the seven-day OAuth testing-token expiry and required service-account
   folder sharing.
+- Added administrator account removal with preserved historical authorship and
+  same-ID reactivation when an account is added again.
+- Updated the GWS account display name to `Prof. Gan`.
 
 ## v0.1.75 - 2026-06-17
 

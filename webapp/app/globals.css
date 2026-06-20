@@ -322,6 +322,7 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
 .btn.primary:hover { opacity: 0.9; color: #fff; }
 .btn.danger { border-color: #efb2b2; background: #fff5f5; color: #b42318; }
 .btn.danger:hover { border-color: #d92d20; color: #912018; }
+.btn.compact { min-height: 30px; padding: 5px 10px; font-size: 12px; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
 .card-actions { margin-top: 14px; }
@@ -503,7 +504,7 @@ h2 { font-size: 19px; margin: 28px 0 12px; }
 .team-directory { display: grid; gap: 10px; margin-top: 14px; }
 .team-member { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); }
 .team-member > div:first-child { display: grid; gap: 3px; min-width: 140px; }
-.team-member .meta-row { justify-content: flex-end; }
+.team-member .meta-row { justify-content: flex-end; flex-wrap: wrap; }
 @media (max-width: 680px) {
   .team-member { align-items: flex-start; flex-direction: column; }
   .team-member .meta-row { justify-content: flex-start; }

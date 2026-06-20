@@ -92,8 +92,15 @@ export async function POST(req: NextRequest) {
       if (!actor || actor.role !== "admin") {
         return NextResponse.json({ error: "Only a team administrator can add accounts." }, { status: 403 });
       }
-      if (config.members.some((member) => member.id === id)) {
+      const existing = config.members.find((member) => member.id === id);
+      if (existing?.active) {
         return NextResponse.json({ error: `Account ${id} already exists.` }, { status: 409 });
+      }
+      if (existing) {
+        existing.name = name;
+        existing.active = true;
+        await writeTeam(config, sha);
+        return NextResponse.json({ member: existing, members: config.members });
       }
       const member = {
         id,
@@ -106,6 +113,61 @@ export async function POST(req: NextRequest) {
       config.members.push(member);
       await writeTeam(config, sha);
       return NextResponse.json({ member, members: config.members });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (!message.includes("(409)") || attempt === 2) {
+        return NextResponse.json({ error: message }, { status: 502 });
+      }
+    }
+  }
+  return NextResponse.json({ error: "Member registry changed concurrently. Retry." }, { status: 409 });
+}
+
+export async function DELETE(req: NextRequest) {
+  const username = req.headers.get("x-kb-user");
+  const body = (await req.json()) as { id?: string };
+  const id = String(body.id || "").trim().toUpperCase();
+  if (!username) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (isGuest(username)) {
+    return NextResponse.json(
+      { error: "Guest mode cannot remove team accounts." },
+      { status: 403 },
+    );
+  }
+  if (!id) return NextResponse.json({ error: "Account ID is required." }, { status: 400 });
+  if (id === username) {
+    return NextResponse.json(
+      { error: "Administrators cannot remove their own account." },
+      { status: 400 },
+    );
+  }
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const { config, sha } = await readTeam();
+      const actor = config.members.find((item) => item.id === username && item.active);
+      if (!actor || actor.role !== "admin") {
+        return NextResponse.json(
+          { error: "Only a team administrator can remove accounts." },
+          { status: 403 },
+        );
+      }
+      const target = config.members.find((item) => item.id === id && item.active);
+      if (!target) return NextResponse.json({ error: "Active account not found." }, { status: 404 });
+      if (target.role === "admin") {
+        return NextResponse.json(
+          { error: "Administrator accounts cannot be removed here." },
+          { status: 400 },
+        );
+      }
+
+      target.active = false;
+      await writeTeam(config, sha);
+      return NextResponse.json({
+        removed: true,
+        member: target,
+        members: config.members.filter((item) => item.active),
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       if (!message.includes("(409)") || attempt === 2) {

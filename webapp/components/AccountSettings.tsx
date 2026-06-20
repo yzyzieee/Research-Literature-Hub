@@ -41,8 +41,9 @@ export default function AccountSettings() {
   const [proposalLabel, setProposalLabel] = useState("");
   const [proposalReason, setProposalReason] = useState("");
   const [proposals, setProposals] = useState<DomainProposal[]>([]);
+  const [removeCandidate, setRemoveCandidate] = useState("");
   const [guest, setGuest] = useState(false);
-  const [busy, setBusy] = useState<"" | "save" | "add" | "propose" | "review">("");
+  const [busy, setBusy] = useState<"" | "save" | "add" | "remove" | "propose" | "review">("");
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
   useEffect(() => {
@@ -107,6 +108,30 @@ export default function AccountSettings() {
       setMessage({ ok: true, text: t("settings.memberAdded") });
     } catch (error) {
       setMessage({ ok: false, text: `${t("settings.failed")}: ${error instanceof Error ? error.message : error}` });
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const removeMember = async (id: string) => {
+    setBusy("remove");
+    setMessage(null);
+    try {
+      const response = await fetch("/api/team", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+      setMembers((data.members || []).filter((item: TeamMember) => item.active));
+      setRemoveCandidate("");
+      setMessage({ ok: true, text: t("settings.memberRemoved") });
+    } catch (error) {
+      setMessage({
+        ok: false,
+        text: `${t("settings.failed")}: ${error instanceof Error ? error.message : error}`,
+      });
     } finally {
       setBusy("");
     }
@@ -221,6 +246,37 @@ export default function AccountSettings() {
                   ))
                 ) : (
                   <span className="badge">{t("settings.domainsPending")}</span>
+                )}
+                {member?.role === "admin" && item.role !== "admin" && (
+                  removeCandidate === item.id ? (
+                    <>
+                      <button
+                        className="btn danger compact"
+                        type="button"
+                        onClick={() => removeMember(item.id)}
+                        disabled={busy !== ""}
+                      >
+                        {busy === "remove" ? t("settings.removing") : t("settings.confirmRemove")}
+                      </button>
+                      <button
+                        className="btn compact"
+                        type="button"
+                        onClick={() => setRemoveCandidate("")}
+                        disabled={busy !== ""}
+                      >
+                        {t("settings.cancelRemove")}
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      className="btn danger compact"
+                      type="button"
+                      onClick={() => setRemoveCandidate(item.id)}
+                      disabled={busy !== ""}
+                    >
+                      {t("settings.removeMember")}
+                    </button>
+                  )
                 )}
               </div>
             </div>
