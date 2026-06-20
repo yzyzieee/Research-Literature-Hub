@@ -55,6 +55,14 @@
       ],
       "active": true,
       "created": "2026-06-16"
+    },
+    {
+      "id": "GWS",
+      "name": "GWS",
+      "role": "member",
+      "domains": [],
+      "active": true,
+      "created": "2026-06-20"
     }
   ]
 }
