@@ -11,26 +11,30 @@ function hasOwnerOAuth(): boolean {
   );
 }
 
-export function driveConfigured(): boolean {
-  return hasOwnerOAuth() || Boolean(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
+function hasServiceAccount(): boolean {
+  return Boolean(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
 }
 
-export async function getDriveAccessToken(): Promise<string> {
-  if (hasOwnerOAuth()) {
-    const res = await fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        grant_type: "refresh_token",
-        refresh_token: process.env.GOOGLE_OAUTH_REFRESH_TOKEN!,
-        client_id: process.env.GOOGLE_OAUTH_CLIENT_ID!,
-        client_secret: process.env.GOOGLE_OAUTH_CLIENT_SECRET!,
-      }),
-    });
-    if (!res.ok) throw new Error(`oauth refresh ${res.status}: ${(await res.text()).slice(0, 200)}`);
-    return ((await res.json()) as { access_token: string }).access_token;
-  }
+export function driveConfigured(): boolean {
+  return hasOwnerOAuth() || hasServiceAccount();
+}
 
+async function getOwnerOAuthAccessToken(): Promise<string> {
+  const res = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: process.env.GOOGLE_OAUTH_REFRESH_TOKEN!,
+      client_id: process.env.GOOGLE_OAUTH_CLIENT_ID!,
+      client_secret: process.env.GOOGLE_OAUTH_CLIENT_SECRET!,
+    }),
+  });
+  if (!res.ok) throw new Error(`oauth refresh ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  return ((await res.json()) as { access_token: string }).access_token;
+}
+
+async function getServiceAccountAccessToken(): Promise<string> {
   const creds = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY!) as {
     client_email: string;
     private_key: string;
@@ -39,7 +43,7 @@ export async function getDriveAccessToken(): Promise<string> {
   const enc = (o: unknown) => Buffer.from(JSON.stringify(o)).toString("base64url");
   const unsigned = `${enc({ alg: "RS256", typ: "JWT" })}.${enc({
     iss: creds.client_email,
-    scope: "https://www.googleapis.com/auth/drive.file",
+    scope: "https://www.googleapis.com/auth/drive",
     aud: "https://oauth2.googleapis.com/token",
     iat: now,
     exp: now + 3600,
@@ -55,6 +59,35 @@ export async function getDriveAccessToken(): Promise<string> {
   });
   if (!res.ok) throw new Error(`sa token ${res.status}: ${(await res.text()).slice(0, 200)}`);
   return ((await res.json()) as { access_token: string }).access_token;
+}
+
+export async function getDriveAccessToken(): Promise<string> {
+  let oauthError: unknown;
+  if (hasOwnerOAuth()) {
+    try {
+      return await getOwnerOAuthAccessToken();
+    } catch (error) {
+      oauthError = error;
+      if (!hasServiceAccount()) throw error;
+    }
+  }
+
+  if (hasServiceAccount()) {
+    try {
+      return await getServiceAccountAccessToken();
+    } catch (serviceAccountError) {
+      const oauthMessage = oauthError instanceof Error ? oauthError.message : String(oauthError || "");
+      const serviceAccountMessage =
+        serviceAccountError instanceof Error ? serviceAccountError.message : String(serviceAccountError);
+      throw new Error(
+        oauthMessage
+          ? `owner OAuth failed (${oauthMessage}); service account failed (${serviceAccountMessage})`
+          : serviceAccountMessage,
+      );
+    }
+  }
+
+  throw new Error("Google Drive credentials are not configured.");
 }
 
 /** Download a Drive file's bytes (the app can read files it uploaded). */

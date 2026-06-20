@@ -101,11 +101,20 @@ NEXT_PUBLIC_DRIVE_UPLOAD=1
 NEXT_PUBLIC_DRIVE_FOLDER_URL=<folder URL>
 ```
 
-Choose one server-side authorization method:
+Configure one or both server-side authorization methods:
 
 - Owner OAuth client ID, client secret, and refresh token.
 - A service-account JSON object stored as one environment variable, with access to an
   appropriate Workspace location.
+
+When both are configured, the app prefers owner OAuth and automatically falls back to
+the service account if refreshing OAuth fails. The folder identified by
+`DRIVE_FOLDER_ID` must be shared with the service account's `client_email`.
+
+For owner OAuth, publish the Google OAuth consent screen to **Production** before
+long-term use. Refresh tokens issued while the app remains in **Testing** may expire
+after seven days. Service accounts are best suited to Workspace Shared Drives; for a
+personal My Drive folder that must accept uploads, keep valid owner OAuth configured.
 
 Never expose these values with a `NEXT_PUBLIC_` prefix.
 

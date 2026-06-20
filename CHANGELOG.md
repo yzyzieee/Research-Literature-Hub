@@ -3,6 +3,13 @@
 All notable human-facing changes are summarized here. The app version is bumped
 automatically by the maintenance workflow after changes land on `main`.
 
+## Unreleased
+
+- Added automatic Google Drive authentication fallback from expired owner OAuth
+  to a configured service account.
+- Documented the seven-day OAuth testing-token expiry and required service-account
+  folder sharing.
+
 ## v0.1.75 - 2026-06-17
 
 - Set the literature library to 14 papers per page so figure-heavy cards remain
